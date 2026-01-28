@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, ChevronRight, Award, Calendar, Users, Wrench, Mail, MapPin, Github, Linkedin, Instagram } from 'lucide-react';
+import * as THREE from 'three';
 
 const SponsorCard = ({ sponsor, index }) => {
   const [imageError, setImageError] = useState(false);
@@ -148,11 +149,311 @@ const LogoImage = () => {
   
   return (
     <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
-      <img 
-        src="/data/logo.png" 
-        alt="Wolverine Robotics Logo" 
-        className="w-full h-full object-contain" 
-      />
+      <div className="w-full h-full bg-gradient-to-br from-blue-600 to-orange-600 flex items-center justify-center text-white font-black text-xl">
+        WR
+      </div>
+    </div>
+  );
+};
+
+const GridScan = ({ sensitivity = 0.55, lineThickness = 1, linesColor = '#392e4e', scanColor = '#FF6B35', scanOpacity = 0.4, gridScale = 0.1, noiseIntensity = 0.01 }) => {
+  const containerRef = useRef(null);
+  const rendererRef = useRef(null);
+  const materialRef = useRef(null);
+  const rafRef = useRef(null);
+  
+  const lookTarget = useRef(new THREE.Vector2(0, 0));
+  const lookCurrent = useRef(new THREE.Vector2(0, 0));
+  const lookVel = useRef(new THREE.Vector2(0, 0));
+
+  const vert = `
+varying vec2 vUv;
+void main(){
+  vUv = uv;
+  gl_Position = vec4(position.xy, 0.0, 1.0);
+}
+`;
+
+  const frag = `
+precision highp float;
+uniform vec3 iResolution;
+uniform float iTime;
+uniform vec2 uSkew;
+uniform float uLineThickness;
+uniform vec3 uLinesColor;
+uniform vec3 uScanColor;
+uniform float uGridScale;
+uniform float uScanOpacity;
+uniform float uNoise;
+varying vec2 vUv;
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
+{
+    vec2 p = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+    vec3 ro = vec3(0.0);
+    vec3 rd = normalize(vec3(p, 2.0));
+
+    vec2 skew = clamp(uSkew, vec2(-0.7), vec2(0.7));
+    rd.xy += skew * rd.z;
+
+    vec3 color = vec3(0.0);
+    float minT = 1e20;
+    float fadeStrength = 2.0;
+    vec2 gridUV = vec2(0.0);
+
+    for (int i = 0; i < 4; i++)
+    {
+        float isY = float(i < 2);
+        float pos = mix(-0.2, 0.2, float(i)) * isY + mix(-0.5, 0.5, float(i - 2)) * (1.0 - isY);
+        float num = pos - (isY * ro.y + (1.0 - isY) * ro.x);
+        float den = isY * rd.y + (1.0 - isY) * rd.x;
+        float t = num / den;
+        vec3 h = ro + rd * t;
+
+        bool use = t > 0.0 && t < minT;
+        gridUV = use ? mix(h.zy, h.xz, isY) / uGridScale : gridUV;
+        minT = use ? t : minT;
+    }
+
+    vec3 hit = ro + rd * minT;
+    float dist = length(hit - ro);
+
+    float fx = fract(gridUV.x);
+    float fy = fract(gridUV.y);
+    float ax = min(fx, 1.0 - fx);
+    float ay = min(fy, 1.0 - fy);
+    float wx = fwidth(gridUV.x);
+    float wy = fwidth(gridUV.y);
+    float halfPx = max(0.0, uLineThickness) * 0.5;
+
+    float tx = halfPx * wx;
+    float ty = halfPx * wy;
+    float aax = wx;
+    float aay = wy;
+
+    float lineX = 1.0 - smoothstep(tx, tx + aax, ax);
+    float lineY = 1.0 - smoothstep(ty, ty + aay, ay);
+    float lineMask = max(lineX, lineY);
+
+    float fade = exp(-dist * fadeStrength);
+
+    float scanZ = mod(iTime * 0.5, 2.0);
+    float dz = abs(hit.z - scanZ);
+    float sigma = 0.18;
+    float scanPulse = exp(-0.5 * (dz * dz) / (sigma * sigma));
+
+    vec3 gridCol = uLinesColor * lineMask * fade;
+    vec3 scanCol = uScanColor * scanPulse * uScanOpacity;
+
+    color = gridCol + scanCol;
+
+    float n = fract(sin(dot(gl_FragCoord.xy + vec2(iTime * 123.4), vec2(12.9898,78.233))) * 43758.5453123);
+    color += (n - 0.5) * uNoise;
+    color = clamp(color, 0.0, 1.0);
+    float alpha = clamp(max(lineMask, scanPulse * uScanOpacity), 0.0, 1.0);
+    fragColor = vec4(color, alpha);
+}
+
+void main(){
+  vec4 c;
+  mainImage(c, vUv * iResolution.xy);
+  gl_FragColor = c;
+}
+`;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    
+    const onMove = e => {
+      const rect = el.getBoundingClientRect();
+      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      lookTarget.current.set(nx, ny);
+    };
+    
+    const onLeave = () => {
+      lookTarget.current.set(0, 0);
+    };
+    
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+    
+    return () => {
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    rendererRef.current = renderer;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setClearColor(0x000000, 0);
+    container.appendChild(renderer.domElement);
+
+    const srgbColor = (hex) => {
+      const c = new THREE.Color(hex);
+      return c.convertSRGBToLinear();
+    };
+
+    const uniforms = {
+      iResolution: {
+        value: new THREE.Vector3(container.clientWidth, container.clientHeight, renderer.getPixelRatio())
+      },
+      iTime: { value: 0 },
+      uSkew: { value: new THREE.Vector2(0, 0) },
+      uLineThickness: { value: lineThickness },
+      uLinesColor: { value: srgbColor(linesColor) },
+      uScanColor: { value: srgbColor(scanColor) },
+      uGridScale: { value: gridScale },
+      uScanOpacity: { value: scanOpacity },
+      uNoise: { value: noiseIntensity }
+    };
+
+    const material = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader: vert,
+      fragmentShader: frag,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false
+    });
+    materialRef.current = material;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+    scene.add(quad);
+
+    const onResize = () => {
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      material.uniforms.iResolution.value.set(container.clientWidth, container.clientHeight, renderer.getPixelRatio());
+    };
+    window.addEventListener('resize', onResize);
+
+    const s = THREE.MathUtils.clamp(sensitivity, 0, 1);
+    const skewScale = THREE.MathUtils.lerp(0.06, 0.2, s);
+    const smoothTime = THREE.MathUtils.lerp(0.45, 0.12, s);
+    const maxSpeed = Infinity;
+
+    let last = performance.now();
+    const tick = () => {
+      const now = performance.now();
+      const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
+      last = now;
+
+      const smoothDampVec2 = (current, target, currentVelocity, smoothTime, maxSpeed, deltaTime) => {
+        const out = current.clone();
+        smoothTime = Math.max(0.0001, smoothTime);
+        const omega = 2 / smoothTime;
+        const x = omega * deltaTime;
+        const exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+
+        let change = current.clone().sub(target);
+        const maxChange = maxSpeed * smoothTime;
+        if (change.length() > maxChange) change.setLength(maxChange);
+
+        const newTarget = current.clone().sub(change);
+        const temp = currentVelocity.clone().addScaledVector(change, omega).multiplyScalar(deltaTime);
+        currentVelocity.sub(temp.clone().multiplyScalar(omega));
+        currentVelocity.multiplyScalar(exp);
+
+        out.copy(newTarget.clone().add(change.add(temp).multiplyScalar(exp)));
+        return out;
+      };
+
+      lookCurrent.current.copy(
+        smoothDampVec2(lookCurrent.current, lookTarget.current, lookVel.current, smoothTime, maxSpeed, dt)
+      );
+
+      const skew = new THREE.Vector2(lookCurrent.current.x * skewScale, -lookCurrent.current.y * 1.4 * skewScale);
+      material.uniforms.uSkew.value.set(skew.x, skew.y);
+      material.uniforms.iTime.value = now / 1000;
+      
+      renderer.clear(true, true, true);
+      renderer.render(scene, camera);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', onResize);
+      material.dispose();
+      quad.geometry.dispose();
+      renderer.dispose();
+      container.removeChild(renderer.domElement);
+    };
+  }, [sensitivity, lineThickness, linesColor, scanColor, scanOpacity, gridScale, noiseIntensity]);
+
+  return <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />;
+};
+
+const ClickSpark = ({ children, sparkColor = '#FF6B35', sparkSize = 10, sparkRadius = 15, sparkCount = 8, duration = 400 }) => {
+  const [sparks, setSparks] = useState([]);
+
+  const handleClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const newSparks = Array.from({ length: sparkCount }, (_, i) => ({
+      id: Date.now() + i,
+      x,
+      y,
+      angle: (Math.PI * 2 * i) / sparkCount
+    }));
+    
+    setSparks(prev => [...prev, ...newSparks]);
+    
+    setTimeout(() => {
+      setSparks(prev => prev.filter(spark => !newSparks.find(ns => ns.id === spark.id)));
+    }, duration);
+  };
+
+  return (
+    <div onClick={handleClick} style={{ position: 'relative', cursor: 'pointer' }}>
+      {children}
+      {sparks.map(spark => (
+        <div
+          key={spark.id}
+          style={{
+            position: 'absolute',
+            left: spark.x,
+            top: spark.y,
+            width: sparkSize,
+            height: sparkSize,
+            backgroundColor: sparkColor,
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            animation: `sparkFly ${duration}ms ease-out forwards`,
+            '--spark-angle': `${spark.angle}rad`,
+            '--spark-radius': `${sparkRadius}px`
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes sparkFly {
+          0% {
+            transform: translate(-50%, -50%) translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-50%, -50%) 
+              translate(
+                calc(cos(var(--spark-angle)) * var(--spark-radius)),
+                calc(sin(var(--spark-angle)) * var(--spark-radius))
+              ) 
+              scale(0);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 };
@@ -163,7 +464,6 @@ const App = () => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
 
-  // Add CSS animations
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -242,24 +542,24 @@ const App = () => {
 
   const teamMembers = {
     students: [
-      { name: 'Dev Gavande', role: 'Team Captain, Founder, Driver, CAD Lead, Build Team Lead', image: '/data/team/dev.jpg', initials: 'D', rookie: false },
-      { name: 'Sahejdeep Singh', role: 'Build Team, Drive Coach, and Lead Programmer', image: '/data/team/sahejdeep.jpg', initials: 'S', rookie: true },
-      { name: 'Sripaadh J Kuppusamy', role: 'Human Player and Build Team', image: '/data/team/sripadh.jpg', initials: 'S', rookie: true },
-      { name: 'Manveer Singh Tib', role: 'Human Player and Build Team', image: '/data/team/manveer.jpg', initials: 'M', rookie: true },
-      { name: 'Piousvir Singh', role: 'Build Team', image: '/data/team/pious.jpg', initials: 'P', rookie: true },
+      { name: 'Dev Gavande', role: 'Team Captain, Founder, Driver, CAD Lead, Build Team Lead', image: '/data/team/dev.jpg', initials: 'DG', rookie: false },
+      { name: 'Sahejdeep Singh', role: 'Build Team, Drive Coach, and Lead Programmer', image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true },
+      { name: 'Sripaadh J Kuppusamy', role: 'Human Player and Build Team', image: '/data/team/sripadh.jpg', initials: 'SK', rookie: true },
+      { name: 'Manveer Singh Tib', role: 'Human Player and Build Team', image: '/data/team/manveer.jpg', initials: 'MT', rookie: true },
+      { name: 'Piousvir Singh', role: 'Build Team', image: '/data/team/pious.jpg', initials: 'PS', rookie: true },
       { name: 'Kalvik Das', role: 'MoneyBag', image: '/data/team/Kalvik.jpg', initials: 'KD', rookie: true },
       { name: 'Jacob Esparza', role: 'MoneyBag', image: '/data/team/Jacob.jpeg', initials: 'JE', rookie: true },
-      { name: 'Alexander Fiderfish', role: 'MoneyBag', image: '/data/team/member9.jpg', initials: 'M9', rookie: true },
-      { name: 'Pratham Erramilli', role: 'MoneyBag', image: '/data/team/member10.jpg', initials: 'M10', rookie: true },
-      { name: 'Abhi Ravulaparthy', role: 'MoneyBag', image: '/data/team/member11.jpg', initials: 'M11', rookie: true },
-      { name: 'Kavin Murugan', role: 'MoneyBag', image: '/data/team/member12.jpg', initials: 'M12', rookie: true },
-      { name: 'Arshaan Husain', role: 'MoneyBag', image: '/data/team/member13.jpg', initials: 'M13', rookie: true },
-      { name: 'Trisha Chauhan', role: 'MoneyBag', image: '/data/team/member14.jpg', initials: 'M14', rookie: true },
-      { name: 'Kaiden Lee', role: 'MoneyBag', image: '/data/team/member15.jpg', initials: 'M15', rookie: true },
-      { name: 'Jivansh Pandya', role: 'MoneyBag', image: '/data/team/Jivansh.jpg', initials: 'M16', rookie: true },
+      { name: 'Alexander Fiderfish', role: 'MoneyBag', image: '/data/team/member9.jpg', initials: 'AF', rookie: true },
+      { name: 'Pratham Erramilli', role: 'MoneyBag', image: '/data/team/member10.jpg', initials: 'PE', rookie: true },
+      { name: 'Abhi Ravulaparthy', role: 'MoneyBag', image: '/data/team/member11.jpg', initials: 'AR', rookie: true },
+      { name: 'Kavin Murugan', role: 'MoneyBag', image: '/data/team/member12.jpg', initials: 'KM', rookie: true },
+      { name: 'Arshaan Husain', role: 'MoneyBag', image: '/data/team/member13.jpg', initials: 'AH', rookie: true },
+      { name: 'Trisha Chauhan', role: 'MoneyBag', image: '/data/team/member14.jpg', initials: 'TC', rookie: true },
+      { name: 'Kaiden Lee', role: 'MoneyBag', image: '/data/team/member15.jpg', initials: 'KL', rookie: true },
+      { name: 'Jivansh Pandya', role: 'MoneyBag', image: '/data/team/Jivansh.jpg', initials: 'JP', rookie: true },
     ],
     mentors: [
-      { name: 'Abdullah Khalid', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'A', rookie: false },
+      { name: 'Abdullah Khalid', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false },
     ],
     coaches: [
       { name: 'Mr. Ellis', role: 'Coach', image: '/data/team/ellis.jpg', initials: 'E', rookie: false },
@@ -278,6 +578,15 @@ const App = () => {
       return (
         <div className="min-h-screen">
           <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-black via-gray-900 to-blue-900">
+            <GridScan
+              sensitivity={0.55}
+              lineThickness={1}
+              linesColor="#392e4e"
+              gridScale={0.1}
+              scanColor="#FF6B35"
+              scanOpacity={0.4}
+              noiseIntensity={0.01}
+            />
             <div
               className="absolute inset-0 opacity-10"
               style={{
@@ -910,7 +1219,14 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-black overflow-x-hidden">
+    <ClickSpark
+      sparkColor='#FF6B35'
+      sparkSize={10}
+      sparkRadius={15}
+      sparkCount={8}
+      duration={400}
+    >
+      <div className="min-h-[100dvh] bg-black overflow-x-hidden">
       <nav className="fixed top-0 w-full bg-black/95 backdrop-blur-sm border-b-2 border-blue-500 z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
@@ -1021,6 +1337,7 @@ const App = () => {
         </div>
       </footer>
     </div>
+    </ClickSpark>
   );
 };
 
