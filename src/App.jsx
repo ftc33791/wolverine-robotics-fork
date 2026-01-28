@@ -149,9 +149,17 @@ const LogoImage = () => {
   
   return (
     <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
-      <div className="w-full h-full bg-gradient-to-br from-blue-600 to-orange-600 flex items-center justify-center text-white font-black text-xl">
-        WR
-      </div>
+      {!imageLoaded || imageError ? (
+        <div className="w-full h-full bg-gradient-to-br from-blue-600 to-orange-600 flex items-center justify-center text-white font-black text-xl">
+          WR
+        </div>
+      ) : (
+        <img 
+          src="/data/logo.png" 
+          alt="Wolverine Robotics Logo" 
+          className="w-full h-full object-contain" 
+        />
+      )}
     </div>
   );
 };
