@@ -394,7 +394,7 @@ void main(){
   return <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />;
 };
 
-const ClickSpark = ({ children, sparkColor = '#FF6B35', sparkSize = 10, sparkRadius = 15, sparkCount = 8, duration = 400 }) => {
+const ClickSpark = ({ children, sparkColor = '#FF6B35', sparkSize = 10, sparkRadius = 15, sparkCount = 8, duration = 200 }) => {
   const [sparks, setSparks] = useState([]);
 
   const handleClick = (e) => {
