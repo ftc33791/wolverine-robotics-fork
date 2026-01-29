@@ -551,7 +551,7 @@ const App = () => {
   const teamMembers = {
     students: [
       { name: 'Dev Gavande', role: 'Team Captain, Founder, Driver, CAD Lead, Build Team Lead', image: '/data/team/dev.jpg', initials: 'DG', rookie: false },
-      { name: 'Sahejdeep Singh', role: 'Build Team, Drive Coach, and Programmer', image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true },
+      { name: 'Sahejdeep Singh', role: 'Lead Programmer, Drive Coach, Build Team', image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true },
       { name: 'Sripaadh J Kuppusamy', role: 'Human Player and Build Team', image: '/data/team/sripadh.jpg', initials: 'SK', rookie: true },
       { name: 'Manveer Singh Tib', role: 'Human Player and Build Team', image: '/data/team/manveer.jpg', initials: 'MT', rookie: true },
       { name: 'Piousvir Singh', role: 'Build Team', image: '/data/team/pious.jpg', initials: 'PS', rookie: true },
