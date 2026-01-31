@@ -563,7 +563,7 @@ const App = () => {
       { name: 'Kavin Murugan', role: 'Outreach', image: '/data/team/kavin.jpg', initials: 'KM', rookie: true },
       { name: 'Arshaan Husain', role: 'Outreach', image: '/data/team/member13.jpg', initials: 'AH', rookie: true },
       { name: 'Trisha Chauhan', role: 'Outreach', image: '/data/team/trisha.jpg', initials: 'TC', rookie: true },
-      { name: 'Kaiden Lee', role: 'Outreach', image: '/data/team/member15.jpg', initials: 'KL', rookie: true },
+      { name: 'Kaiden Lee', role: 'Outreach', image: '/data/team/kaiden.jpg', initials: 'KL', rookie: true },
       { name: 'Jivansh Pandya', role: 'Outreach', image: '/data/team/Jivansh.jpg', initials: 'JP', rookie: true },
     ],
     mentors: [
