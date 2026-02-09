@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://www.wolverine-robotics.com/$1",
+      "permanent": true
+    }
+  ]
+}
