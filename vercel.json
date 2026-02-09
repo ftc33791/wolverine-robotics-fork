@@ -1,0 +1,12 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "wolverine-robotics.com" }
+      ],
+      "destination": "https://www.wolverine-robotics.com/$1",
+      "permanent": true
+    }
+  ]
+}
