@@ -1,8 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ChevronRight, Award, Calendar, Users, Wrench, Mail, MapPin, Github, Linkedin, Instagram } from 'lucide-react';
+import { Menu, X, ChevronRight, Award, Calendar, Users, Mail, MapPin, Github, Linkedin, Instagram, Zap } from 'lucide-react';
 import * as THREE from 'three';
 
-const SponsorCard = ({ sponsor, index }) => {
+const ClawMark = ({ className = "", opacity = 0.1 }) => (
+  <div className={`absolute pointer-events-none ${className}`} style={{ opacity }}>
+    <div className="relative w-full h-full">
+      <div className="absolute w-1 bg-orange-500 transform rotate-45" style={{ height: '150%', left: '0%' }} />
+      <div className="absolute w-1 bg-orange-500 transform rotate-45" style={{ height: '150%', left: '25%' }} />
+      <div className="absolute w-1 bg-orange-500 transform rotate-45" style={{ height: '150%', left: '50%' }} />
+    </div>
+  </div>
+);
+
+const AngleButton = ({ children, onClick, variant = 'primary', className = '' }) => {
+  const baseClasses = "relative px-8 py-4 font-bold transition-all duration-300 hover:scale-105 overflow-hidden group";
+  const variantClasses = {
+    primary: "bg-gradient-to-br from-orange-600 to-orange-700 text-white",
+    secondary: "bg-gradient-to-br from-blue-900 to-blue-950 text-white border-2 border-blue-500",
+    ghost: "bg-transparent text-white border-2 border-orange-500 hover:bg-orange-500/10"
+  };
+
+  return (
+    <button 
+      onClick={onClick}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+      style={{
+        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'
+      }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+      <span className="relative z-10 flex items-center gap-2">
+        {children}
+      </span>
+    </button>
+  );
+};
+
+const SponsorCard = ({ sponsor }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const hasChecked = useRef(false);
@@ -25,7 +59,12 @@ const SponsorCard = ({ sponsor, index }) => {
   }, [sponsor.image]);
   
   return (
-    <div className="aspect-video bg-white flex items-center justify-center mb-6 overflow-hidden">
+    <div 
+      className="aspect-video bg-white flex items-center justify-center mb-6 overflow-hidden relative group"
+      style={{
+        clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'
+      }}
+    >
       {!imageLoaded ? (
         <div className="w-full h-full bg-gradient-to-br from-blue-900 to-orange-900 flex items-center justify-center">
           <div className="text-white text-6xl font-black">{initials}</div>
@@ -38,7 +77,7 @@ const SponsorCard = ({ sponsor, index }) => {
         <img 
           src={sponsor.image} 
           alt={sponsor.name} 
-          className="w-full h-full object-contain p-4" 
+          className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-300" 
         />
       )}
     </div>
@@ -67,22 +106,37 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
   }, [member.image]);
   
   const sizeClasses = size === 'small' 
-    ? 'w-24 h-24 text-3xl' 
+    ? 'w-28 h-28 text-3xl' 
     : 'aspect-square text-6xl';
   
   return (
-    <div className={`${sizeClasses} bg-gradient-to-br from-blue-600 to-orange-600 mx-auto flex items-center justify-center text-white font-bold overflow-hidden relative`}>
-      {!imageLoaded || imageError ? (
-        <span>{member.initials}</span>
-      ) : (
-        <img 
-          src={member.image} 
-          alt={member.name} 
-          className="w-full h-full object-cover" 
-        />
-      )}
+    <div className="relative">
+      <div 
+        className={`${sizeClasses} bg-gradient-to-br from-orange-600 to-orange-800 mx-auto flex items-center justify-center text-white font-black overflow-hidden relative group`}
+        style={{
+          clipPath: size === 'small' 
+            ? 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'
+            : 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'
+        }}
+      >
+        {!imageLoaded || imageError ? (
+          <span>{member.initials}</span>
+        ) : (
+          <img 
+            src={member.image} 
+            alt={member.name} 
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
       {showRookie && member.rookie && (
-        <div className="absolute top-2 right-2 bg-orange-600 text-white text-xs font-bold px-2 py-1 border border-orange-400 shadow-lg">
+        <div 
+          className="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-black px-3 py-1 shadow-lg z-10"
+          style={{
+            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'
+          }}
+        >
           ROOKIE
         </div>
       )}
@@ -114,7 +168,7 @@ const RobotImage = ({ src, alt, fallbackText }) => {
   return (
     <>
       {!imageLoaded || imageError ? (
-        <span className="text-white font-black">{fallbackText}</span>
+        <span className="text-white font-black text-8xl">{fallbackText}</span>
       ) : (
         <img 
           src={src} 
@@ -148,9 +202,14 @@ const LogoImage = () => {
   }, []);
   
   return (
-    <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
+    <div 
+      className="w-12 h-12 flex items-center justify-center overflow-hidden"
+      style={{
+        clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'
+      }}
+    >
       {!imageLoaded || imageError ? (
-        <div className="w-full h-full bg-gradient-to-br from-blue-600 to-orange-600 flex items-center justify-center text-white font-black text-xl">
+        <div className="w-full h-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-black text-xl">
           WR
         </div>
       ) : (
@@ -164,10 +223,9 @@ const LogoImage = () => {
   );
 };
 
-const GridScan = ({ sensitivity = 0.55, lineThickness = 1, linesColor = '#392e4e', scanColor = '#FF6B35', scanOpacity = 0.4, gridScale = 0.1, noiseIntensity = 0.01 }) => {
+const GridScan = ({ sensitivity = 0.55, lineThickness = 1, linesColor = '#FF5A1F', scanColor = '#FF5A1F', scanOpacity = 0.3, gridScale = 0.15, noiseIntensity = 0.008 }) => {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
-  const materialRef = useRef(null);
   const rafRef = useRef(null);
   
   const lookTarget = useRef(new THREE.Vector2(0, 0));
@@ -206,7 +264,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     vec3 color = vec3(0.0);
     float minT = 1e20;
-    float fadeStrength = 2.0;
+    float fadeStrength = 1.5;
     vec2 gridUV = vec2(0.0);
 
     for (int i = 0; i < 4; i++)
@@ -245,9 +303,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     float fade = exp(-dist * fadeStrength);
 
-    float scanZ = mod(iTime * 0.5, 2.0);
+    float scanZ = mod(iTime * 0.4, 2.0);
     float dz = abs(hit.z - scanZ);
-    float sigma = 0.18;
+    float sigma = 0.2;
     float scanPulse = exp(-0.5 * (dz * dz) / (sigma * sigma));
 
     vec3 gridCol = uLinesColor * lineMask * fade;
@@ -258,7 +316,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float n = fract(sin(dot(gl_FragCoord.xy + vec2(iTime * 123.4), vec2(12.9898,78.233))) * 43758.5453123);
     color += (n - 0.5) * uNoise;
     color = clamp(color, 0.0, 1.0);
-    float alpha = clamp(max(lineMask, scanPulse * uScanOpacity), 0.0, 1.0);
+    float alpha = clamp(max(lineMask * fade, scanPulse * uScanOpacity), 0.0, 1.0) * 0.6;
     fragColor = vec4(color, alpha);
 }
 
@@ -331,7 +389,6 @@ void main(){
       depthWrite: false,
       depthTest: false
     });
-    materialRef.current = material;
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -345,8 +402,8 @@ void main(){
     window.addEventListener('resize', onResize);
 
     const s = THREE.MathUtils.clamp(sensitivity, 0, 1);
-    const skewScale = THREE.MathUtils.lerp(0.06, 0.2, s);
-    const smoothTime = THREE.MathUtils.lerp(0.45, 0.12, s);
+    const skewScale = THREE.MathUtils.lerp(0.04, 0.15, s);
+    const smoothTime = THREE.MathUtils.lerp(0.5, 0.15, s);
     const maxSpeed = Infinity;
 
     let last = performance.now();
@@ -379,11 +436,10 @@ void main(){
         smoothDampVec2(lookCurrent.current, lookTarget.current, lookVel.current, smoothTime, maxSpeed, dt)
       );
 
-      const skew = new THREE.Vector2(lookCurrent.current.x * skewScale, -lookCurrent.current.y * 1.4 * skewScale);
+      const skew = new THREE.Vector2(lookCurrent.current.x * skewScale, -lookCurrent.current.y * 1.2 * skewScale);
       material.uniforms.uSkew.value.set(skew.x, skew.y);
       material.uniforms.iTime.value = now / 1000;
       
-      renderer.clear(true, true, true);
       renderer.render(scene, camera);
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -402,70 +458,6 @@ void main(){
   return <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />;
 };
 
-const ClickSpark = ({ children, sparkColor = '#FF6B35', sparkSize = 10, sparkRadius = 15, sparkCount = 8, duration = 200 }) => {
-  const [sparks, setSparks] = useState([]);
-
-  const handleClick = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const newSparks = Array.from({ length: sparkCount }, (_, i) => ({
-      id: Date.now() + i,
-      x,
-      y,
-      angle: (Math.PI * 2 * i) / sparkCount
-    }));
-    
-    setSparks(prev => [...prev, ...newSparks]);
-    
-    setTimeout(() => {
-      setSparks(prev => prev.filter(spark => !newSparks.find(ns => ns.id === spark.id)));
-    }, duration);
-  };
-
-  return (
-    <div onClick={handleClick} style={{ position: 'relative', cursor: 'pointer' }}>
-      {children}
-      {sparks.map(spark => (
-        <div
-          key={spark.id}
-          style={{
-            position: 'absolute',
-            left: spark.x,
-            top: spark.y,
-            width: sparkSize,
-            height: sparkSize,
-            backgroundColor: sparkColor,
-            borderRadius: '50%',
-            pointerEvents: 'none',
-            animation: `sparkFly ${duration}ms ease-out forwards`,
-            '--spark-angle': `${spark.angle}rad`,
-            '--spark-radius': `${sparkRadius}px`
-          }}
-        />
-      ))}
-      <style>{`
-        @keyframes sparkFly {
-          0% {
-            transform: translate(-50%, -50%) translate(0, 0) scale(1);
-            opacity: 1;
-          }
-          100% {
-            transform: translate(-50%, -50%) 
-              translate(
-                calc(cos(var(--spark-angle)) * var(--spark-radius)),
-                calc(sin(var(--spark-angle)) * var(--spark-radius))
-              ) 
-              scale(0);
-            opacity: 0;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -478,15 +470,43 @@ const App = () => {
       @keyframes fadeInUp {
         from {
           opacity: 0;
-          transform: translateY(50px) scale(0.95);
+          transform: translateY(30px);
         }
         to {
           opacity: 1;
-          transform: translateY(0) scale(1);
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(-40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
         }
       }
       .animate-fade-in-up {
-        animation: fadeInUp 1s ease-out forwards;
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+      }
+      .animate-slide-in-right {
+        animation: slideInRight 0.8s ease-out forwards;
+        opacity: 0;
+      }
+      .animate-scale-in {
+        animation: scaleIn 0.8s ease-out forwards;
         opacity: 0;
       }
     `;
@@ -513,7 +533,7 @@ const App = () => {
         }
       });
       setIsVisible(visibilityMap);
-    }, 50);
+    }, 100);
     
     return () => clearTimeout(timer);
   }, [currentPage]);
@@ -527,7 +547,7 @@ const App = () => {
           }
         });
       },
-      { threshold: 0.05 }
+      { threshold: 0.1 }
     );
 
     const timeoutId = setTimeout(() => {
@@ -541,11 +561,11 @@ const App = () => {
   }, [currentPage]);
 
   const navigation = [
-    { name: 'Home', id: 'home' },
-    { name: 'About', id: 'about' },
-    { name: 'Robots', id: 'robots' },
-    { name: 'Sponsors', id: 'sponsors' },
-    { name: 'Contact', id: 'contact' },
+    { name: 'HOME', id: 'home' },
+    { name: 'ABOUT', id: 'about' },
+    { name: 'ROBOTS', id: 'robots' },
+    { name: 'SPONSORS', id: 'sponsors' },
+    { name: 'CONTACT', id: 'contact' },
   ];
 
   const teamMembers = {
@@ -584,164 +604,271 @@ const App = () => {
     if (currentPage === 'home') {
       return (
         <div className="min-h-screen">
-          <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-black via-gray-900 to-blue-900">
-            <GridScan
-              sensitivity={0.55}
-              lineThickness={1}
-              linesColor="#392e4e"
-              gridScale={0.1}
-              scanColor="#FF6B35"
-              scanOpacity={0.4}
-              noiseIntensity={0.01}
-            />
+          {/* Hero Section */}
+          <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-[#132038]">
+            <GridScan />
+            <ClawMark className="bottom-0 right-0 w-64 h-64" opacity={0.05} />
+            
+            {/* Animated Background Pattern */}
             <div
-              className="absolute inset-0 opacity-10"
+              className="absolute inset-0 opacity-5"
               style={{
-                backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.3) 1px, transparent 0)',
-                backgroundSize: '50px 50px',
-                transform: `translateY(${scrollY * 0.3}px)`,
+                backgroundImage: 'linear-gradient(45deg, #FF5A1F 1px, transparent 1px), linear-gradient(-45deg, #FF5A1F 1px, transparent 1px)',
+                backgroundSize: '60px 60px',
+                transform: `translateY(${scrollY * 0.2}px)`,
               }}
             />
             
             <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
-              <div className="overflow-hidden mb-6">
-                <h1 className="text-7xl md:text-9xl font-black text-white animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+              <div className="mb-8">
+                <div className="inline-block mb-6 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                  <div className="flex items-center gap-3 px-6 py-3 bg-orange-600/20 border-2 border-orange-600"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
+                    <Zap className="text-orange-500" size={20} />
+                    <span className="text-orange-500 font-black text-sm tracking-wider">FTC TEAM 33791</span>
+                  </div>
+                </div>
+                
+                <h1 className="text-7xl md:text-9xl font-black text-white mb-4 animate-fade-in-up tracking-tight" style={{animationDelay: '0.3s', fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.02em'}}>
                   WOLVERINE
                 </h1>
-              </div>
-              <div className="overflow-hidden mb-8">
-                <h2 className="text-5xl md:text-7xl font-bold text-orange-500 animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+                <h2 className="text-5xl md:text-8xl font-black text-orange-500 mb-8 animate-fade-in-up" style={{animationDelay: '0.4s', fontFamily: 'system-ui, -apple-system, sans-serif'}}>
                   ROBOTICS
                 </h2>
               </div>
-              <div className="overflow-hidden mb-8">
-                <p className="text-xl md:text-2xl text-blue-400 font-semibold animate-fade-in-up" style={{animationDelay: '0.6s'}}>
-                  FTC Team 33791 | Frisco, Texas
+              
+              <div className="max-w-2xl mx-auto mb-12 space-y-4">
+                <p className="text-lg md:text-xl text-gray-300 animate-fade-in-up leading-relaxed" style={{animationDelay: '0.5s'}}>
+                  First-year FTC team from Frisco, TX pushing the boundaries of what rookies can achieve.
+                </p>
+                <p className="text-base md:text-lg text-gray-400 animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+                  Built with precision. Engineered for excellence. Driven by innovation.
                 </p>
               </div>
-              <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto animate-fade-in-up" style={{animationDelay: '0.8s'}}>
-                We are FTC team 33791, Wolverine Robotics from Frisco, TX. This is our first year in FIRST, and we are extremely excited to start our foray into robotics!
-              </p>
               
-              <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up" style={{animationDelay: '1s'}}>
-                <button
-                  onClick={() => setCurrentPage('about')}
-                  className="group relative px-8 py-4 bg-blue-600 text-white font-bold transition-all duration-300 hover:bg-blue-500 hover:scale-105 border-2 border-blue-400"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Learn More <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </button>
-                
-                <button
-                  onClick={() => setCurrentPage('contact')}
-                  className="group relative px-8 py-4 bg-orange-600 text-white font-bold transition-all duration-300 hover:bg-orange-500 hover:scale-105 border-2 border-orange-400"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Join the Team <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </button>
+              <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up" style={{animationDelay: '0.7s'}}>
+                <AngleButton onClick={() => setCurrentPage('robots')} variant="primary">
+                  VIEW MATCHSTICK <ChevronRight size={20} />
+                </AngleButton>
+                <AngleButton onClick={() => setCurrentPage('about')} variant="ghost">
+                  MEET THE TEAM
+                </AngleButton>
+              </div>
+
+              {/* Stats Bar */}
+              <div className="grid grid-cols-3 gap-6 mt-20 max-w-3xl mx-auto animate-fade-in-up" style={{animationDelay: '0.8s'}}>
+                {[
+                  { label: 'RECORD', value: '5-0-1' },
+                  { label: 'TEAM SIZE', value: '17' },
+                  { label: 'SEASON', value: '2025' }
+                ].map((stat, idx) => (
+                  <div key={idx} className="relative group">
+                    <div className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-orange-600/50 backdrop-blur-sm"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
+                      <div className="text-3xl md:text-4xl font-black text-white mb-1">{stat.value}</div>
+                      <div className="text-xs text-orange-500 font-bold tracking-widest">{stat.label}</div>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-600/0 via-orange-600/20 to-orange-600/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="py-24 bg-gray-900">
+          {/* Robot Showcase */}
+          <div className="py-32 bg-gradient-to-b from-[#132038] to-black relative overflow-hidden">
+            <ClawMark className="top-0 left-0 w-96 h-96" opacity={0.03} />
+            
             <div className="max-w-7xl mx-auto px-4">
-              <h2
-                id="robot-highlight"
-                data-animate
-                className={`text-5xl md:text-6xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-blue-500 transition-all duration-1000 transform pb-2 ${
-                  isVisible['robot-highlight'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
-                }`}
-              >
-                Meet Matchstick
-              </h2>
+              <div className="text-center mb-20">
+                <div 
+                  id="robot-section"
+                  data-animate
+                  className={`inline-block mb-6 transition-all duration-1000 ${
+                    isVisible['robot-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                >
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                    <span className="text-orange-500 font-black text-sm tracking-widest">OUR MACHINE</span>
+                  </div>
+                </div>
+                
+                <h2 
+                  id="robot-title"
+                  data-animate
+                  className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-1000 ${
+                    isVisible['robot-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}
+                >
+                  MEET MATCHSTICK
+                </h2>
+                <p 
+                  id="robot-subtitle"
+                  data-animate
+                  className={`text-xl text-gray-400 max-w-2xl mx-auto transition-all duration-1000 ${
+                    isVisible['robot-subtitle'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{transitionDelay: '100ms'}}
+                >
+                  Precision-engineered for the 2025-26 DECODE season
+                </p>
+              </div>
               
               <div
                 id="robot-card"
                 data-animate
-                className={`bg-gray-800 p-8 md:p-12 border-4 border-blue-500 transition-all duration-1000 hover:border-orange-500 hover:shadow-2xl hover:shadow-blue-500/20 transform ${
-                  isVisible['robot-card'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+                className={`relative transition-all duration-1000 ${
+                  isVisible['robot-card'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                 }`}
               >
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                  <div className="aspect-square bg-gradient-to-br from-blue-900 to-orange-900 flex items-center justify-center text-white text-9xl font-black border-4 border-orange-500">
-                    <RobotImage 
-                      src="/data/robots/matchstick-main.jpg" 
-                      alt="Matchstick Robot" 
-                      fallbackText="MS"
-                    />
-                  </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-4 translate-y-4"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
+                
+                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-orange-600 overflow-hidden"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
+                  <ClawMark className="top-0 right-0 w-48 h-48" opacity={0.08} />
                   
-                  <div>
-                    <h3 className="text-4xl font-bold text-white mb-4">Matchstick</h3>
-                    <p className="text-gray-300 text-lg mb-6">
-                      Our inaugural robot, built in record time and ready to compete at the highest level.
-                    </p>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                      <div className="bg-blue-900 p-4 border-2 border-blue-500">
-                        <p className="text-blue-400 font-semibold mb-1">Season</p>
-                        <p className="text-white text-xl font-bold">2025-26 Decode</p>
+                  <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
+                    <div className="space-y-6">
+                      <div 
+                        className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative group"
+                        style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}
+                      >
+                        <RobotImage 
+                          src="/data/robots/matchstick-main.jpg" 
+                          alt="Matchstick Robot" 
+                          fallbackText="MS"
+                        />
+                        <div className="absolute inset-0 border-4 border-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                             style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
                       </div>
-                      <div className="bg-orange-900 p-4 border-2 border-orange-500">
-                        <p className="text-orange-400 font-semibold mb-1">Status</p>
-                        <p className="text-white text-xl font-bold">Active</p>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div
+                            key={i}
+                            className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden group hover:scale-105 transition-transform duration-300"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
+                          >
+                            <RobotImage 
+                              src={`/data/robots/matchstick-${i}.jpg`} 
+                              alt={`Matchstick detail ${i}`} 
+                              fallbackText={i.toString()}
+                            />
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    
-                    <button
-                      onClick={() => setCurrentPage('robots')}
-                      className="group px-6 py-3 bg-orange-600 text-white font-bold transition-all duration-300 hover:bg-orange-500 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/50 border-2 border-orange-400"
-                    >
-                      <span className="flex items-center gap-2">
-                        View Details <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-                      </span>
-                    </button>
+
+                    <div className="space-y-8">
+                      <div>
+                        <h3 className="text-5xl font-black text-white mb-2" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                          MATCHSTICK
+                        </h3>
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="h-1 w-16 bg-gradient-to-r from-orange-600 to-transparent" />
+                          <p className="text-orange-500 font-bold tracking-wider text-sm">SEASON 2025-26</p>
+                        </div>
+                        <p className="text-gray-300 text-lg leading-relaxed">
+                          Our inaugural machine. Engineered in record time with zero compromises on performance. Every component optimized for competitive excellence.
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { label: 'WEIGHT', value: '28 LBS' },
+                          { label: 'HEIGHT', value: '18 IN' },
+                          { label: 'DRIVE', value: 'MECANUM' },
+                          { label: 'CODE', value: 'JAVA 17' }
+                        ].map((spec, idx) => (
+                          <div 
+                            key={idx}
+                            className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-4 border-2 border-orange-600/50 group hover:border-orange-600 transition-colors"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
+                          >
+                            <p className="text-orange-500/70 font-bold text-xs mb-1 tracking-wider">{spec.label}</p>
+                            <p className="text-white text-xl font-black">{spec.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <AngleButton onClick={() => setCurrentPage('robots')} variant="primary" className="w-full">
+                        FULL SPECIFICATIONS <ChevronRight size={20} />
+                      </AngleButton>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="py-24 bg-black">
+          {/* Events Section */}
+          <div className="py-32 bg-black relative overflow-hidden">
+            <ClawMark className="bottom-0 right-0 w-96 h-96" opacity={0.03} />
+            
             <div className="max-w-7xl mx-auto px-4">
-              <h2
-                id="events-title"
-                data-animate
-                className={`text-5xl md:text-6xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-orange-500 transition-all duration-1000 transform pb-2 ${
-                  isVisible['events-title'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
-                }`}
-              >
-                Upcoming Events
-              </h2>
+              <div className="text-center mb-20">
+                <div 
+                  id="events-tag"
+                  data-animate
+                  className={`inline-block mb-6 transition-all duration-1000 ${
+                    isVisible['events-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                >
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                    <span className="text-orange-500 font-black text-sm tracking-widest">UPCOMING</span>
+                  </div>
+                </div>
+                
+                <h2 
+                  id="events-title"
+                  data-animate
+                  className={`text-5xl md:text-7xl font-black text-white transition-all duration-1000 ${
+                    isVisible['events-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}
+                >
+                  EVENTS & SCHEDULE
+                </h2>
+              </div>
               
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-3 gap-6">
                 {upcomingEvents.map((event, idx) => (
                   <div
                     key={idx}
                     id={`event-${idx}`}
                     data-animate
-                    className={`bg-gray-900 p-8 border-2 border-blue-500 hover:border-orange-500 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-2 transition-all duration-500 transform ${
-                      isVisible[`event-${idx}`] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+                    className={`relative group transition-all duration-1000 ${
+                      isVisible[`event-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                     }`}
-                    style={{ transitionDelay: `${idx * 150}ms` }}
+                    style={{ transitionDelay: `${idx * 100}ms` }}
                   >
-                    <Calendar className="text-orange-500 mb-4" size={40} />
-                    <h3 className="text-2xl font-bold text-white mb-4">{event.name}</h3>
-                    <div className="space-y-2 text-gray-300">
-                      <p className="flex items-center gap-2">
-                        <Calendar size={16} className="text-blue-400" />
-                        {event.date}
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <span className="text-blue-400 text-xl">⏰</span>
-                        {event.time}
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <MapPin size={16} className="text-blue-400" />
-                        {event.location}
-                      </p>
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
+                    
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600/50 group-hover:border-orange-600 transition-colors overflow-hidden"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-600/10 to-transparent transform translate-x-8 -translate-y-8 rotate-45" />
+                      
+                      <Calendar className="text-orange-500 mb-6" size={36} />
+                      <h3 className="text-2xl font-black text-white mb-6">{event.name}</h3>
+                      <div className="space-y-3 text-gray-300">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 bg-orange-600" />
+                          <span className="text-sm">{event.date}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 bg-orange-600" />
+                          <span className="text-sm">{event.time}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 bg-orange-600" />
+                          <span className="text-sm">{event.location}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -749,45 +876,69 @@ const App = () => {
             </div>
           </div>
 
-          <div className="py-24 bg-gradient-to-b from-black to-gray-900">
-            <div className="max-w-7xl mx-auto px-4">
-              <h2
-                id="team-preview"
-                data-animate
-                className={`text-5xl md:text-6xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-blue-500 transition-all duration-1000 transform pb-2 ${
-                  isVisible['team-preview'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
-                }`}
-              >
-                Our Team
-              </h2>
+          {/* Team Preview */}
+          <div className="py-32 bg-gradient-to-b from-black to-[#132038] relative overflow-hidden">
+            <GridScan sensitivity={0.3} scanOpacity={0.2} />
+            
+            <div className="max-w-7xl mx-auto px-4 relative z-10">
+              <div className="text-center mb-20">
+                <div 
+                  id="team-tag"
+                  data-animate
+                  className={`inline-block mb-6 transition-all duration-1000 ${
+                    isVisible['team-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                >
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                    <span className="text-orange-500 font-black text-sm tracking-widest">THE PACK</span>
+                  </div>
+                </div>
+                
+                <h2 
+                  id="team-title"
+                  data-animate
+                  className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-1000 ${
+                    isVisible['team-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}
+                >
+                  MEET THE TEAM
+                </h2>
+                <p 
+                  id="team-subtitle"
+                  data-animate
+                  className={`text-xl text-gray-400 max-w-2xl mx-auto transition-all duration-1000 ${
+                    isVisible['team-subtitle'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{transitionDelay: '100ms'}}
+                >
+                  17 students. 1 vision. Unlimited potential.
+                </p>
+              </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
                 {teamMembers.students.slice(0, 4).map((member, idx) => (
                   <div
                     key={idx}
-                    id={`member-${idx}`}
+                    id={`member-preview-${idx}`}
                     data-animate
-                    className={`group bg-gray-800 p-6 text-center border-2 border-blue-500 hover:border-orange-500 hover:shadow-xl hover:shadow-orange-500/30 hover:-translate-y-2 transition-all duration-500 transform ${
-                      isVisible[`member-${idx}`] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+                    className={`group text-center transition-all duration-1000 ${
+                      isVisible[`member-preview-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                     }`}
                     style={{ transitionDelay: `${idx * 100}ms` }}
                   >
                     <TeamMemberCard member={member} size="small" showRookie={false} />
-                    <h3 className="text-white font-bold text-lg mb-1 mt-4">{member.name}</h3>
-                    <p className="text-blue-400 text-sm">{member.role}</p>
+                    <h3 className="text-white font-bold text-base mt-4 mb-1">{member.name}</h3>
+                    <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role.split(',')[0]}</p>
                   </div>
                 ))}
               </div>
               
-              <div className="text-center mt-12">
-                <button
-                  onClick={() => setCurrentPage('about')}
-                  className="group px-8 py-4 bg-blue-600 text-white font-bold transition-all duration-300 hover:bg-blue-500 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 border-2 border-blue-400"
-                >
-                  <span className="flex items-center gap-2">
-                    Meet the Team <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </button>
+              <div className="text-center">
+                <AngleButton onClick={() => setCurrentPage('about')} variant="secondary">
+                  FULL ROSTER <ChevronRight size={20} />
+                </AngleButton>
               </div>
             </div>
           </div>
@@ -797,101 +948,142 @@ const App = () => {
 
     if (currentPage === 'about') {
       return (
-        <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black py-24">
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32">
           <div className="max-w-7xl mx-auto px-4">
-            <h1
-              id="about-title"
-              data-animate
-              className={`text-6xl md:text-7xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-orange-500 transition-all duration-1000 transform pb-2 ${
-                isVisible['about-title'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
-              }`}
-            >
-              About Us
-            </h1>
+            <div className="text-center mb-20">
+              <div 
+                id="about-tag"
+                data-animate
+                className={`inline-block mb-6 transition-all duration-1000 ${
+                  isVisible['about-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+              >
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">TEAM 33791</span>
+                </div>
+              </div>
+              
+              <h1 
+                id="about-title"
+                data-animate
+                className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-1000 ${
+                  isVisible['about-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}
+              >
+                THE PACK
+              </h1>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                A first-year team built on precision engineering, relentless innovation, and the drive to prove that rookies can compete at the highest level.
+              </p>
+            </div>
 
+            {/* Students */}
             <div
-              id="team-gallery"
+              id="students-section"
               data-animate
-              className={`transition-all duration-1000 transform ${
-                isVisible['team-gallery'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+              className={`mb-24 transition-all duration-1000 ${
+                isVisible['students-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
               }`}
             >
-              <h2 className="text-4xl font-bold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-blue-500 pb-2">
-                Students
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+              <div className="mb-12">
+                <div className="flex items-center gap-4 mb-2">
+                  <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                    STUDENTS
+                  </h2>
+                  <div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" />
+                </div>
+                <p className="text-orange-500 font-bold tracking-wider text-sm">THE ENGINEERS</p>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {teamMembers.students.map((member, i) => (
                   <div
                     key={i}
-                    className="bg-gray-900 border-2 border-blue-500 hover:border-orange-500 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+                    className="group text-center hover:-translate-y-2 transition-transform duration-300"
                   >
                     <TeamMemberCard member={member} size="large" showRookie={true} />
-                    <div className="p-4 bg-gray-900">
-                      <h3 className="text-white font-bold text-lg mb-1">{member.name}</h3>
-                      <p className="text-blue-400 text-sm">{member.role}</p>
+                    <div className="mt-4">
+                      <h3 className="text-white font-bold text-base mb-1">{member.name}</h3>
+                      <p className="text-orange-500 text-xs font-bold tracking-wider leading-relaxed">{member.role}</p>
                     </div>
                   </div>
                 ))}
               </div>
-
-              {teamMembers.mentors.length > 0 && (
-                <>
-                  <h2 className="text-4xl font-bold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-orange-500 pb-2">
-                    Mentors
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-                    {teamMembers.mentors.map((member, i) => (
-                      <div
-                        key={i}
-                        className="bg-gray-800 border-2 border-blue-500 hover:border-orange-500 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden group"
-                        style={{ transform: 'translateZ(0)' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-8px) translateZ(0)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0) translateZ(0)';
-                        }}
-                      >
-                        <TeamMemberCard member={member} size="large" showRookie={false} />
-                        <div className="p-4 bg-gray-900">
-                          <h3 className="text-white font-bold text-lg mb-1">{member.name}</h3>
-                          <p className="text-blue-400 text-sm">{member.role}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {teamMembers.coaches.length > 0 && (
-                <>
-                  <h2 className="text-4xl font-bold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-blue-500 pb-2">
-                    Coaches
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {teamMembers.coaches.map((member, i) => (
-                      <div
-                        key={i}
-                        className="bg-gray-800 border-2 border-blue-500 hover:border-orange-500 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 overflow-hidden group"
-                        style={{ transform: 'translateZ(0)' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-8px) translateZ(0)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0) translateZ(0)';
-                        }}
-                      >
-                        <TeamMemberCard member={member} size="large" showRookie={false} />
-                        <div className="p-4 bg-gray-900">
-                          <h3 className="text-white font-bold text-lg mb-1">{member.name}</h3>
-                          <p className="text-blue-400 text-sm">{member.role}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
             </div>
+
+            {/* Mentors */}
+            {teamMembers.mentors.length > 0 && (
+              <div
+                id="mentors-section"
+                data-animate
+                className={`mb-24 transition-all duration-1000 ${
+                  isVisible['mentors-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                }`}
+              >
+                <div className="mb-12">
+                  <div className="flex items-center gap-4 mb-2">
+                    <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                      MENTORS
+                    </h2>
+                    <div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" />
+                  </div>
+                  <p className="text-orange-500 font-bold tracking-wider text-sm">THE GUIDES</p>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {teamMembers.mentors.map((member, i) => (
+                    <div
+                      key={i}
+                      className="group text-center hover:-translate-y-2 transition-transform duration-300"
+                    >
+                      <TeamMemberCard member={member} size="large" showRookie={false} />
+                      <div className="mt-4">
+                        <h3 className="text-white font-bold text-base mb-1">{member.name}</h3>
+                        <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Coaches */}
+            {teamMembers.coaches.length > 0 && (
+              <div
+                id="coaches-section"
+                data-animate
+                className={`transition-all duration-1000 ${
+                  isVisible['coaches-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                }`}
+              >
+                <div className="mb-12">
+                  <div className="flex items-center gap-4 mb-2">
+                    <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                      COACHES
+                    </h2>
+                    <div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" />
+                  </div>
+                  <p className="text-orange-500 font-bold tracking-wider text-sm">THE LEADERS</p>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {teamMembers.coaches.map((member, i) => (
+                    <div
+                      key={i}
+                      className="group text-center hover:-translate-y-2 transition-transform duration-300"
+                    >
+                      <TeamMemberCard member={member} size="large" showRookie={false} />
+                      <div className="mt-4">
+                        <h3 className="text-white font-bold text-base mb-1">{member.name}</h3>
+                        <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -899,119 +1091,149 @@ const App = () => {
 
     if (currentPage === 'robots') {
       return (
-        <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black py-24">
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32">
           <div className="max-w-7xl mx-auto px-4">
-            <h1
-              id="robots-title"
-              data-animate
-              className={`text-6xl md:text-7xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-blue-500 transition-all duration-1000 transform pb-2 ${
-                isVisible['robots-title'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
-              }`}
-            >
-              Our Robots
-            </h1>
+            <div className="text-center mb-20">
+              <div 
+                id="robots-tag"
+                data-animate
+                className={`inline-block mb-6 transition-all duration-1000 ${
+                  isVisible['robots-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+              >
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">TECHNICAL SPECS</span>
+                </div>
+              </div>
+              
+              <h1 
+                id="robots-title"
+                data-animate
+                className={`text-6xl md:text-8xl font-black text-white transition-all duration-1000 ${
+                  isVisible['robots-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}
+              >
+                MATCHSTICK
+              </h1>
+            </div>
 
             <div
               id="matchstick-detail"
               data-animate
-              className={`bg-gray-800 p-8 md:p-12 border-4 border-blue-500 transition-all duration-1000 hover:border-orange-500 hover:shadow-2xl hover:shadow-orange-500/20 transform ${
-                isVisible['matchstick-detail'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+              className={`relative transition-all duration-1000 ${
+                isVisible['matchstick-detail'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
               }`}
             >
-              <div className="grid md:grid-cols-2 gap-12">
-                <div className="space-y-6">
-                  <div className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white text-9xl font-black border-4 border-orange-500 overflow-hidden">
-                    <RobotImage 
-                      src="/data/robots/matchstick-main.jpg" 
-                      alt="Matchstick Robot" 
-                      fallbackText="MS"
-                    />
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-6 translate-y-6"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}} />
+              
+              <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-16 border-4 border-orange-600 overflow-hidden"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}>
+                <ClawMark className="top-0 right-0 w-64 h-64" opacity={0.05} />
+                
+                <div className="grid md:grid-cols-2 gap-16 relative z-10">
+                  <div className="space-y-8">
+                    <div 
+                      className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative group"
+                      style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}
+                    >
+                      <RobotImage 
+                        src="/data/robots/matchstick-main.jpg" 
+                        alt="Matchstick Robot" 
+                        fallbackText="MS"
+                      />
+                      <div className="absolute inset-0 border-4 border-orange-600 opacity-0 group-hover:opacity-50 transition-opacity duration-300"
+                           style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}} />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-5xl font-bold overflow-hidden hover:scale-105 transition-transform duration-300"
+                          style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}
+                        >
+                          <RobotImage 
+                            src={`/data/robots/matchstick-${i}.jpg`} 
+                            alt={`Matchstick detail ${i}`} 
+                            fallbackText={i.toString()}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-5xl font-bold border-2 border-blue-500 hover:border-orange-500 transition-all duration-300 overflow-hidden"
-                      >
-                        <RobotImage 
-                          src={`/data/robots/matchstick-${i}.jpg`} 
-                          alt={`Matchstick detail ${i}`} 
-                          fallbackText={i.toString()}
-                        />
+
+                  <div className="space-y-10">
+                    <div>
+                      <h2 className="text-6xl font-black text-white mb-3" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                        MATCHSTICK
+                      </h2>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="h-1 w-24 bg-gradient-to-r from-orange-600 to-transparent" />
+                        <p className="text-orange-500 font-black tracking-widest text-sm">2025-26 DECODE</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="text-5xl font-black text-white mb-4">Matchstick</h2>
-                  <p className="text-blue-400 text-xl font-semibold mb-6">Season 2025-26</p>
-                  
-                  <p className="text-gray-300 text-lg mb-8 leading-relaxed">
-                    Matchstick represents our team's dedication and rapid development. This robot showcases our ability to work under pressure and deliver exceptional results.
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="bg-blue-900 p-6 border-2 border-blue-500">
-                      <p className="text-blue-400 font-semibold mb-2">Weight</p>
-                      <p className="text-white text-2xl font-bold">28 lbs</p>
+                      <p className="text-gray-300 text-lg leading-relaxed mb-8">
+                        Our first machine. Every component precision-engineered for maximum performance. Built to dominate the competition field from day one.
+                      </p>
                     </div>
-                    <div className="bg-orange-900 p-6 border-2 border-orange-500">
-                      <p className="text-orange-400 font-semibold mb-2">Height</p>
-                      <p className="text-white text-2xl font-bold">18 in</p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { label: 'WEIGHT', value: '28 LBS' },
+                        { label: 'HEIGHT', value: '18 IN' },
+                        { label: 'DRIVETRAIN', value: 'MECANUM' },
+                        { label: 'LANGUAGE', value: 'JAVA 17' }
+                      ].map((spec, idx) => (
+                        <div 
+                          key={idx}
+                          className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-orange-600/50 hover:border-orange-600 transition-colors"
+                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
+                        >
+                          <p className="text-orange-500/70 font-bold text-xs mb-2 tracking-wider">{spec.label}</p>
+                          <p className="text-white text-2xl font-black">{spec.value}</p>
+                        </div>
+                      ))}
                     </div>
-                    <div className="bg-blue-900 p-6 border-2 border-blue-500">
-                      <p className="text-blue-400 font-semibold mb-2">Drive Type</p>
-                      <p className="text-white text-2xl font-bold">Mecanum</p>
-                    </div>
-                    <div className="bg-orange-900 p-6 border-2 border-orange-500">
-                      <p className="text-orange-400 font-semibold mb-2">Language</p>
-                      <p className="text-white text-2xl font-bold">Java JDK 17</p>
-                    </div>
-                  </div>
 
-                  <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-6 border-2 border-blue-500 mb-6">
-                    <h3 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
-                      <Award className="text-orange-500" />
-                      Achievements
-                    </h3>
-                    <ul className="space-y-2 text-gray-300">
-                      <li className="flex items-center gap-2">
-                        <span className="text-blue-400">•</span>
-                        5-0-1 Record
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-blue-400">•</span>
-                        #2 OPR and Rank in League Meet 3
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-blue-400">•</span>
-                        Wolverine Robotics' Inaugural Robot
-                      </li>
-                    </ul>
-                  </div>
+                    <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/30 p-8 border-2 border-blue-500/50"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
+                      <div className="flex items-center gap-3 mb-6">
+                        <Award className="text-orange-500" size={28} />
+                        <h3 className="text-white font-black text-2xl">ACHIEVEMENTS</h3>
+                      </div>
+                      <ul className="space-y-3">
+                        {[
+                          '5-0-1 COMPETITION RECORD',
+                          '#2 OPR & RANK - LEAGUE MEET 3',
+                          'TEAM 33791 INAUGURAL ROBOT'
+                        ].map((achievement, idx) => (
+                          <li key={idx} className="flex items-center gap-3 text-gray-300">
+                            <div className="w-2 h-2 bg-orange-600 transform rotate-45" />
+                            <span className="font-semibold">{achievement}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  <div className="bg-gradient-to-r from-orange-900 to-orange-800 p-6 border-2 border-orange-500">
-                    <h3 className="text-white font-bold text-xl mb-4">Key Features</h3>
-                    <ul className="space-y-2 text-gray-300">
-                      <li className="flex items-center gap-2">
-                        <span className="text-orange-400">✓</span>
-                        12 Ball And 6 Ball Autonomous
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-orange-400">✓</span>
-                        1 Second Cycle Time
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-orange-400">✓</span>
-                        Auto-Adujusting Aiming System
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-orange-400">✓</span>
-                        Durable aluminum chassis
-                      </li>
-                    </ul>
+                    <div className="bg-gradient-to-br from-orange-900/30 to-orange-950/30 p-8 border-2 border-orange-500/50"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
+                      <h3 className="text-white font-black text-2xl mb-6">KEY FEATURES</h3>
+                      <ul className="space-y-3">
+                        {[
+                          '12 & 6 BALL AUTONOMOUS MODES',
+                          '1 SECOND CYCLE TIME',
+                          'AUTO-ADJUSTING AIMING SYSTEM',
+                          'REINFORCED ALUMINUM CHASSIS'
+                        ].map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-3 text-gray-300">
+                            <div className="w-2 h-2 bg-orange-600 transform rotate-45" />
+                            <span className="font-semibold">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1023,34 +1245,38 @@ const App = () => {
 
     if (currentPage === 'sponsors') {
       return (
-        <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black py-24">
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32">
           <div className="max-w-7xl mx-auto px-4">
-            <h1
-              id="sponsors-title"
-              data-animate
-              className={`text-6xl md:text-7xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-orange-500 transition-all duration-1000 transform pb-2 ${
-                isVisible['sponsors-title'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
-              }`}
-            >
-              Our Sponsors
-            </h1>
-
-            <div
-              id="sponsors-intro"
-              data-animate
-              className={`bg-gray-800 p-8 md:p-12 mb-16 border-4 border-blue-500 text-center transition-all duration-1000 transform ${
-                isVisible['sponsors-intro'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
-              }`}
-            >
-              <p className="text-gray-300 text-lg leading-relaxed mb-4">
-                We are incredibly grateful to our sponsors for their generous support. Their contributions make it possible for us to compete, learn, and grow as a team.
-              </p>
-              <p className="text-blue-400 text-xl font-semibold">
-                Thank you for believing in our mission!
+            <div className="text-center mb-20">
+              <div 
+                id="sponsors-tag"
+                data-animate
+                className={`inline-block mb-6 transition-all duration-1000 ${
+                  isVisible['sponsors-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+              >
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">SUPPORTERS</span>
+                </div>
+              </div>
+              
+              <h1 
+                id="sponsors-title"
+                data-animate
+                className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-1000 ${
+                  isVisible['sponsors-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}
+              >
+                OUR SPONSORS
+              </h1>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                Their support makes innovation possible. Together, we're building the future of robotics.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto mb-20">
               {[
                 { name: 'Wakeland High School', image: '/data/sponsors/wakeland-high-school.jpg' },
                 { name: 'Wakeland High School NHS', image: '/data/sponsors/wakeland-nhs.jpg' }
@@ -1059,13 +1285,19 @@ const App = () => {
                   key={idx}
                   id={`sponsor-${idx}`}
                   data-animate
-                  className={`bg-gray-800 p-8 border-4 border-blue-500 hover:border-orange-500 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-2 transition-all duration-500 transform ${
-                    isVisible[`sponsor-${idx}`] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+                  className={`relative group transition-all duration-1000 ${
+                    isVisible[`sponsor-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                   }`}
                   style={{ transitionDelay: `${idx * 200}ms` }}
                 >
-                  <SponsorCard sponsor={sponsor} index={idx} />
-                  <h3 className="text-white font-bold text-2xl text-center">{sponsor.name}</h3>
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-4 translate-y-4 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}} />
+                  
+                  <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600/50 group-hover:border-orange-600 transition-colors"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}}>
+                    <SponsorCard sponsor={sponsor} />
+                    <h3 className="text-white font-black text-2xl text-center">{sponsor.name}</h3>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1073,22 +1305,25 @@ const App = () => {
             <div
               id="become-sponsor"
               data-animate
-              className={`mt-16 bg-gradient-to-r from-blue-900 to-orange-900 p-8 md:p-12 border-4 border-orange-500 text-center transition-all duration-1000 transform ${
-                isVisible['become-sponsor'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+              className={`relative max-w-4xl mx-auto transition-all duration-1000 ${
+                isVisible['become-sponsor'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
               }`}
             >
-              <h2 className="text-4xl font-bold text-white mb-6">Become a Sponsor</h2>
-              <p className="text-gray-200 text-lg mb-8 max-w-3xl mx-auto">
-                Interested in supporting STEM education and robotics in our community? We'd love to partner with you!
-              </p>
-              <button
-                onClick={() => setCurrentPage('contact')}
-                className="group px-8 py-4 bg-white text-blue-900 font-bold transition-all duration-300 hover:bg-gray-100 hover:scale-105 hover:shadow-lg border-2 border-white"
-              >
-                <span className="flex items-center gap-2">
-                  Contact Us <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-                </span>
-              </button>
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 to-blue-900/30 transform translate-x-4 translate-y-4"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
+              
+              <div className="relative bg-gradient-to-br from-orange-900/40 to-blue-900/40 p-12 md:p-16 text-center border-4 border-orange-600"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
+                <h2 className="text-5xl font-black text-white mb-6" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                  BECOME A SPONSOR
+                </h2>
+                <p className="text-gray-200 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+                  Join us in empowering the next generation of engineers and innovators. Your support directly impacts our ability to compete and excel.
+                </p>
+                <AngleButton onClick={() => setCurrentPage('contact')} variant="primary" className="text-lg px-12 py-5">
+                  PARTNER WITH US <ChevronRight size={24} />
+                </AngleButton>
+              </div>
             </div>
           </div>
         </div>
@@ -1096,152 +1331,187 @@ const App = () => {
     }
 
     if (currentPage === 'contact') {
-      const ContactForm = () => {
-        const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-        const [submitted, setSubmitted] = useState(false);
-
-        const handleSubmit = (e) => {
-          e.preventDefault();
-          setSubmitted(true);
-          setTimeout(() => {
-            setSubmitted(false);
-            setFormData({ name: '', email: '', message: '' });
-          }, 3000);
-        };
-
-        return (
-          <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black py-24">
-            <div className="max-w-4xl mx-auto px-4">
-              <h1
-                id="contact-title"
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="text-center mb-20">
+              <div 
+                id="contact-tag"
                 data-animate
-                className={`text-6xl md:text-7xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-orange-500 transition-all duration-1000 transform pb-2 ${
-                  isVisible['contact-title'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-32 scale-90'
+                className={`inline-block mb-6 transition-all duration-1000 ${
+                  isVisible['contact-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}
               >
-                Get In Touch
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">CONNECT</span>
+                </div>
+              </div>
+              
+              <h1 
+                id="contact-title"
+                data-animate
+                className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-1000 ${
+                  isVisible['contact-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}
+              >
+                GET IN TOUCH
               </h1>
+              <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                Questions? Sponsorship opportunities? Let's talk.
+              </p>
+            </div>
 
-              <div className="grid md:grid-cols-2 gap-12 mb-16">
-                <div
-                  id="contact-info"
-                  data-animate
-                  className={`space-y-6 transition-all duration-1000 transform ${
-                    isVisible['contact-info'] ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 -translate-x-32 scale-90'
-                  }`}
-                >
-                  <div className="bg-gray-800 p-8 border-2 border-blue-500 hover:border-orange-500 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
-                    <Mail className="text-blue-400 mb-4" size={32} />
-                    <h3 className="text-white font-bold text-xl mb-2">Email Us</h3>
-                    <p className="text-gray-300">wolverine.robotics.33791@gmail.com</p>
-                  </div>
-
-                  <div className="bg-gray-800 p-8 border-2 border-blue-500 hover:border-orange-500 transition-all duration-300">
-                    <MapPin className="text-orange-400 mb-4" size={32} />
-                    <h3 className="text-white font-bold text-xl mb-2">Location</h3>
-                    <p className="text-gray-300">Wakeland High School<br />Frisco, Texas</p>
-                  </div>
-
-                  <div className="bg-gray-800 p-8 border-2 border-blue-500 hover:border-orange-500 transition-all duration-300">
-                    <Users className="text-blue-400 mb-4" size={32} />
-                    <h3 className="text-white font-bold text-xl mb-2">Social Media</h3>
-                    <div className="flex gap-4 mt-4">
-                      <a href="https://github.com/wolverine-robotics" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-all duration-300">
-                        <Github className="text-white" size={24} />
-                      </a>
-                      <a href="https://www.linkedin.com/company/wolverine-robotics/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-all duration-300">
-                        <Linkedin className="text-white" size={24} />
-                      </a>
-                      <a href="https://www.instagram.com/wolverine_robotics/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300">
-                        <Instagram className="text-white" size={24} />
-                      </a>
+            <div className="grid md:grid-cols-2 gap-10">
+              <div
+                id="contact-info"
+                data-animate
+                className={`space-y-6 transition-all duration-1000 ${
+                  isVisible['contact-info'] ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'
+                }`}
+              >
+                {[
+                  {
+                    icon: Mail,
+                    title: 'EMAIL',
+                    content: 'wolverine.robotics.33791@gmail.com',
+                    color: 'orange'
+                  },
+                  {
+                    icon: MapPin,
+                    title: 'LOCATION',
+                    content: 'Wakeland High School\nFrisco, Texas',
+                    color: 'orange'
+                  },
+                  {
+                    icon: Users,
+                    title: 'SOCIAL MEDIA',
+                    content: null,
+                    color: 'orange'
+                  }
+                ].map((item, idx) => (
+                  <div 
+                    key={idx}
+                    className="relative group"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
+                    
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600/50 group-hover:border-orange-600 transition-colors"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
+                      <item.icon className="text-orange-500 mb-4" size={32} />
+                      <h3 className="text-white font-black text-lg mb-3 tracking-wider">{item.title}</h3>
+                      {item.content ? (
+                        <p className="text-gray-300 whitespace-pre-line">{item.content}</p>
+                      ) : (
+                        <div className="flex gap-4">
+                          <a 
+                            href="https://github.com/wolverine-robotics" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                          >
+                            <Github className="text-white" size={20} />
+                          </a>
+                          <a 
+                            href="https://www.linkedin.com/company/wolverine-robotics/" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                          >
+                            <Linkedin className="text-white" size={20} />
+                          </a>
+                          <a 
+                            href="https://www.instagram.com/wolverine_robotics/" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                          >
+                            <Instagram className="text-white" size={20} />
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
 
-                <div
-                  id="contact-form"
-                  data-animate
-                  className={`transition-all duration-1000 transform ${
-                    isVisible['contact-form'] ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 translate-x-32 scale-90'
-                  }`}
-                >
-                  <div className="bg-gray-800 p-8 border-2 border-blue-500">
-                    <div className="mb-6">
-                      <label className="block text-white font-semibold mb-2">Name</label>
+              <div
+                id="contact-form"
+                data-animate
+                className={`relative transition-all duration-1000 ${
+                  isVisible['contact-form'] ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20'
+                }`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-3 translate-y-3"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}} />
+                
+                <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
+                  <form className="space-y-6">
+                    <div>
+                      <label className="block text-white font-bold text-sm mb-2 tracking-wider">NAME</label>
                       <input
                         type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-4 py-3 bg-gray-900 text-white border-2 border-blue-500 focus:border-orange-500 focus:outline-none transition-colors"
-                        required
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-orange-600/50 focus:border-orange-600 focus:outline-none transition-colors"
+                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
 
-                    <div className="mb-6">
-                      <label className="block text-white font-semibold mb-2">Email</label>
+                    <div>
+                      <label className="block text-white font-bold text-sm mb-2 tracking-wider">EMAIL</label>
                       <input
                         type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-3 bg-gray-900 text-white border-2 border-blue-500 focus:border-orange-500 focus:outline-none transition-colors"
-                        required
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-orange-600/50 focus:border-orange-600 focus:outline-none transition-colors"
+                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
 
-                    <div className="mb-6">
-                      <label className="block text-white font-semibold mb-2">Message</label>
+                    <div>
+                      <label className="block text-white font-bold text-sm mb-2 tracking-wider">MESSAGE</label>
                       <textarea
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        rows="5"
-                        className="w-full px-4 py-3 bg-gray-900 text-white border-2 border-blue-500 focus:border-orange-500 focus:outline-none transition-colors resize-none"
-                        required
+                        rows="6"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-orange-600/50 focus:border-orange-600 focus:outline-none transition-colors resize-none"
+                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
 
-                    <button
-                      onClick={handleSubmit}
-                      className={`w-full py-4 font-bold transition-all duration-300 border-2 ${
-                        submitted
-                          ? 'bg-green-600 text-white border-green-500'
-                          : 'bg-orange-600 hover:bg-orange-500 text-white border-orange-400'
-                      }`}
-                      disabled={submitted}
-                    >
-                      {submitted ? '✓ Message Sent!' : 'Send Message'}
-                    </button>
-                  </div>
+                    <AngleButton variant="primary" className="w-full text-lg py-4">
+                      SEND MESSAGE <ChevronRight size={20} />
+                    </AngleButton>
+                  </form>
                 </div>
               </div>
             </div>
           </div>
-        );
-      };
-
-      return <ContactForm />;
+        </div>
+      );
     }
 
     return null;
   };
 
   return (
-    <ClickSpark
-      sparkColor='#FF6B35'
-      sparkSize={10}
-      sparkRadius={15}
-      sparkCount={8}
-      duration={400}
-    >
-      <div className="min-h-[100dvh] bg-black overflow-x-hidden">
-      <nav className="fixed top-0 w-full bg-black/95 backdrop-blur-sm border-b-2 border-blue-500 z-50">
+    <div className="min-h-[100dvh] bg-black overflow-x-hidden">
+      <nav className="fixed top-0 w-full bg-[#132038]/95 backdrop-blur-md border-b-2 border-orange-600 z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-              <LogoImage />
+            <div 
+              className="flex items-center gap-3 cursor-pointer group" 
+              onClick={() => setCurrentPage('home')}
+            >
+              <div className="transform group-hover:scale-110 transition-transform duration-300">
+                <LogoImage />
+              </div>
               <div>
-                <h1 className="text-white font-black text-xl">WOLVERINE</h1>
-                <p className="text-blue-400 text-xs font-semibold">TEAM 33791</p>
+                <h1 className="text-white font-black text-lg tracking-wider" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                  WOLVERINE
+                </h1>
+                <p className="text-orange-500 text-xs font-black tracking-widest">TEAM 33791</p>
               </div>
             </div>
 
@@ -1250,20 +1520,23 @@ const App = () => {
                 <button
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
-                  className={`text-lg font-bold transition-all duration-300 ${
+                  className={`text-sm font-black tracking-wider transition-all duration-300 relative group ${
                     currentPage === item.id
                       ? 'text-orange-500'
-                      : 'text-white hover:text-blue-400'
+                      : 'text-white hover:text-orange-500'
                   }`}
                 >
                   {item.name}
+                  <div className={`absolute bottom-0 left-0 h-0.5 bg-orange-600 transition-all duration-300 ${
+                    currentPage === item.id ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`} />
                 </button>
               ))}
             </div>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white"
+              className="md:hidden text-white hover:text-orange-500 transition-colors"
             >
               {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -1271,8 +1544,8 @@ const App = () => {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-gray-900 border-t-2 border-blue-500">
-            <div className="flex flex-col py-4">
+          <div className="md:hidden bg-[#0f1629] border-t-2 border-orange-600">
+            <div className="flex flex-col">
               {navigation.map((item) => (
                 <button
                   key={item.id}
@@ -1280,10 +1553,10 @@ const App = () => {
                     setCurrentPage(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`px-6 py-4 text-left font-bold transition-all duration-300 ${
+                  className={`px-6 py-5 text-left font-black tracking-wider transition-all duration-300 ${
                     currentPage === item.id
-                      ? 'text-orange-500 bg-gray-800'
-                      : 'text-white hover:bg-gray-800'
+                      ? 'text-orange-500 bg-orange-600/10 border-l-4 border-orange-600'
+                      : 'text-white hover:bg-orange-600/5 hover:text-orange-500'
                   }`}
                 >
                   {item.name}
@@ -1296,55 +1569,77 @@ const App = () => {
 
       <div className="pt-20">{renderPage()}</div>
 
-      <footer className="bg-black border-t-2 border-blue-500 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
+      <footer className="bg-[#0f1629] border-t-2 border-orange-600 py-16 relative overflow-hidden">
+        <ClawMark className="bottom-0 left-0 w-64 h-64" opacity={0.03} />
+        
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="grid md:grid-cols-3 gap-12 mb-12">
             <div>
-              <h3 className="text-white font-bold text-xl mb-4">Wolverine Robotics</h3>
-              <p className="text-gray-400">FTC Team 33791</p>
-              <p className="text-gray-400">Frisco, Texas</p>
+              <h3 className="text-white font-black text-xl mb-4 tracking-wider">WOLVERINE ROBOTICS</h3>
+              <p className="text-gray-400 font-semibold">FTC TEAM 33791</p>
+              <p className="text-gray-400">FRISCO, TEXAS</p>
             </div>
+            
             <div>
-              <h3 className="text-white font-bold text-xl mb-4">Quick Links</h3>
+              <h3 className="text-white font-black text-xl mb-4 tracking-wider">QUICK LINKS</h3>
               <div className="flex flex-col gap-2">
                 {navigation.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setCurrentPage(item.id)}
-                    className="text-gray-400 hover:text-blue-400 text-left transition-colors"
+                    className="text-gray-400 hover:text-orange-500 text-left transition-colors font-semibold"
                   >
                     {item.name}
                   </button>
                 ))}
               </div>
             </div>
+            
             <div>
-              <h3 className="text-white font-bold text-xl mb-4">Connect</h3>
+              <h3 className="text-white font-black text-xl mb-4 tracking-wider">CONNECT</h3>
               <div className="flex gap-4">
-                <a href="https://github.com/wolverine-robotics" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-all duration-300">
+                <a 
+                  href="https://github.com/wolverine-robotics" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                >
                   <Github className="text-white" size={20} />
                 </a>
-                <a href="https://www.linkedin.com/company/wolverine-robotics/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-all duration-300">
+                <a 
+                  href="https://www.linkedin.com/company/wolverine-robotics/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                >
                   <Linkedin className="text-white" size={20} />
                 </a>
-                <a href="https://www.instagram.com/wolverine_robotics/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300">
+                <a 
+                  href="https://www.instagram.com/wolverine_robotics/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                >
                   <Instagram className="text-white" size={20} />
                 </a>
               </div>
             </div>
           </div>
-          <div className="border-t-2 border-gray-800 pt-8 text-center">
-            <p className="text-gray-500 text-sm">
-              © 2025 Wolverine Robotics. All rights reserved.
+          
+          <div className="border-t-2 border-orange-600/30 pt-8 space-y-2">
+            <p className="text-gray-500 text-sm font-semibold text-center">
+              © 2025 WOLVERINE ROBOTICS. ALL RIGHTS RESERVED.
             </p>
-            <p className="text-gray-600 text-xs mt-2">
+            <p className="text-gray-600 text-xs text-center">
               Website developed by Sahejdeep Singh: sahej.robotics@outlook.com
             </p>
           </div>
         </div>
       </footer>
     </div>
-    </ClickSpark>
   );
 };
 
