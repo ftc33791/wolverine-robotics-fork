@@ -259,7 +259,7 @@ const LogoImage = () => {
       setImageError(true);
       setImageLoaded(true);
     };
-    img.src = '/data/claw.png';
+    img.src = '/data/logo.svg';
   }, []);
   
   return (
@@ -536,7 +536,7 @@ const InitialLoadAnimation = ({ onComplete }) => {
       setClawImageError(true);
       setClawImageLoaded(true);
     };
-    img.src = '/logo.svg';
+    img.src = '/claw.png';
   }, []);
   
   useEffect(() => {
