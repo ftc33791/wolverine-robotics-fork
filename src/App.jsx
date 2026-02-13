@@ -259,7 +259,7 @@ const LogoImage = () => {
       setImageError(true);
       setImageLoaded(true);
     };
-    img.src = '/data/logo.svg';
+    img.src = '/data/claw.png';
   }, []);
   
   return (
