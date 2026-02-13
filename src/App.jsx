@@ -620,11 +620,14 @@ const InitialLoadAnimation = ({ onComplete }) => {
         <div className="relative">
           {/* LARGER claw image with slash reveal */}
           <div className="w-80 h-80 relative mb-6 flex items-center justify-center">
+            {/* Opaque background so slash doesn't show through */}
+            <div className="absolute inset-0 bg-[#132038] z-0" />
+            
             {clawImageLoaded && !clawImageError ? (
               <img 
                 src="/data/logo.svg" 
                 alt="Wolverine Claw" 
-                className={`w-full h-full object-contain transition-all duration-1000 ${
+                className={`w-full h-full object-contain transition-all duration-1000 relative z-10 ${
                   phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
                 }`}
                 style={{ 
@@ -633,13 +636,13 @@ const InitialLoadAnimation = ({ onComplete }) => {
               />
             ) : (
               // Fallback lightning bolt
-              <div className={`text-orange-500 text-9xl font-black transition-all duration-700 ${
+              <div className={`text-orange-500 text-9xl font-black transition-all duration-700 relative z-10 ${
                 phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
               }`}>⚡</div>
             )}
             
             {/* Pulsing glow */}
-            <div className="absolute inset-0 bg-orange-500/30 blur-3xl animate-pulse" />
+            <div className="absolute inset-0 bg-orange-500/30 blur-3xl animate-pulse z-5" />
           </div>
           
           {/* Team name */}
@@ -663,6 +666,7 @@ const App = () => {
   const [isVisible, setIsVisible] = useState({});
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [pageTransitioning, setPageTransitioning] = useState(false);
+  const [displayPage, setDisplayPage] = useState('home'); // The page actually being rendered
 
   // Set favicon on mount
   useEffect(() => {
@@ -786,18 +790,24 @@ const App = () => {
           transform: scale(1);
         }
       }
-      @keyframes pageWipe {
-        0% {
-          opacity: 0;
-        }
-        10% {
+      @keyframes slideOutLeft {
+        from {
+          transform: translateX(0);
           opacity: 1;
         }
-        90% {
-          opacity: 1;
-        }
-        100% {
+        to {
+          transform: translateX(-100%);
           opacity: 0;
+        }
+      }
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
         }
       }
       .animate-fade-in-up {
@@ -838,8 +848,11 @@ const App = () => {
         animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
-      .animate-page-wipe {
-        animation: pageWipe 0.4s ease-in-out forwards;
+      .animate-slide-out-left {
+        animation: slideOutLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .animate-slide-in-right {
+        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
     `;
     document.head.appendChild(style);
@@ -852,28 +865,31 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Page change effect - instant scroll + transition
+  // Page change effect - slide transition
   useEffect(() => {
-    if (currentPage === 'home' && isInitialLoad) {
-      return;
-    }
+    if (currentPage === displayPage) return; // No change needed
+    if (currentPage === 'home' && isInitialLoad) return;
     
-    // Start transition
+    // Start slide-out transition
     setPageTransitioning(true);
     
-    // INSTANT teleport to top (no smooth scrolling)
-    window.scrollTo(0, 0);
+    // After slide-out animation (200ms), switch page and scroll to top
+    const switchTimer = setTimeout(() => {
+      setDisplayPage(currentPage);
+      window.scrollTo(0, 0); // Instant teleport to top
+      setIsVisible({}); // Reset visibility
+    }, 200);
     
-    // Reset visibility immediately
-    setIsVisible({});
-    
-    // End transition after animation completes
-    const timer = setTimeout(() => {
+    // After slide-in animation completes (400ms total), end transition
+    const endTimer = setTimeout(() => {
       setPageTransitioning(false);
     }, 400);
     
-    return () => clearTimeout(timer);
-  }, [currentPage, isInitialLoad]);
+    return () => {
+      clearTimeout(switchTimer);
+      clearTimeout(endTimer);
+    };
+  }, [currentPage, displayPage, isInitialLoad]);
 
   // Scroll-based intersection observer
   useEffect(() => {
@@ -903,7 +919,7 @@ const App = () => {
     }, 100);
     
     return () => clearTimeout(setupTimer);
-  }, [currentPage, isInitialLoad]); // Re-run when page or initial load changes
+  }, [displayPage, isInitialLoad]); // Re-run when display page changes
 
   const navigation = [
     { name: 'HOME', id: 'home' },
@@ -951,7 +967,7 @@ const App = () => {
   };
 
   const renderPage = () => {
-    if (currentPage === 'home') {
+    if (displayPage === 'home') {
       return (
         <div className="min-h-screen">
           {/* Hero Section */}
@@ -1366,7 +1382,7 @@ const App = () => {
       );
     }
 
-    if (currentPage === 'about') {
+    if (displayPage === 'about') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
           <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[800px] h-[800px]" />
@@ -1521,7 +1537,7 @@ const App = () => {
       );
     }
 
-    if (currentPage === 'robots') {
+    if (displayPage === 'robots') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
           <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[900px] h-[900px]" />
@@ -1698,7 +1714,7 @@ const App = () => {
       );
     }
 
-    if (currentPage === 'sponsors') {
+    if (displayPage === 'sponsors') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
           <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[750px] h-[750px]" />
@@ -1800,7 +1816,7 @@ const App = () => {
       );
     }
 
-    if (currentPage === 'contact') {
+    if (displayPage === 'contact') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
           <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[850px] h-[850px]" />
@@ -2004,20 +2020,9 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden">
-      {/* Page Transition Overlay */}
-      {pageTransitioning && (
-        <div className="fixed inset-0 z-[150] bg-gradient-to-br from-[#132038] via-[#1a2847] to-[#0a1628] animate-page-wipe">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/5 via-transparent to-blue-900/5" />
-          <div className="absolute inset-0 overflow-hidden opacity-30">
-            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/3 transform -skew-y-12" />
-            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/2 transform -skew-y-12" />
-            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-2/3 transform -skew-y-12" />
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
+      {/* Main Content with slide animation */}
+      <div className={`min-h-[100dvh] ${pageTransitioning ? 'animate-slide-out-left' : 'animate-slide-in-right'}`}>
+        <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
             <div 
@@ -2155,6 +2160,7 @@ const App = () => {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 };
