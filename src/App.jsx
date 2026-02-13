@@ -620,6 +620,7 @@ const App = () => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const [pageTransition, setPageTransition] = useState(false);
+  const [transitionOut, setTransitionOut] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
@@ -724,6 +725,22 @@ const App = () => {
           transform: scale(1);
         }
       }
+      @keyframes diagonalWipeIn {
+        from {
+          clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+      @keyframes diagonalWipeOut {
+        from {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+        }
+      }
       .animate-fade-in-up {
         animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
@@ -762,6 +779,12 @@ const App = () => {
         animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
+      .page-transition-wipe-in {
+        animation: diagonalWipeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .page-transition-wipe-out {
+        animation: diagonalWipeOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
     `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
@@ -780,9 +803,17 @@ const App = () => {
     
     window.scrollTo(0, 0);
     setIsVisible({});
-    setPageTransition(true);
     
-    // FIXED: Removed orange flash - faster and cleaner transition
+    // Start exit animation
+    setTransitionOut(true);
+    
+    // After exit animation, switch page
+    const exitTimer = setTimeout(() => {
+      setTransitionOut(false);
+      setPageTransition(true);
+    }, 400);
+    
+    // Show new page content
     const transitionTimer = setTimeout(() => {
       setPageTransition(false);
       
@@ -794,9 +825,10 @@ const App = () => {
         }
       });
       setIsVisible(visibilityMap);
-    }, 300);
+    }, 500);
     
     return () => {
+      clearTimeout(exitTimer);
       clearTimeout(transitionTimer);
     };
   }, [currentPage, isInitialLoad]);
@@ -1917,9 +1949,23 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden">
-      {/* FIXED: Removed orange flash - now just a clean fade transition */}
-      {pageTransition && (
-        <div className="fixed inset-0 z-[100] bg-[#132038] transition-opacity duration-300" />
+      {/* Diagonal Wipe Transition Overlay */}
+      {(transitionOut || pageTransition) && (
+        <div 
+          className={`fixed inset-0 z-[100] bg-gradient-to-br from-[#132038] via-[#1a2847] to-[#0a1628] ${
+            transitionOut ? 'page-transition-wipe-out' : 'page-transition-wipe-in'
+          }`}
+        >
+          {/* Subtle orange glow during transition */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/5 via-transparent to-blue-900/5" />
+          
+          {/* Animated diagonal lines */}
+          <div className="absolute inset-0 overflow-hidden opacity-30">
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/3 transform -skew-y-12" />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/2 transform -skew-y-12" />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-2/3 transform -skew-y-12" />
+          </div>
+        </div>
       )}
 
       {/* Main Content */}
