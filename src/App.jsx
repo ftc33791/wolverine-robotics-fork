@@ -791,24 +791,20 @@ const App = () => {
           transform: scale(1);
         }
       }
-      @keyframes slideOutLeft {
+      @keyframes slideInFromRight {
+        from {
+          transform: translateX(100%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+      @keyframes slideOutToLeft {
         from {
           transform: translateX(0);
-          opacity: 1;
         }
         to {
           transform: translateX(-100%);
-          opacity: 0;
-        }
-      }
-      @keyframes slideInRight {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
         }
       }
       .animate-fade-in-up {
@@ -849,11 +845,11 @@ const App = () => {
         animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
-      .animate-slide-out-left {
-        animation: slideOutLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-slide-in-from-right {
+        animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
-      .animate-slide-in-right {
-        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-slide-out-to-left {
+        animation: slideOutToLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
     `;
     document.head.appendChild(style);
@@ -871,23 +867,23 @@ const App = () => {
     if (currentPage === displayPage) return; // No change needed
     if (currentPage === 'home' && isInitialLoad) return;
     
-    // Save the current page as previous
-    setPreviousPage(displayPage);
-    
     // Start slide transition
     setPageTransitioning(true);
     
-    // Immediately switch to new page and scroll to top
-    setDisplayPage(currentPage);
-    window.scrollTo(0, 0); // Instant teleport to top
-    setIsVisible({}); // Reset visibility
+    // Wait for slide-out, then switch page
+    const switchTimer = setTimeout(() => {
+      setDisplayPage(currentPage);
+      window.scrollTo(0, 0); // Instant teleport to top
+      setIsVisible({}); // Reset visibility
+    }, 250); // Half of transition time
     
-    // End transition after animation completes
+    // End transition after both animations complete
     const endTimer = setTimeout(() => {
       setPageTransitioning(false);
     }, 500);
     
     return () => {
+      clearTimeout(switchTimer);
       clearTimeout(endTimer);
     };
   }, [currentPage, displayPage, isInitialLoad]);
@@ -1046,7 +1042,7 @@ const App = () => {
                 className={`flex flex-wrap gap-6 justify-center mb-16 transition-all duration-700 ${
                   isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
-                style={{animationDelay: '0.7s'}}
+                style={{animationDelay: '0.5s'}}
               >
                 <AngleButton onClick={() => setCurrentPage('robots')} variant="primary">
                   VIEW MATCHSTICK <ChevronRight size={20} />
@@ -1063,7 +1059,7 @@ const App = () => {
                 className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-24 transition-all duration-700 ${
                   isVisible['hero-stats'] ? 'animate-slide-down-fade' : 'opacity-0 translate-y-[-100%]'
                 }`}
-                style={{animationDelay: '0.5s'}}
+                style={{animationDelay: '0.6s'}}
               >
                 {[
                   { label: 'RECORD', value: '5-0-1' },
@@ -2023,20 +2019,13 @@ const App = () => {
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden relative">
       {/* Page Transition Overlay - covers everything during transition */}
       {pageTransitioning && (
-        <div className="fixed inset-0 z-[200] bg-gradient-to-br from-[#132038] via-[#1a2847] to-[#0a1628] flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/5 via-transparent to-blue-900/5" />
-          <div className="absolute inset-0 overflow-hidden opacity-30">
-            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/3 transform -skew-y-12 animate-pulse" />
-            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/2 transform -skew-y-12 animate-pulse" style={{animationDelay: '0.1s'}} />
-            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-2/3 transform -skew-y-12 animate-pulse" style={{animationDelay: '0.2s'}} />
-          </div>
-          {/* Loading logo during transition */}
-          <div className="relative z-10">
-            <div className="w-32 h-32 relative mb-4 flex items-center justify-center animate-pulse">
+        <div className="fixed inset-0 z-[200] bg-[#132038] transition-opacity duration-300" style={{opacity: pageTransitioning ? 1 : 0}}>
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-24 h-24 relative flex items-center justify-center">
               <img 
                 src="/data/logo.svg" 
                 alt="Loading" 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain animate-pulse"
                 style={{ 
                   filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 30px rgba(255, 90, 31, 0.9))',
                 }}
