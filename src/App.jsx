@@ -520,6 +520,36 @@ const App = () => {
           transform: translateY(0);
         }
       }
+      @keyframes slideInFromLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-100px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes slideInFromRight {
+        from {
+          opacity: 0;
+          transform: translateX(100px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes slideInFromBottom {
+        from {
+          opacity: 0;
+          transform: translateY(80px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -531,32 +561,70 @@ const App = () => {
       @keyframes scaleIn {
         from {
           opacity: 0;
-          transform: scale(0.95);
+          transform: scale(0.9);
         }
         to {
           opacity: 1;
           transform: scale(1);
         }
       }
-      @keyframes clawSlash {
+      @keyframes clawSlashEnter {
+        0% {
+          transform: translateX(-150%) rotate(-25deg) scale(2);
+          opacity: 0;
+        }
+        15% {
+          opacity: 1;
+        }
+        50% {
+          transform: translateX(0%) rotate(-25deg) scale(2);
+          opacity: 1;
+        }
+        70% {
+          opacity: 0.8;
+        }
+        100% {
+          transform: translateX(150%) rotate(-25deg) scale(2);
+          opacity: 0;
+        }
+      }
+      @keyframes pageReveal {
         0% {
           clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+          filter: brightness(0.3);
+        }
+        60% {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+          filter: brightness(0.3);
         }
         100% {
           clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+          filter: brightness(1);
         }
       }
-      @keyframes clawReveal {
-        0% {
-          transform: translateX(-120%) rotate(-15deg) scale(1.5);
+      @keyframes screenFlash {
+        0%, 100% {
           opacity: 0;
         }
         50% {
-          opacity: 1;
+          opacity: 0.4;
         }
-        100% {
-          transform: translateX(120%) rotate(-15deg) scale(1.5);
-          opacity: 0;
+      }
+      @keyframes glitchEffect {
+        0%, 100% {
+          transform: translate(0);
+        }
+        20% {
+          transform: translate(-5px, 5px);
+        }
+        40% {
+          transform: translate(-5px, -5px);
+        }
+        60% {
+          transform: translate(5px, 5px);
+        }
+        80% {
+          transform: translate(5px, -5px);
         }
       }
       .animate-fade-in-up {
@@ -571,11 +639,29 @@ const App = () => {
         animation: scaleIn 0.6s ease-out forwards;
         opacity: 0;
       }
-      .page-transition-enter {
-        animation: clawSlash 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-slide-in-left {
+        animation: slideInFromLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
       }
-      .claw-slash-overlay {
-        animation: clawReveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-slide-in-right {
+        animation: slideInFromRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+      }
+      .animate-slide-in-bottom {
+        animation: slideInFromBottom 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+      }
+      .page-transition-reveal {
+        animation: pageReveal 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .claw-slash-effect {
+        animation: clawSlashEnter 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .screen-flash {
+        animation: screenFlash 0.3s ease-out forwards;
+      }
+      .glitch {
+        animation: glitchEffect 0.3s ease-in-out;
       }
     `;
     document.head.appendChild(style);
@@ -595,7 +681,7 @@ const App = () => {
     
     const transitionTimer = setTimeout(() => {
       setPageTransition(false);
-    }, 800);
+    }, 1000);
     
     const timer = setTimeout(() => {
       const elements = document.querySelectorAll('[data-animate]');
@@ -606,7 +692,7 @@ const App = () => {
         }
       });
       setIsVisible(visibilityMap);
-    }, 900);
+    }, 1100);
     
     return () => {
       clearTimeout(timer);
@@ -759,7 +845,7 @@ const App = () => {
                   id="robot-section"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['robot-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['robot-section'] ? 'animate-scale-in' : 'opacity-0 scale-90'
                   }`}
                 >
                   <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -772,7 +858,7 @@ const App = () => {
                   id="robot-title"
                   data-animate
                   className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-700 ${
-                    isVisible['robot-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['robot-title'] ? 'animate-slide-in-left' : 'opacity-0 translate-x-[-100px]'
                   }`}
                   style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
                 >
@@ -782,7 +868,7 @@ const App = () => {
                   id="robot-subtitle"
                   data-animate
                   className={`text-xl text-gray-400 max-w-2xl mx-auto transition-all duration-700 ${
-                    isVisible['robot-subtitle'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['robot-subtitle'] ? 'animate-slide-in-right' : 'opacity-0 translate-x-[100px]'
                   }`}
                   style={{transitionDelay: '200ms'}}
                 >
@@ -794,7 +880,7 @@ const App = () => {
                 id="robot-card"
                 data-animate
                 className={`relative transition-all duration-700 ${
-                  isVisible['robot-card'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                  isVisible['robot-card'] ? 'animate-slide-in-bottom' : 'opacity-0 translate-y-[80px]'
                 }`}
                 style={{transitionDelay: '300ms'}}
               >
@@ -887,7 +973,7 @@ const App = () => {
                   id="events-tag"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['events-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['events-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
                   }`}
                 >
                   <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -900,7 +986,7 @@ const App = () => {
                   id="events-title"
                   data-animate
                   className={`text-5xl md:text-7xl font-black text-white transition-all duration-700 ${
-                    isVisible['events-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['events-title'] ? 'animate-slide-in-bottom' : 'opacity-0 translate-y-[80px]'
                   }`}
                   style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
                 >
@@ -915,7 +1001,7 @@ const App = () => {
                     id={`event-${idx}`}
                     data-animate
                     className={`relative group transition-all duration-700 ${
-                      isVisible[`event-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                      isVisible[`event-${idx}`] ? 'animate-slide-in-bottom' : 'opacity-0 translate-y-[80px]'
                     }`}
                     style={{ transitionDelay: `${idx * 100}ms` }}
                   >
@@ -960,7 +1046,7 @@ const App = () => {
                   id="team-tag"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['team-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['team-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
                   }`}
                 >
                   <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -973,7 +1059,7 @@ const App = () => {
                   id="team-title"
                   data-animate
                   className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-700 ${
-                    isVisible['team-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['team-title'] ? 'animate-slide-in-left' : 'opacity-0 translate-x-[-100px]'
                   }`}
                   style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
                 >
@@ -983,7 +1069,7 @@ const App = () => {
                   id="team-subtitle"
                   data-animate
                   className={`text-xl text-gray-400 max-w-2xl mx-auto transition-all duration-700 ${
-                    isVisible['team-subtitle'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    isVisible['team-subtitle'] ? 'animate-slide-in-right' : 'opacity-0 translate-x-[100px]'
                   }`}
                   style={{transitionDelay: '200ms'}}
                 >
@@ -998,7 +1084,7 @@ const App = () => {
                     id={`member-preview-${idx}`}
                     data-animate
                     className={`group text-center transition-all duration-700 hover:scale-105 ${
-                      isVisible[`member-preview-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                      isVisible[`member-preview-${idx}`] ? (idx % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right') : `opacity-0 ${idx % 2 === 0 ? 'translate-x-[-100px]' : 'translate-x-[100px]'}`
                     }`}
                     style={{ transitionDelay: `${idx * 75}ms` }}
                   >
@@ -1031,7 +1117,7 @@ const App = () => {
                 id="about-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['about-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                  isVisible['about-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1044,7 +1130,7 @@ const App = () => {
                 id="about-title"
                 data-animate
                 className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${
-                  isVisible['about-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  isVisible['about-title'] ? 'animate-slide-in-bottom' : 'opacity-0 translate-y-[80px]'
                 }`}
                 style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
               >
@@ -1060,7 +1146,7 @@ const App = () => {
               id="students-section"
               data-animate
               className={`mb-24 transition-all duration-700 ${
-                isVisible['students-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                isVisible['students-section'] ? 'animate-slide-in-left' : 'opacity-0 translate-x-[-100px]'
               }`}
               style={{transitionDelay: '300ms'}}
             >
@@ -1101,7 +1187,7 @@ const App = () => {
                 id="mentors-section"
                 data-animate
                 className={`mb-24 transition-all duration-700 ${
-                  isVisible['mentors-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                  isVisible['mentors-section'] ? 'animate-slide-in-right' : 'opacity-0 translate-x-[100px]'
                 }`}
                 style={{transitionDelay: '400ms'}}
               >
@@ -1139,7 +1225,7 @@ const App = () => {
                 id="coaches-section"
                 data-animate
                 className={`transition-all duration-700 ${
-                  isVisible['coaches-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                  isVisible['coaches-section'] ? 'animate-slide-in-left' : 'opacity-0 translate-x-[-100px]'
                 }`}
                 style={{transitionDelay: '500ms'}}
               >
@@ -1186,7 +1272,7 @@ const App = () => {
                 id="robots-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['robots-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                  isVisible['robots-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1199,7 +1285,7 @@ const App = () => {
                 id="robots-title"
                 data-animate
                 className={`text-6xl md:text-8xl font-black text-white transition-all duration-700 ${
-                  isVisible['robots-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  isVisible['robots-title'] ? 'animate-slide-in-bottom' : 'opacity-0 translate-y-[80px]'
                 }`}
                 style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
               >
@@ -1211,7 +1297,7 @@ const App = () => {
               id="matchstick-detail"
               data-animate
               className={`relative transition-all duration-700 ${
-                isVisible['matchstick-detail'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                isVisible['matchstick-detail'] ? 'animate-scale-in' : 'opacity-0 scale-90'
               }`}
               style={{transitionDelay: '200ms'}}
             >
@@ -1341,7 +1427,7 @@ const App = () => {
                 id="sponsors-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['sponsors-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                  isVisible['sponsors-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1354,7 +1440,7 @@ const App = () => {
                 id="sponsors-title"
                 data-animate
                 className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${
-                  isVisible['sponsors-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  isVisible['sponsors-title'] ? 'animate-slide-in-bottom' : 'opacity-0 translate-y-[80px]'
                 }`}
                 style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
               >
@@ -1375,7 +1461,7 @@ const App = () => {
                   id={`sponsor-${idx}`}
                   data-animate
                   className={`relative group transition-all duration-700 ${
-                    isVisible[`sponsor-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                    isVisible[`sponsor-${idx}`] ? (idx % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right') : `opacity-0 ${idx % 2 === 0 ? 'translate-x-[-100px]' : 'translate-x-[100px]'}`
                   }`}
                   style={{ transitionDelay: `${idx * 150}ms` }}
                 >
@@ -1395,7 +1481,7 @@ const App = () => {
               id="become-sponsor"
               data-animate
               className={`relative max-w-4xl mx-auto transition-all duration-700 ${
-                isVisible['become-sponsor'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                isVisible['become-sponsor'] ? 'animate-scale-in' : 'opacity-0 scale-90'
               }`}
               style={{transitionDelay: '300ms'}}
             >
@@ -1431,7 +1517,7 @@ const App = () => {
                 id="contact-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['contact-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                  isVisible['contact-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1444,7 +1530,7 @@ const App = () => {
                 id="contact-title"
                 data-animate
                 className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${
-                  isVisible['contact-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  isVisible['contact-title'] ? 'animate-slide-in-bottom' : 'opacity-0 translate-y-[80px]'
                 }`}
                 style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
               >
@@ -1460,7 +1546,7 @@ const App = () => {
                 id="contact-info"
                 data-animate
                 className={`space-y-6 transition-all duration-700 ${
-                  isVisible['contact-info'] ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'
+                  isVisible['contact-info'] ? 'animate-slide-in-left' : 'opacity-0 translate-x-[-100px]'
                 }`}
                 style={{transitionDelay: '300ms'}}
               >
@@ -1542,7 +1628,7 @@ const App = () => {
                 id="contact-form"
                 data-animate
                 className={`relative transition-all duration-700 ${
-                  isVisible['contact-form'] ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20'
+                  isVisible['contact-form'] ? 'animate-slide-in-right' : 'opacity-0 translate-x-[100px]'
                 }`}
                 style={{transitionDelay: '400ms'}}
               >
@@ -1598,55 +1684,85 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-black overflow-x-hidden">
-      {/* Claw Slash Transition Overlay */}
+      {/* Enhanced Claw Slash Transition Overlay */}
       {pageTransition && (
         <>
+          {/* Screen flash effect */}
           <div 
-            className="fixed inset-0 z-[100] pointer-events-none claw-slash-overlay"
+            className="fixed inset-0 z-[102] pointer-events-none screen-flash"
             style={{
-              background: 'linear-gradient(135deg, #FF5A1F 0%, #FF8C42 100%)',
-              mixBlendMode: 'screen'
+              background: 'radial-gradient(circle, rgba(255,90,31,0.6) 0%, rgba(255,90,31,0) 70%)'
             }}
+          />
+          
+          {/* Main claw slash effect */}
+          <div 
+            className="fixed inset-0 z-[101] pointer-events-none claw-slash-effect overflow-hidden"
           >
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative w-full h-full">
-                {/* Three claw marks */}
+                {/* Enhanced three claw marks with glow */}
                 <div 
-                  className="absolute w-3 bg-white transform rotate-[-20deg] shadow-2xl"
+                  className="absolute bg-white transform rotate-[-25deg]"
                   style={{ 
-                    height: '150%', 
-                    left: '35%',
-                    top: '-25%',
-                    boxShadow: '0 0 40px rgba(255, 255, 255, 0.8)'
+                    width: '8px',
+                    height: '200%', 
+                    left: '30%',
+                    top: '-50%',
+                    boxShadow: '0 0 60px 10px rgba(255, 90, 31, 0.9), 0 0 100px 20px rgba(255, 140, 66, 0.6)',
+                    filter: 'brightness(1.5)'
                   }} 
                 />
                 <div 
-                  className="absolute w-3 bg-white transform rotate-[-20deg] shadow-2xl"
+                  className="absolute bg-white transform rotate-[-25deg]"
                   style={{ 
-                    height: '150%', 
+                    width: '8px',
+                    height: '200%', 
                     left: '47.5%',
-                    top: '-25%',
-                    boxShadow: '0 0 40px rgba(255, 255, 255, 0.8)'
+                    top: '-50%',
+                    boxShadow: '0 0 60px 10px rgba(255, 90, 31, 0.9), 0 0 100px 20px rgba(255, 140, 66, 0.6)',
+                    filter: 'brightness(1.5)'
                   }} 
                 />
                 <div 
-                  className="absolute w-3 bg-white transform rotate-[-20deg] shadow-2xl"
+                  className="absolute bg-white transform rotate-[-25deg]"
                   style={{ 
-                    height: '150%', 
-                    left: '60%',
-                    top: '-25%',
-                    boxShadow: '0 0 40px rgba(255, 255, 255, 0.8)'
+                    width: '8px',
+                    height: '200%', 
+                    left: '65%',
+                    top: '-50%',
+                    boxShadow: '0 0 60px 10px rgba(255, 90, 31, 0.9), 0 0 100px 20px rgba(255, 140, 66, 0.6)',
+                    filter: 'brightness(1.5)'
                   }} 
                 />
               </div>
             </div>
+            
+            {/* Orange gradient trail */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(120deg, transparent 0%, rgba(255,90,31,0.3) 40%, rgba(255,140,66,0.4) 50%, rgba(255,90,31,0.3) 60%, transparent 100%)',
+              }}
+            />
           </div>
-          <div className="fixed inset-0 z-[99] bg-black" />
+          
+          {/* Dark overlay behind slash */}
+          <div className="fixed inset-0 z-[100] bg-black" />
+          
+          {/* Particle effect overlay */}
+          <div 
+            className="fixed inset-0 z-[103] pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle at 50% 50%, rgba(255,90,31,0.1) 0%, transparent 50%)',
+              animation: 'pulse 0.5s ease-in-out'
+            }}
+          />
         </>
       )}
 
       {/* Main Content with page transition animation */}
-      <div className={pageTransition ? 'page-transition-enter' : ''}>
+      <div className={pageTransition ? 'page-transition-reveal' : ''}>
       <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
