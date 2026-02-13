@@ -2,16 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, ChevronRight, Award, Calendar, Users, Mail, MapPin, Github, Linkedin, Instagram, Zap } from 'lucide-react';
 import * as THREE from 'three';
 
-const ClawMarkPattern = ({ className = "", opacity = 0.1 }) => (
-  <div className={`absolute pointer-events-none ${className}`} style={{ opacity }}>
-    <div className="relative w-full h-full">
-      <div className="absolute w-1 bg-orange-500 transform rotate-45" style={{ height: '150%', left: '0%' }} />
-      <div className="absolute w-1 bg-orange-500 transform rotate-45" style={{ height: '150%', left: '25%' }} />
-      <div className="absolute w-1 bg-orange-500 transform rotate-45" style={{ height: '150%', left: '50%' }} />
-    </div>
-  </div>
-);
-
+// Updated ClawMarkImage component - now uses claw.png everywhere
 const ClawMarkImage = ({ opacity = 0.15, className = "" }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -43,7 +34,10 @@ const ClawMarkImage = ({ opacity = 0.15, className = "" }) => {
           style={{ filter: 'brightness(1.3) contrast(1.2)' }}
         />
       ) : (
-        <ClawMarkPattern className="w-full h-full" opacity={1} />
+        // Simple fallback while loading or on error
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="text-orange-500/30 text-6xl font-black">⚡</div>
+        </div>
       )}
     </div>
   );
@@ -105,7 +99,7 @@ const SponsorCard = ({ sponsor }) => {
   
   return (
     <div 
-      className="aspect-video bg-white flex items-center justify-center mb-6 overflow-hidden relative group transition-all duration-500 hover:scale-105"
+      className="aspect-video bg-white flex items-center justify-center mb-6 overflow-hidden relative group transition-all duration-500 hover:scale-[1.03]"
       style={{
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'
       }}
@@ -162,9 +156,9 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
   
   return (
     <div className="relative">
-      {/* CARD CONTAINER - ALL ANIMATIONS APPLY HERE */}
+      {/* CARD CONTAINER - REDUCED HOVER SCALE */}
       <div 
-        className={`${sizeClasses} bg-gradient-to-br from-[#132038] to-[#1a2847] mx-auto flex items-center justify-center text-white font-black overflow-hidden relative border-2 border-[#A2A9B1] group transition-all duration-500 hover:scale-110 hover:border-orange-600`}
+        className={`${sizeClasses} bg-gradient-to-br from-[#132038] to-[#1a2847] mx-auto flex items-center justify-center text-white font-black overflow-hidden relative border-2 border-[#A2A9B1] group transition-all duration-500 hover:scale-[1.05] hover:border-orange-600`}
         style={{
           clipPath: size === 'small' 
             ? 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'
@@ -525,22 +519,35 @@ void main(){
   return <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />;
 };
 
-// New: Enhanced Initial Load Animation
+// FIXED: Loading screen now uses claw.png image
 const InitialLoadAnimation = ({ onComplete }) => {
-  const [phase, setPhase] = useState('grid'); // grid -> logo -> complete
+  const [phase, setPhase] = useState('grid');
+  const [clawImageLoaded, setClawImageLoaded] = useState(false);
+  const [clawImageError, setClawImageError] = useState(false);
+  
+  // Preload claw image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setClawImageLoaded(true);
+      setClawImageError(false);
+    };
+    img.onerror = () => {
+      setClawImageError(true);
+      setClawImageLoaded(true);
+    };
+    img.src = '/claw.png';
+  }, []);
   
   useEffect(() => {
-    // Grid scan phase
     const gridTimer = setTimeout(() => {
       setPhase('logo');
     }, 800);
     
-    // Logo reveal phase
     const logoTimer = setTimeout(() => {
       setPhase('complete');
     }, 1600);
     
-    // Complete and fade out
     const completeTimer = setTimeout(() => {
       onComplete();
     }, 2200);
@@ -556,13 +563,10 @@ const InitialLoadAnimation = ({ onComplete }) => {
     <div className={`fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center transition-opacity duration-500 ${phase === 'complete' ? 'opacity-0' : 'opacity-100'}`}>
       {/* Animated grid lines scanning */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Horizontal scanning lines */}
         <div className={`absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent transition-all duration-700 ${phase === 'grid' ? 'top-1/2' : 'top-0'}`}
              style={{ boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)' }} />
         <div className={`absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent transition-all duration-700 delay-150 ${phase === 'grid' ? 'top-1/2' : 'bottom-0'}`}
              style={{ boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)' }} />
-        
-        {/* Vertical scanning lines */}
         <div className={`absolute top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-orange-500 to-transparent transition-all duration-700 delay-75 ${phase === 'grid' ? 'left-1/2' : 'left-0'}`}
              style={{ boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)' }} />
         <div className={`absolute top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-orange-500 to-transparent transition-all duration-700 delay-200 ${phase === 'grid' ? 'left-1/2' : 'right-0'}`}
@@ -572,29 +576,25 @@ const InitialLoadAnimation = ({ onComplete }) => {
       {/* Logo assembly in center */}
       <div className={`relative z-10 transition-all duration-700 ${phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
         <div className="relative">
-          {/* Claw marks assembling */}
-          <div className="w-40 h-40 relative mb-6">
-            <div className="absolute w-3 bg-orange-500 transform rotate-45 transition-all duration-500"
-                 style={{ 
-                   height: phase === 'logo' || phase === 'complete' ? '180%' : '0%',
-                   left: '20%',
-                   boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)',
-                   transitionDelay: '0ms'
-                 }} />
-            <div className="absolute w-3 bg-orange-500 transform rotate-45 transition-all duration-500"
-                 style={{ 
-                   height: phase === 'logo' || phase === 'complete' ? '180%' : '0%',
-                   left: '45%',
-                   boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)',
-                   transitionDelay: '100ms'
-                 }} />
-            <div className="absolute w-3 bg-orange-500 transform rotate-45 transition-all duration-500"
-                 style={{ 
-                   height: phase === 'logo' || phase === 'complete' ? '180%' : '0%',
-                   left: '70%',
-                   boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)',
-                   transitionDelay: '200ms'
-                 }} />
+          {/* FIXED: Now using claw.png image instead of 3 lines */}
+          <div className="w-48 h-48 relative mb-6 flex items-center justify-center">
+            {clawImageLoaded && !clawImageError ? (
+              <img 
+                src="/claw.png" 
+                alt="Wolverine Claw" 
+                className={`w-full h-full object-contain transition-all duration-700 ${
+                  phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+                }`}
+                style={{ 
+                  filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 30px rgba(255, 90, 31, 0.8))',
+                }}
+              />
+            ) : (
+              // Fallback lightning bolt
+              <div className={`text-orange-500 text-9xl font-black transition-all duration-700 ${
+                phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+              }`}>⚡</div>
+            )}
             
             {/* Pulsing glow */}
             <div className="absolute inset-0 bg-orange-500/30 blur-3xl animate-pulse" />
@@ -679,7 +679,7 @@ const App = () => {
       @keyframes scaleIn {
         from {
           opacity: 0;
-          transform: scale(0.8);
+          transform: scale(0.9);
         }
         to {
           opacity: 1;
@@ -689,7 +689,7 @@ const App = () => {
       @keyframes growIn {
         from {
           opacity: 0;
-          transform: scale(0.5);
+          transform: scale(0.85);
         }
         to {
           opacity: 1;
@@ -717,7 +717,7 @@ const App = () => {
       @keyframes expandFromCenter {
         from {
           opacity: 0;
-          transform: scale(0.3);
+          transform: scale(0.5);
         }
         to {
           opacity: 1;
@@ -737,7 +737,7 @@ const App = () => {
         opacity: 0;
       }
       .animate-grow-in {
-        animation: growIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        animation: growIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
       .animate-slide-diagonal {
@@ -775,7 +775,6 @@ const App = () => {
 
   useEffect(() => {
     if (currentPage === 'home' && isInitialLoad) {
-      // Don't trigger transition on initial load
       return;
     }
     
@@ -783,11 +782,10 @@ const App = () => {
     setIsVisible({});
     setPageTransition(true);
     
-    // Much faster transition - content loads immediately
+    // FIXED: Removed orange flash - faster and cleaner transition
     const transitionTimer = setTimeout(() => {
       setPageTransition(false);
       
-      // Immediately show content
       const elements = document.querySelectorAll('[data-animate]');
       const visibilityMap = {};
       elements.forEach((el) => {
@@ -796,7 +794,7 @@ const App = () => {
         }
       });
       setIsVisible(visibilityMap);
-    }, 400); // Faster transition
+    }, 300);
     
     return () => {
       clearTimeout(transitionTimer);
@@ -942,7 +940,7 @@ const App = () => {
                 id="hero-buttons"
                 data-animate
                 className={`flex flex-wrap gap-6 justify-center mb-16 transition-all duration-700 ${
-                  isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
                 style={{animationDelay: '0.5s'}}
               >
@@ -954,11 +952,11 @@ const App = () => {
                 </AngleButton>
               </div>
 
-              {/* Stats Bar */}
+              {/* FIXED: Stats Bar - added more bottom margin to prevent overlap */}
               <div 
                 id="hero-stats"
                 data-animate
-                className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto transition-all duration-700 ${
+                className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-24 transition-all duration-700 ${
                   isVisible['hero-stats'] ? 'animate-slide-down-fade' : 'opacity-0 translate-y-[-100%]'
                 }`}
                 style={{animationDelay: '0.6s'}}
@@ -969,9 +967,8 @@ const App = () => {
                   { label: 'SEASON', value: '2025' }
                 ].map((stat, idx) => (
                   <div key={idx} className="relative group">
-                    <div className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] backdrop-blur-sm hover:border-orange-600 transition-all duration-500 group-hover:scale-110"
+                    <div className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] backdrop-blur-sm hover:border-orange-600 transition-all duration-500 group-hover:scale-[1.05]"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                      {/* Pulsing glow on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                            style={{
                              boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
@@ -985,8 +982,8 @@ const App = () => {
             </div>
           </div>
 
-          {/* Robot Showcase */}
-          <div className="py-32 bg-gradient-to-b from-[#132038] to-[#0a1628] relative overflow-hidden">
+          {/* Robot Showcase - FIXED: Added top padding to prevent stats overlap */}
+          <div className="py-32 pt-16 bg-gradient-to-b from-[#132038] to-[#0a1628] relative overflow-hidden">
             <ClawMarkImage opacity={0.08} className="top-1/4 left-0 w-[500px] h-[500px]" />
             
             <div className="max-w-7xl mx-auto px-4 relative z-10">
@@ -995,7 +992,7 @@ const App = () => {
                   id="robot-section"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['robot-section'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                    isVisible['robot-section'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                   }`}
                 >
                   <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
@@ -1030,18 +1027,18 @@ const App = () => {
                 id="robot-card"
                 data-animate
                 className={`relative transition-all duration-700 ${
-                  isVisible['robot-card'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['robot-card'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
                 style={{transitionDelay: '300ms'}}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-4 translate-y-4"
                      style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
                 
-                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500 hover:scale-105"
+                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500 hover:scale-[1.02]"
                      style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
-                  <ClawMarkPattern className="top-0 right-0 w-48 h-48" opacity={0.08} />
+                  {/* FIXED: Using claw.png instead of 3-lined pattern */}
+                  <ClawMarkImage className="top-0 right-0 w-48 h-48" opacity={0.08} />
                   
-                  {/* Pulsing glow on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                        style={{
                          boxShadow: 'inset 0 0 50px rgba(255, 90, 31, 0.4)',
@@ -1050,7 +1047,7 @@ const App = () => {
                   <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
                     <div className="space-y-6">
                       <div 
-                        className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/50 transition-all duration-500 border-2 border-[#A2A9B1] hover:border-orange-600 group hover:scale-105"
+                        className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/50 transition-all duration-500 border-2 border-[#A2A9B1] hover:border-orange-600 group hover:scale-[1.03]"
                         style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}
                       >
                         <RobotImage 
@@ -1064,7 +1061,7 @@ const App = () => {
                         {[1, 2, 3, 4].map((i) => (
                           <div
                             key={i}
-                            className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden hover:scale-110 transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600 group"
+                            className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden hover:scale-[1.05] transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600 group"
                             style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
                           >
                             <RobotImage 
@@ -1072,7 +1069,6 @@ const App = () => {
                               alt={`Matchstick detail ${i}`} 
                               fallbackText={i.toString()}
                             />
-                            {/* Glow effect */}
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                  style={{
                                    boxShadow: 'inset 0 0 20px rgba(255, 90, 31, 0.5)',
@@ -1105,10 +1101,9 @@ const App = () => {
                         ].map((spec, idx) => (
                           <div 
                             key={idx}
-                            className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-4 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-110 transition-all duration-300 group relative"
+                            className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-4 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-[1.05] transition-all duration-300 group relative"
                             style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                           >
-                            {/* Pulsing glow on hover */}
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
                                  style={{
                                    boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.4)',
@@ -1139,7 +1134,7 @@ const App = () => {
                   id="events-tag"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['events-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                    isVisible['events-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                   }`}
                 >
                   <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
@@ -1167,18 +1162,17 @@ const App = () => {
                     id={`event-${idx}`}
                     data-animate
                     className={`relative group transition-all duration-700 ${
-                      isVisible[`event-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                      isVisible[`event-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                     }`}
                     style={{ transitionDelay: `${idx * 100}ms` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
                     
-                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 overflow-hidden hover:scale-110"
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 overflow-hidden hover:scale-[1.03]"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
                       <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-600/10 to-transparent transform translate-x-8 -translate-y-8 rotate-45" />
                       
-                      {/* Pulsing glow on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                            style={{
                              boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
@@ -1218,7 +1212,7 @@ const App = () => {
                   id="team-tag"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['team-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                    isVisible['team-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                   }`}
                 >
                   <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
@@ -1256,7 +1250,7 @@ const App = () => {
                     id={`member-preview-${idx}`}
                     data-animate
                     className={`text-center transition-all duration-700 ${
-                      isVisible[`member-preview-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                      isVisible[`member-preview-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                     }`}
                     style={{ transitionDelay: `${idx * 75}ms` }}
                   >
@@ -1271,7 +1265,7 @@ const App = () => {
                 id="team-cta"
                 data-animate
                 className={`text-center transition-all duration-700 ${
-                  isVisible['team-cta'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['team-cta'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
                 style={{transitionDelay: '0.4s'}}
               >
@@ -1296,7 +1290,7 @@ const App = () => {
                 id="about-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['about-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['about-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1451,7 +1445,7 @@ const App = () => {
                 id="robots-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['robots-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['robots-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1476,18 +1470,18 @@ const App = () => {
               id="matchstick-detail"
               data-animate
               className={`relative transition-all duration-700 ${
-                isVisible['matchstick-detail'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                isVisible['matchstick-detail'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
               }`}
               style={{transitionDelay: '200ms'}}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-6 translate-y-6"
                    style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}} />
               
-              <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-16 border-4 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500 hover:scale-105"
+              <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-16 border-4 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500 hover:scale-[1.02]"
                    style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}>
-                <ClawMarkPattern className="top-0 right-0 w-64 h-64" opacity={0.05} />
+                {/* FIXED: Using claw.png instead of 3-lined pattern */}
+                <ClawMarkImage className="top-0 right-0 w-64 h-64" opacity={0.05} />
                 
-                {/* Pulsing glow on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                      style={{
                        boxShadow: 'inset 0 0 60px rgba(255, 90, 31, 0.5)',
@@ -1496,7 +1490,7 @@ const App = () => {
                 <div className="grid md:grid-cols-2 gap-16 relative z-10">
                   <div className="space-y-8">
                     <div 
-                      className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/60 transition-all duration-500 border-4 border-[#A2A9B1] hover:border-orange-600 hover:scale-110"
+                      className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/60 transition-all duration-500 border-4 border-[#A2A9B1] hover:border-orange-600 hover:scale-[1.03]"
                       style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}
                     >
                       <RobotImage 
@@ -1510,7 +1504,7 @@ const App = () => {
                       {[1, 2, 3, 4].map((i) => (
                         <div
                           key={i}
-                          className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-5xl font-bold overflow-hidden hover:scale-110 transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600 group relative"
+                          className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-5xl font-bold overflow-hidden hover:scale-[1.05] transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600 group relative"
                           style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}
                         >
                           <RobotImage 
@@ -1518,7 +1512,6 @@ const App = () => {
                             alt={`Matchstick detail ${i}`} 
                             fallbackText={i.toString()}
                           />
-                          {/* Glow effect */}
                           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
                                style={{
                                  boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.6)',
@@ -1551,10 +1544,9 @@ const App = () => {
                       ].map((spec, idx) => (
                         <div 
                           key={idx}
-                          className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-110 transition-all duration-300 group relative"
+                          className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-[1.05] transition-all duration-300 group relative"
                           style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
                         >
-                          {/* Pulsing glow on hover */}
                           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
                                style={{
                                  boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.5)',
@@ -1565,9 +1557,8 @@ const App = () => {
                       ))}
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/30 p-8 border-2 border-[#A2A9B1] hover:border-blue-500 transition-all duration-300 group relative hover:scale-105"
+                    <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/30 p-8 border-2 border-[#A2A9B1] hover:border-blue-500 transition-all duration-300 group relative hover:scale-[1.02]"
                          style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
-                      {/* Glow on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                            style={{
                              boxShadow: 'inset 0 0 30px rgba(66, 153, 225, 0.4)',
@@ -1590,9 +1581,8 @@ const App = () => {
                       </ul>
                     </div>
 
-                    <div className="bg-gradient-to-br from-orange-900/30 to-orange-950/30 p-8 border-2 border-[#A2A9B1] hover:border-orange-500 transition-all duration-300 group relative hover:scale-105"
+                    <div className="bg-gradient-to-br from-orange-900/30 to-orange-950/30 p-8 border-2 border-[#A2A9B1] hover:border-orange-500 transition-all duration-300 group relative hover:scale-[1.02]"
                          style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
-                      {/* Pulsing glow on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
                            style={{
                              boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
@@ -1632,7 +1622,7 @@ const App = () => {
                 id="sponsors-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['sponsors-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['sponsors-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1666,16 +1656,15 @@ const App = () => {
                   id={`sponsor-${idx}`}
                   data-animate
                   className={`relative group transition-all duration-700 ${
-                    isVisible[`sponsor-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                    isVisible[`sponsor-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                   }`}
                   style={{ transitionDelay: `${idx * 150}ms` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-4 translate-y-4"
                        style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}} />
                   
-                  <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-110"
+                  <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-[1.03]"
                        style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}}>
-                    {/* Pulsing glow on hover */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                          style={{
                            boxShadow: 'inset 0 0 35px rgba(255, 90, 31, 0.4)',
@@ -1693,16 +1682,15 @@ const App = () => {
               id="become-sponsor"
               data-animate
               className={`relative max-w-4xl mx-auto transition-all duration-700 ${
-                isVisible['become-sponsor'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                isVisible['become-sponsor'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
               }`}
               style={{transitionDelay: '300ms'}}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 to-blue-900/30 transform translate-x-4 translate-y-4"
                    style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
               
-              <div className="relative bg-gradient-to-br from-orange-900/40 to-blue-900/40 p-12 md:p-16 text-center border-4 border-orange-600 group hover:border-orange-500 transition-all duration-500 hover:scale-105"
+              <div className="relative bg-gradient-to-br from-orange-900/40 to-blue-900/40 p-12 md:p-16 text-center border-4 border-orange-600 group hover:border-orange-500 transition-all duration-500 hover:scale-[1.02]"
                    style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
-                {/* Pulsing glow on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                      style={{
                        boxShadow: 'inset 0 0 50px rgba(255, 90, 31, 0.5)',
@@ -1736,7 +1724,7 @@ const App = () => {
                 id="contact-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['contact-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['contact-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1801,9 +1789,8 @@ const App = () => {
                     <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
                     
-                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-110"
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-[1.03]"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                      {/* Pulsing glow on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                            style={{
                              boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
@@ -1866,16 +1853,15 @@ const App = () => {
                 id="contact-form"
                 data-animate
                 className={`relative transition-all duration-700 ${
-                  isVisible['contact-form'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                  isVisible['contact-form'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
                 style={{transitionDelay: '400ms'}}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-3 translate-y-3"
                      style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}} />
                 
-                <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600 group hover:border-orange-500 transition-all duration-500 hover:scale-105"
+                <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600 group hover:border-orange-500 transition-all duration-500 hover:scale-[1.02]"
                      style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
-                  {/* Pulsing glow on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                        style={{
                          boxShadow: 'inset 0 0 35px rgba(255, 90, 31, 0.4)',
@@ -1885,7 +1871,7 @@ const App = () => {
                       <label className="block text-white font-bold text-sm mb-2 tracking-wider">NAME</label>
                       <input
                         type="text"
-                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 focus:scale-105"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 focus:scale-[1.02]"
                         style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
@@ -1894,7 +1880,7 @@ const App = () => {
                       <label className="block text-white font-bold text-sm mb-2 tracking-wider">EMAIL</label>
                       <input
                         type="email"
-                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 focus:scale-105"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 focus:scale-[1.02]"
                         style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
@@ -1903,7 +1889,7 @@ const App = () => {
                       <label className="block text-white font-bold text-sm mb-2 tracking-wider">MESSAGE</label>
                       <textarea
                         rows="6"
-                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 resize-none focus:scale-105"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 resize-none focus:scale-[1.02]"
                         style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
@@ -1931,9 +1917,9 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden">
-      {/* Smooth page transition overlay - orange fade */}
+      {/* FIXED: Removed orange flash - now just a clean fade transition */}
       {pageTransition && (
-        <div className="fixed inset-0 z-[100] bg-gradient-to-br from-orange-600/30 to-[#132038] animate-fade-in" />
+        <div className="fixed inset-0 z-[100] bg-[#132038] transition-opacity duration-300" />
       )}
 
       {/* Main Content */}
