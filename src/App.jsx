@@ -524,6 +524,7 @@ const InitialLoadAnimation = ({ onComplete }) => {
   const [phase, setPhase] = useState('grid');
   const [clawImageLoaded, setClawImageLoaded] = useState(false);
   const [clawImageError, setClawImageError] = useState(false);
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
   
   // Preload claw image
   useEffect(() => {
@@ -536,10 +537,49 @@ const InitialLoadAnimation = ({ onComplete }) => {
       setClawImageError(true);
       setClawImageLoaded(true);
     };
-    img.src = '/claw.png';
+    img.src = '/data/logo.svg';
+  }, []);
+  
+  // Preload critical images
+  useEffect(() => {
+    const criticalImages = [
+      '/data/logo.svg',
+      '/claw.png',
+      '/data/robots/matchstick-main.jpg',
+      '/data/robots/matchstick-1.jpg',
+      '/data/robots/matchstick-2.jpg',
+      '/data/robots/matchstick-3.jpg',
+      '/data/robots/matchstick-4.jpg',
+      '/data/team/dev.jpg',
+      '/data/team/sahejdeep.jpg',
+      '/data/team/sripadh.jpg',
+      '/data/team/manveer.jpg',
+      '/data/sponsors/wakeland-high-school.jpg',
+      '/data/sponsors/wakeland-nhs.jpg'
+    ];
+    
+    let loadedCount = 0;
+    const totalImages = criticalImages.length;
+    
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= totalImages) {
+        setImagesPreloaded(true);
+      }
+    };
+    
+    criticalImages.forEach(src => {
+      const img = new Image();
+      img.onload = checkAllLoaded;
+      img.onerror = checkAllLoaded; // Continue even if image fails
+      img.src = src;
+    });
   }, []);
   
   useEffect(() => {
+    // Only start animation phases after images are preloaded
+    if (!imagesPreloaded) return;
+    
     const gridTimer = setTimeout(() => {
       setPhase('logo');
     }, 800);
@@ -557,12 +597,12 @@ const InitialLoadAnimation = ({ onComplete }) => {
       clearTimeout(logoTimer);
       clearTimeout(completeTimer);
     };
-  }, [onComplete]);
+  }, [onComplete, imagesPreloaded]);
   
   return (
     <div className={`fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center transition-opacity duration-500 ${phase === 'complete' ? 'opacity-0' : 'opacity-100'}`}>
-      {/* Animated slash line that cuts across */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Animated slash line that cuts across - BEHIND logo */}
+      <div className="absolute inset-0 overflow-hidden z-0">
         <div 
           className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent transition-all duration-1000 ${
             phase === 'grid' ? 'w-0 left-1/2 top-1/2' : 'w-[141%] -left-[20%] top-1/2'
@@ -575,8 +615,8 @@ const InitialLoadAnimation = ({ onComplete }) => {
         />
       </div>
       
-      {/* Logo assembly in center */}
-      <div className={`relative z-10 transition-all duration-700 ${phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+      {/* Logo assembly in center - ALWAYS IN FRONT */}
+      <div className={`relative z-20 transition-all duration-700 ${phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
         <div className="relative">
           {/* LARGER claw image with slash reveal */}
           <div className="w-80 h-80 relative mb-6 flex items-center justify-center">
@@ -622,6 +662,7 @@ const App = () => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [pageTransitioning, setPageTransitioning] = useState(false);
 
   // Set favicon on mount
   useEffect(() => {
@@ -745,6 +786,20 @@ const App = () => {
           transform: scale(1);
         }
       }
+      @keyframes pageWipe {
+        0% {
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
       .animate-fade-in-up {
         animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
@@ -783,6 +838,9 @@ const App = () => {
         animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
+      .animate-page-wipe {
+        animation: pageWipe 0.4s ease-in-out forwards;
+      }
     `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
@@ -794,45 +852,58 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // FIXED: Immediate scroll to top on page change, reset visibility
+  // Page change effect - instant scroll + transition
   useEffect(() => {
     if (currentPage === 'home' && isInitialLoad) {
       return;
     }
     
-    // Immediate scroll to top
+    // Start transition
+    setPageTransitioning(true);
+    
+    // INSTANT teleport to top (no smooth scrolling)
     window.scrollTo(0, 0);
     
-    // Reset visibility
+    // Reset visibility immediately
     setIsVisible({});
+    
+    // End transition after animation completes
+    const timer = setTimeout(() => {
+      setPageTransitioning(false);
+    }, 400);
+    
+    return () => clearTimeout(timer);
   }, [currentPage, isInitialLoad]);
 
-  // FIXED: Scroll-based intersection observer
+  // Scroll-based intersection observer
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.target.id) {
-            setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }));
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
+    // Small delay to ensure DOM is ready
+    const setupTimer = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.target.id) {
+              setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }));
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      );
 
-    const timeoutId = setTimeout(() => {
-      document.querySelectorAll('[data-animate]').forEach((el) => {
+      const elements = document.querySelectorAll('[data-animate]');
+      elements.forEach((el) => {
         if (el.id) {
           observer.observe(el);
         }
       });
-    }, 100);
 
-    return () => {
-      clearTimeout(timeoutId);
-      observer.disconnect();
-    };
-  }, [currentPage]);
+      return () => {
+        observer.disconnect();
+      };
+    }, 100);
+    
+    return () => clearTimeout(setupTimer);
+  }, [currentPage, isInitialLoad]); // Re-run when page or initial load changes
 
   const navigation = [
     { name: 'HOME', id: 'home' },
@@ -1933,6 +2004,18 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden">
+      {/* Page Transition Overlay */}
+      {pageTransitioning && (
+        <div className="fixed inset-0 z-[150] bg-gradient-to-br from-[#132038] via-[#1a2847] to-[#0a1628] animate-page-wipe">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/5 via-transparent to-blue-900/5" />
+          <div className="absolute inset-0 overflow-hidden opacity-30">
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/3 transform -skew-y-12" />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/2 transform -skew-y-12" />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-2/3 transform -skew-y-12" />
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
