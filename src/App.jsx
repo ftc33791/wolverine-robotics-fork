@@ -48,105 +48,8 @@ const ClawMarkImage = ({ opacity = 0.08, className = "" }) => {
   );
 };
 
-const OpeningAnimation = ({ onComplete }) => {
-  const [phase, setPhase] = useState('scratch');
-  
-  useEffect(() => {
-    const scratchTimer = setTimeout(() => {
-      setPhase('reveal');
-    }, 1200);
-    
-    const completeTimer = setTimeout(() => {
-      onComplete();
-    }, 2500);
-    
-    return () => {
-      clearTimeout(scratchTimer);
-      clearTimeout(completeTimer);
-    };
-  }, [onComplete]);
-  
-  return (
-    <div className="fixed inset-0 z-[100] bg-[#132038]">
-      {/* Scratch marks that reveal the site */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="absolute h-full bg-black origin-top-left"
-            style={{
-              width: '40%',
-              left: `${i * 30}%`,
-              transform: 'skewX(-15deg)',
-              animation: `scratchReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards`,
-              animationDelay: `${i * 0.15}s`
-            }}
-          />
-        ))}
-      </div>
-      
-      {/* Claw image that scratches */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96"
-        style={{
-          animation: 'clawSwipe 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
-          opacity: phase === 'reveal' ? 0 : 1,
-          transition: 'opacity 0.3s ease-out'
-        }}
-      >
-        <ClawMarkImage opacity={0.6} className="w-full h-full" />
-      </div>
-      
-      {/* Logo reveal */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-        style={{
-          opacity: phase === 'reveal' ? 1 : 0,
-          transform: phase === 'reveal' ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.8)',
-          transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
-      >
-        <div className="text-center">
-          <h1 className="text-8xl font-black text-white mb-2" style={{fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em'}}>
-            WOLVERINE
-          </h1>
-          <div className="h-1 w-32 bg-orange-600 mx-auto mb-2" />
-          <p className="text-orange-500 font-black text-xl tracking-[0.3em]">ROBOTICS</p>
-        </div>
-      </div>
-      
-      <style>{`
-        @keyframes scratchReveal {
-          0% {
-            transform: skewX(-15deg) scaleY(0);
-            transform-origin: top;
-          }
-          100% {
-            transform: skewX(-15deg) scaleY(1.2);
-            transform-origin: top;
-          }
-        }
-        
-        @keyframes clawSwipe {
-          0% {
-            transform: translate(-150%, -150%) rotate(-20deg) scale(0.5);
-            opacity: 0;
-          }
-          50% {
-            opacity: 0.8;
-          }
-          100% {
-            transform: translate(-50%, -50%) rotate(0deg) scale(1);
-            opacity: 0.6;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
 const AngleButton = ({ children, onClick, variant = 'primary', className = '' }) => {
-  const baseClasses = "relative px-8 py-4 font-bold transition-all duration-500 hover:scale-105 overflow-hidden group";
+  const baseClasses = "relative px-8 py-4 font-bold transition-all duration-300 overflow-hidden group";
   const variantClasses = {
     primary: "bg-gradient-to-br from-orange-600 to-orange-700 text-white hover:from-orange-500 hover:to-orange-600",
     secondary: "bg-gradient-to-br from-blue-900 to-blue-950 text-white border-2 border-blue-500 hover:border-blue-400",
@@ -161,8 +64,8 @@ const AngleButton = ({ children, onClick, variant = 'primary', className = '' })
         clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-      <span className="relative z-10 flex items-center gap-2 tracking-wide">
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+      <span className="relative z-10 flex items-center gap-2">
         {children}
       </span>
     </button>
@@ -199,18 +102,18 @@ const SponsorCard = ({ sponsor }) => {
       }}
     >
       {!imageLoaded ? (
-        <div className="w-full h-full bg-gradient-to-br from-[#132038] to-[#FF5A1F] flex items-center justify-center">
+        <div className="w-full h-full bg-gradient-to-br from-blue-900 to-orange-900 flex items-center justify-center">
           <div className="text-white text-6xl font-black animate-pulse">{initials}</div>
         </div>
       ) : imageError ? (
-        <div className="w-full h-full bg-gradient-to-br from-[#132038] to-[#FF5A1F] flex items-center justify-center">
+        <div className="w-full h-full bg-gradient-to-br from-blue-900 to-orange-900 flex items-center justify-center">
           <div className="text-white text-6xl font-black">{initials}</div>
         </div>
       ) : (
         <img 
           src={sponsor.image} 
           alt={sponsor.name} 
-          className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-700 ease-out" 
+          className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500" 
         />
       )}
     </div>
@@ -245,7 +148,7 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
   return (
     <div className="relative">
       <div 
-        className={`${sizeClasses} bg-gradient-to-br from-[#FF5A1F] to-orange-800 mx-auto flex items-center justify-center text-white font-black overflow-hidden relative group`}
+        className={`${sizeClasses} bg-gradient-to-br from-orange-600 to-orange-800 mx-auto flex items-center justify-center text-white font-black overflow-hidden relative group`}
         style={{
           clipPath: size === 'small' 
             ? 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'
@@ -258,14 +161,14 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
           <img 
             src={member.image} 
             alt={member.name} 
-            className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700 ease-out" 
+            className="w-full h-full object-cover transition-transform duration-500" 
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       {showRookie && member.rookie && (
         <div 
-          className="absolute -top-2 -right-2 bg-[#FF5A1F] text-white text-xs font-black px-3 py-1 shadow-lg z-10 animate-pulse"
+          className="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-black px-3 py-1 shadow-lg z-10 animate-pulse"
           style={{
             clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'
           }}
@@ -342,7 +245,7 @@ const LogoImage = () => {
       }}
     >
       {!imageLoaded || imageError ? (
-        <div className="w-full h-full bg-gradient-to-br from-[#FF5A1F] to-orange-800 flex items-center justify-center text-white font-black text-xl">
+        <div className="w-full h-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-black text-xl">
           WR
         </div>
       ) : (
@@ -596,23 +499,6 @@ const App = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
-  const [showOpening, setShowOpening] = useState(true);
-  const [hasSeenOpening, setHasSeenOpening] = useState(false);
-
-  useEffect(() => {
-    // Check if user has seen the opening animation
-    const seen = sessionStorage.getItem('hasSeenOpening');
-    if (seen) {
-      setShowOpening(false);
-      setHasSeenOpening(true);
-    }
-  }, []);
-
-  const handleOpeningComplete = () => {
-    setShowOpening(false);
-    setHasSeenOpening(true);
-    sessionStorage.setItem('hasSeenOpening', 'true');
-  };
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -620,80 +506,42 @@ const App = () => {
       @keyframes fadeInUp {
         from {
           opacity: 0;
-          transform: translateY(40px);
+          transform: translateY(30px);
         }
         to {
           opacity: 1;
           transform: translateY(0);
         }
       }
-      @keyframes slideInRight {
+      @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateX(-60px);
         }
         to {
           opacity: 1;
-          transform: translateX(0);
-        }
-      }
-      @keyframes slideInLeft {
-        from {
-          opacity: 0;
-          transform: translateX(60px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
         }
       }
       @keyframes scaleIn {
         from {
           opacity: 0;
-          transform: scale(0.85);
+          transform: scale(0.95);
         }
         to {
           opacity: 1;
           transform: scale(1);
         }
       }
-      @keyframes glow {
-        0%, 100% {
-          box-shadow: 0 0 20px rgba(255, 90, 31, 0.3);
-        }
-        50% {
-          box-shadow: 0 0 40px rgba(255, 90, 31, 0.6);
-        }
-      }
-      @keyframes pulse {
-        0%, 100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.7;
-        }
-      }
       .animate-fade-in-up {
-        animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: fadeInUp 0.6s ease-out forwards;
         opacity: 0;
       }
-      .animate-slide-in-right {
-        animation: slideInRight 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-      }
-      .animate-slide-in-left {
-        animation: slideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
         opacity: 0;
       }
       .animate-scale-in {
-        animation: scaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: scaleIn 0.6s ease-out forwards;
         opacity: 0;
-      }
-      .animate-glow {
-        animation: glow 3s ease-in-out infinite;
-      }
-      .animate-pulse {
-        animation: pulse 2s ease-in-out infinite;
       }
     `;
     document.head.appendChild(style);
@@ -793,9 +641,8 @@ const App = () => {
           {/* Hero Section */}
           <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-[#132038]">
             <GridScan />
-            <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[600px] h-[600px] animate-pulse" />
+            <ClawMarkImage opacity={0.06} className="bottom-0 right-0 w-[600px] h-[600px]" />
             
-            {/* Animated Background Pattern */}
             <div
               className="absolute inset-0 opacity-5"
               style={{
@@ -808,31 +655,31 @@ const App = () => {
             <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
               <div className="mb-8">
                 <div className="inline-block mb-6 animate-scale-in" style={{animationDelay: '0.1s'}}>
-                  <div className="flex items-center gap-3 px-6 py-3 bg-[#FF5A1F]/20 border-2 border-[#FF5A1F] animate-glow"
+                  <div className="flex items-center gap-3 px-6 py-3 bg-orange-600/20 border-2 border-orange-600"
                        style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                    <Zap className="text-[#FF5A1F] animate-pulse" size={20} />
-                    <span className="text-[#FF5A1F] font-black text-sm tracking-[0.2em]">FTC TEAM 33791</span>
+                    <Zap className="text-orange-500" size={20} />
+                    <span className="text-orange-500 font-black text-sm tracking-wider">FTC TEAM 33791</span>
                   </div>
                 </div>
                 
-                <h1 className="text-7xl md:text-9xl font-black text-white mb-4 animate-fade-in-up tracking-tight" style={{animationDelay: '0.3s', fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em'}}>
+                <h1 className="text-7xl md:text-9xl font-black text-white mb-4 animate-fade-in-up tracking-tight" style={{animationDelay: '0.2s', fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.02em'}}>
                   WOLVERINE
                 </h1>
-                <h2 className="text-5xl md:text-8xl font-black text-[#FF5A1F] mb-8 animate-fade-in-up" style={{animationDelay: '0.5s', fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em'}}>
+                <h2 className="text-5xl md:text-8xl font-black text-orange-500 mb-8 animate-fade-in-up" style={{animationDelay: '0.3s', fontFamily: 'system-ui, -apple-system, sans-serif'}}>
                   ROBOTICS
                 </h2>
               </div>
               
               <div className="max-w-2xl mx-auto mb-12 space-y-4">
-                <p className="text-lg md:text-xl text-[#A2A9B1] animate-fade-in-up leading-relaxed" style={{animationDelay: '0.7s'}}>
+                <p className="text-lg md:text-xl text-gray-300 animate-fade-in-up leading-relaxed" style={{animationDelay: '0.4s'}}>
                   First-year FTC team from Frisco, TX pushing the boundaries of what rookies can achieve.
                 </p>
-                <p className="text-base md:text-lg text-[#A2A9B1]/70 animate-fade-in-up" style={{animationDelay: '0.8s'}}>
+                <p className="text-base md:text-lg text-gray-400 animate-fade-in-up" style={{animationDelay: '0.5s'}}>
                   Built with precision. Engineered for excellence. Driven by innovation.
                 </p>
               </div>
               
-              <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up" style={{animationDelay: '0.9s'}}>
+              <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up" style={{animationDelay: '0.6s'}}>
                 <AngleButton onClick={() => setCurrentPage('robots')} variant="primary">
                   VIEW MATCHSTICK <ChevronRight size={20} />
                 </AngleButton>
@@ -842,19 +689,18 @@ const App = () => {
               </div>
 
               {/* Stats Bar */}
-              <div className="grid grid-cols-3 gap-6 mt-20 max-w-3xl mx-auto animate-scale-in" style={{animationDelay: '1s'}}>
+              <div className="grid grid-cols-3 gap-6 mt-20 max-w-3xl mx-auto animate-scale-in" style={{animationDelay: '0.7s'}}>
                 {[
                   { label: 'RECORD', value: '5-0-1' },
                   { label: 'TEAM SIZE', value: '17' },
                   { label: 'SEASON', value: '2025' }
                 ].map((stat, idx) => (
                   <div key={idx} className="relative group">
-                    <div className="bg-gradient-to-br from-[#FF5A1F]/20 to-[#132038]/20 p-6 border-2 border-[#FF5A1F]/50 backdrop-blur-sm hover:border-[#FF5A1F] transition-all duration-500"
+                    <div className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-orange-600/50 backdrop-blur-sm hover:border-orange-600 transition-colors duration-300"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
                       <div className="text-3xl md:text-4xl font-black text-white mb-1">{stat.value}</div>
-                      <div className="text-xs text-[#FF5A1F] font-black tracking-[0.2em]">{stat.label}</div>
+                      <div className="text-xs text-orange-500 font-bold tracking-widest">{stat.label}</div>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#FF5A1F]/0 via-[#FF5A1F]/20 to-[#FF5A1F]/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   </div>
                 ))}
               </div>
@@ -863,38 +709,37 @@ const App = () => {
 
           {/* Robot Showcase */}
           <div className="py-32 bg-gradient-to-b from-[#132038] to-black relative overflow-hidden">
-            <ClawMarkImage opacity={0.08} className="top-1/4 left-0 w-[500px] h-[500px]" />
-            <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[600px] h-[600px]" />
+            <ClawMarkImage opacity={0.04} className="top-1/4 left-0 w-[500px] h-[500px]" />
             
             <div className="max-w-7xl mx-auto px-4 relative z-10">
               <div className="text-center mb-20">
                 <div 
                   id="robot-section"
                   data-animate
-                  className={`inline-block mb-6 transition-all duration-1000 ${
+                  className={`inline-block mb-6 transition-all duration-700 ${
                     isVisible['robot-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                 >
-                  <div className="px-6 py-2 bg-[#FF5A1F]/20 border-2 border-[#FF5A1F]"
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
-                    <span className="text-[#FF5A1F] font-black text-sm tracking-[0.2em]">OUR MACHINE</span>
+                    <span className="text-orange-500 font-black text-sm tracking-widest">OUR MACHINE</span>
                   </div>
                 </div>
                 
                 <h2 
                   id="robot-title"
                   data-animate
-                  className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-1000 ${
+                  className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-700 ${
                     isVisible['robot-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
-                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms', letterSpacing: '0.05em'}}
+                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
                 >
                   MEET MATCHSTICK
                 </h2>
                 <p 
                   id="robot-subtitle"
                   data-animate
-                  className={`text-xl text-[#A2A9B1] max-w-2xl mx-auto transition-all duration-1000 ${
+                  className={`text-xl text-gray-400 max-w-2xl mx-auto transition-all duration-700 ${
                     isVisible['robot-subtitle'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                   style={{transitionDelay: '200ms'}}
@@ -906,22 +751,22 @@ const App = () => {
               <div
                 id="robot-card"
                 data-animate
-                className={`relative transition-all duration-1000 ${
-                  isVisible['robot-card'] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95'
+                className={`relative transition-all duration-700 ${
+                  isVisible['robot-card'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                 }`}
                 style={{transitionDelay: '300ms'}}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#FF5A1F]/10 to-[#132038]/10 transform translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-6 group-hover:translate-y-6"
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-4 translate-y-4"
                      style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
                 
-                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-[#FF5A1F] overflow-hidden group"
+                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-orange-600 overflow-hidden group"
                      style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
                   <ClawMarkPattern className="top-0 right-0 w-48 h-48" opacity={0.08} />
                   
                   <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
                     <div className="space-y-6">
                       <div 
-                        className="aspect-square bg-gradient-to-br from-[#FF5A1F] to-[#132038] flex items-center justify-center text-white font-black overflow-hidden relative group/img hover:shadow-2xl hover:shadow-[#FF5A1F]/30 transition-all duration-700"
+                        className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/30 transition-shadow duration-500"
                         style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}
                       >
                         <RobotImage 
@@ -929,15 +774,13 @@ const App = () => {
                           alt="Matchstick Robot" 
                           fallbackText="MS"
                         />
-                        <div className="absolute inset-0 border-4 border-[#FF5A1F] opacity-0 group-hover/img:opacity-50 transition-opacity duration-500"
-                             style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
                         {[1, 2, 3, 4].map((i) => (
                           <div
                             key={i}
-                            className="aspect-square bg-gradient-to-br from-[#132038] to-[#FF5A1F] flex items-center justify-center text-white text-4xl font-bold overflow-hidden hover:scale-110 transition-transform duration-500 hover:shadow-lg hover:shadow-[#FF5A1F]/20"
+                            className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden hover:scale-105 transition-transform duration-300"
                             style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
                           >
                             <RobotImage 
@@ -952,14 +795,14 @@ const App = () => {
 
                     <div className="space-y-8">
                       <div>
-                        <h3 className="text-5xl font-black text-white mb-2" style={{fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em'}}>
+                        <h3 className="text-5xl font-black text-white mb-2" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
                           MATCHSTICK
                         </h3>
                         <div className="flex items-center gap-3 mb-6">
-                          <div className="h-1 w-16 bg-gradient-to-r from-[#FF5A1F] to-transparent" />
-                          <p className="text-[#FF5A1F] font-black tracking-[0.15em] text-sm">SEASON 2025-26</p>
+                          <div className="h-1 w-16 bg-gradient-to-r from-orange-600 to-transparent" />
+                          <p className="text-orange-500 font-bold tracking-wider text-sm">SEASON 2025-26</p>
                         </div>
-                        <p className="text-[#A2A9B1] text-lg leading-relaxed">
+                        <p className="text-gray-300 text-lg leading-relaxed">
                           Our inaugural machine. Engineered in record time with zero compromises on performance. Every component optimized for competitive excellence.
                         </p>
                       </div>
@@ -973,10 +816,10 @@ const App = () => {
                         ].map((spec, idx) => (
                           <div 
                             key={idx}
-                            className="bg-gradient-to-br from-[#FF5A1F]/20 to-[#132038]/20 p-4 border-2 border-[#FF5A1F]/50 group/spec hover:border-[#FF5A1F] hover:scale-105 transition-all duration-500"
+                            className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-4 border-2 border-orange-600/50 hover:border-orange-600 hover:scale-105 transition-all duration-300"
                             style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                           >
-                            <p className="text-[#FF5A1F]/70 font-black text-xs mb-1 tracking-[0.15em] group-hover/spec:text-[#FF5A1F] transition-colors">{spec.label}</p>
+                            <p className="text-orange-500/70 font-bold text-xs mb-1 tracking-wider">{spec.label}</p>
                             <p className="text-white text-xl font-black">{spec.value}</p>
                           </div>
                         ))}
@@ -994,30 +837,30 @@ const App = () => {
 
           {/* Events Section */}
           <div className="py-32 bg-black relative overflow-hidden">
-            <ClawMarkImage opacity={0.10} className="bottom-0 right-0 w-[700px] h-[700px]" />
+            <ClawMarkImage opacity={0.05} className="bottom-0 right-0 w-[700px] h-[700px]" />
             
             <div className="max-w-7xl mx-auto px-4 relative z-10">
               <div className="text-center mb-20">
                 <div 
                   id="events-tag"
                   data-animate
-                  className={`inline-block mb-6 transition-all duration-1000 ${
+                  className={`inline-block mb-6 transition-all duration-700 ${
                     isVisible['events-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                 >
-                  <div className="px-6 py-2 bg-[#FF5A1F]/20 border-2 border-[#FF5A1F]"
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
-                    <span className="text-[#FF5A1F] font-black text-sm tracking-[0.2em]">UPCOMING</span>
+                    <span className="text-orange-500 font-black text-sm tracking-widest">UPCOMING</span>
                   </div>
                 </div>
                 
                 <h2 
                   id="events-title"
                   data-animate
-                  className={`text-5xl md:text-7xl font-black text-white transition-all duration-1000 ${
+                  className={`text-5xl md:text-7xl font-black text-white transition-all duration-700 ${
                     isVisible['events-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
-                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms', letterSpacing: '0.05em'}}
+                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
                 >
                   EVENTS & SCHEDULE
                 </h2>
@@ -1029,32 +872,32 @@ const App = () => {
                     key={idx}
                     id={`event-${idx}`}
                     data-animate
-                    className={`relative group transition-all duration-1000 ${
-                      isVisible[`event-${idx}`] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95'
+                    className={`relative group transition-all duration-700 ${
+                      isVisible[`event-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                     }`}
-                    style={{ transitionDelay: `${idx * 150}ms` }}
+                    style={{ transitionDelay: `${idx * 100}ms` }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#FF5A1F]/20 to-[#132038]/20 transform translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform duration-500"
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
                     
-                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#FF5A1F]/50 group-hover:border-[#FF5A1F] transition-colors duration-500 overflow-hidden"
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600/50 hover:border-orange-600 transition-colors duration-300 overflow-hidden"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#FF5A1F]/10 to-transparent transform translate-x-8 -translate-y-8 rotate-45 group-hover:scale-150 transition-transform duration-700" />
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-600/10 to-transparent transform translate-x-8 -translate-y-8 rotate-45" />
                       
-                      <Calendar className="text-[#FF5A1F] mb-6 group-hover:scale-110 transition-transform duration-500" size={36} />
-                      <h3 className="text-2xl font-black text-white mb-6" style={{letterSpacing: '0.02em'}}>{event.name}</h3>
-                      <div className="space-y-3 text-[#A2A9B1]">
-                        <div className="flex items-center gap-3 group-hover:translate-x-2 transition-transform duration-300">
-                          <div className="w-1 h-6 bg-[#FF5A1F]" />
-                          <span className="text-sm font-semibold">{event.date}</span>
+                      <Calendar className="text-orange-500 mb-6" size={36} />
+                      <h3 className="text-2xl font-black text-white mb-6">{event.name}</h3>
+                      <div className="space-y-3 text-gray-300">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 bg-orange-600" />
+                          <span className="text-sm">{event.date}</span>
                         </div>
-                        <div className="flex items-center gap-3 group-hover:translate-x-2 transition-transform duration-300" style={{transitionDelay: '50ms'}}>
-                          <div className="w-1 h-6 bg-[#FF5A1F]" />
-                          <span className="text-sm font-semibold">{event.time}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 bg-orange-600" />
+                          <span className="text-sm">{event.time}</span>
                         </div>
-                        <div className="flex items-center gap-3 group-hover:translate-x-2 transition-transform duration-300" style={{transitionDelay: '100ms'}}>
-                          <div className="w-1 h-6 bg-[#FF5A1F]" />
-                          <span className="text-sm font-semibold">{event.location}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 bg-orange-600" />
+                          <span className="text-sm">{event.location}</span>
                         </div>
                       </div>
                     </div>
@@ -1067,38 +910,37 @@ const App = () => {
           {/* Team Preview */}
           <div className="py-32 bg-gradient-to-b from-black to-[#132038] relative overflow-hidden">
             <GridScan sensitivity={0.3} scanOpacity={0.2} />
-            <ClawMarkImage opacity={0.08} className="top-1/3 left-1/4 w-[550px] h-[550px]" />
-            <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[650px] h-[650px]" />
+            <ClawMarkImage opacity={0.04} className="top-1/3 left-1/4 w-[550px] h-[550px]" />
             
             <div className="max-w-7xl mx-auto px-4 relative z-10">
               <div className="text-center mb-20">
                 <div 
                   id="team-tag"
                   data-animate
-                  className={`inline-block mb-6 transition-all duration-1000 ${
+                  className={`inline-block mb-6 transition-all duration-700 ${
                     isVisible['team-tag'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                 >
-                  <div className="px-6 py-2 bg-[#FF5A1F]/20 border-2 border-[#FF5A1F]"
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
-                    <span className="text-[#FF5A1F] font-black text-sm tracking-[0.2em]">THE PACK</span>
+                    <span className="text-orange-500 font-black text-sm tracking-widest">THE PACK</span>
                   </div>
                 </div>
                 
                 <h2 
                   id="team-title"
                   data-animate
-                  className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-1000 ${
+                  className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-700 ${
                     isVisible['team-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
-                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms', letterSpacing: '0.05em'}}
+                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
                 >
                   MEET THE TEAM
                 </h2>
                 <p 
                   id="team-subtitle"
                   data-animate
-                  className={`text-xl text-[#A2A9B1] max-w-2xl mx-auto transition-all duration-1000 ${
+                  className={`text-xl text-gray-400 max-w-2xl mx-auto transition-all duration-700 ${
                     isVisible['team-subtitle'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                   style={{transitionDelay: '200ms'}}
@@ -1113,22 +955,19 @@ const App = () => {
                     key={idx}
                     id={`member-preview-${idx}`}
                     data-animate
-                    className={`group text-center transition-all duration-1000 ${
-                      isVisible[`member-preview-${idx}`] ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95'
+                    className={`group text-center transition-all duration-700 hover:scale-105 ${
+                      isVisible[`member-preview-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                     }`}
-                    style={{ transitionDelay: `${idx * 100}ms` }}
+                    style={{ transitionDelay: `${idx * 75}ms` }}
                   >
                     <TeamMemberCard member={member} size="small" showRookie={false} />
-                    <h3 className="text-white font-bold text-base mt-4 mb-1 group-hover:text-[#FF5A1F] transition-colors duration-300">{member.name}</h3>
-                    <p className="text-[#FF5A1F] text-xs font-black tracking-[0.1em]">{member.role.split(',')[0]}</p>
+                    <h3 className="text-white font-bold text-base mt-4 mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                    <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role.split(',')[0]}</p>
                   </div>
                 ))}
               </div>
               
-              <div 
-                className="text-center animate-fade-in-up"
-                style={{animationDelay: '600ms'}}
-              >
+              <div className="text-center animate-fade-in-up" style={{animationDelay: '0.5s'}}>
                 <AngleButton onClick={() => setCurrentPage('about')} variant="secondary">
                   FULL ROSTER <ChevronRight size={20} />
                 </AngleButton>
@@ -1142,35 +981,34 @@ const App = () => {
     if (currentPage === 'about') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
-          <ClawMarkImage opacity={0.10} className="bottom-0 right-0 w-[800px] h-[800px]" />
-          <ClawMarkImage opacity={0.06} className="top-1/4 left-0 w-[500px] h-[500px]" />
+          <ClawMarkImage opacity={0.05} className="bottom-0 right-0 w-[800px] h-[800px]" />
           
           <div className="max-w-7xl mx-auto px-4 relative z-10">
             <div className="text-center mb-20">
               <div 
                 id="about-tag"
                 data-animate
-                className={`inline-block mb-6 transition-all duration-1000 ${
+                className={`inline-block mb-6 transition-all duration-700 ${
                   isVisible['about-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
                 }`}
               >
-                <div className="px-6 py-2 bg-[#FF5A1F]/20 border-2 border-[#FF5A1F]"
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
                      style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
-                  <span className="text-[#FF5A1F] font-black text-sm tracking-[0.2em]">TEAM 33791</span>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">TEAM 33791</span>
                 </div>
               </div>
               
               <h1 
                 id="about-title"
                 data-animate
-                className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-1000 ${
+                className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${
                   isVisible['about-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}
-                style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms', letterSpacing: '0.05em'}}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
               >
                 THE PACK
               </h1>
-              <p className="text-xl text-[#A2A9B1] max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay: '200ms'}}>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay: '200ms'}}>
                 A first-year team built on precision engineering, relentless innovation, and the drive to prove that rookies can compete at the highest level.
               </p>
             </div>
@@ -1179,36 +1017,36 @@ const App = () => {
             <div
               id="students-section"
               data-animate
-              className={`mb-24 transition-all duration-1000 ${
+              className={`mb-24 transition-all duration-700 ${
                 isVisible['students-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
               }`}
               style={{transitionDelay: '300ms'}}
             >
               <div className="mb-12">
                 <div className="flex items-center gap-4 mb-2">
-                  <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em'}}>
+                  <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
                     STUDENTS
                   </h2>
-                  <div className="flex-1 h-1 bg-gradient-to-r from-[#FF5A1F] to-transparent" />
+                  <div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" />
                 </div>
-                <p className="text-[#FF5A1F] font-black tracking-[0.15em] text-sm">THE ENGINEERS</p>
+                <p className="text-orange-500 font-bold tracking-wider text-sm">THE ENGINEERS</p>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {teamMembers.students.map((member, i) => (
                   <div
                     key={i}
-                    className="group text-center hover:-translate-y-3 transition-all duration-500"
+                    className="group text-center hover:scale-105 transition-all duration-300"
                     style={{
-                      animation: `fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-                      animationDelay: `${i * 50}ms`,
+                      animation: `fadeInUp 0.6s ease-out forwards`,
+                      animationDelay: `${i * 40}ms`,
                       opacity: 0
                     }}
                   >
                     <TeamMemberCard member={member} size="large" showRookie={true} />
                     <div className="mt-4">
-                      <h3 className="text-white font-bold text-base mb-1 group-hover:text-[#FF5A1F] transition-colors duration-300">{member.name}</h3>
-                      <p className="text-[#FF5A1F] text-xs font-black tracking-[0.1em] leading-relaxed">{member.role}</p>
+                      <h3 className="text-white font-bold text-base mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                      <p className="text-orange-500 text-xs font-bold tracking-wider leading-relaxed">{member.role}</p>
                     </div>
                   </div>
                 ))}
@@ -1220,32 +1058,32 @@ const App = () => {
               <div
                 id="mentors-section"
                 data-animate
-                className={`mb-24 transition-all duration-1000 ${
+                className={`mb-24 transition-all duration-700 ${
                   isVisible['mentors-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                 }`}
                 style={{transitionDelay: '400ms'}}
               >
                 <div className="mb-12">
                   <div className="flex items-center gap-4 mb-2">
-                    <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em'}}>
+                    <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
                       MENTORS
                     </h2>
-                    <div className="flex-1 h-1 bg-gradient-to-r from-[#FF5A1F] to-transparent" />
+                    <div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" />
                   </div>
-                  <p className="text-[#FF5A1F] font-black tracking-[0.15em] text-sm">THE GUIDES</p>
+                  <p className="text-orange-500 font-bold tracking-wider text-sm">THE GUIDES</p>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   {teamMembers.mentors.map((member, i) => (
                     <div
                       key={i}
-                      className="group text-center hover:-translate-y-3 transition-all duration-500 animate-fade-in-up"
-                      style={{animationDelay: `${i * 50}ms`}}
+                      className="group text-center hover:scale-105 transition-all duration-300 animate-fade-in-up"
+                      style={{animationDelay: `${i * 40}ms`}}
                     >
                       <TeamMemberCard member={member} size="large" showRookie={false} />
                       <div className="mt-4">
-                        <h3 className="text-white font-bold text-base mb-1 group-hover:text-[#FF5A1F] transition-colors duration-300">{member.name}</h3>
-                        <p className="text-[#FF5A1F] text-xs font-black tracking-[0.1em]">{member.role}</p>
+                        <h3 className="text-white font-bold text-base mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                        <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role}</p>
                       </div>
                     </div>
                   ))}
@@ -1258,32 +1096,32 @@ const App = () => {
               <div
                 id="coaches-section"
                 data-animate
-                className={`transition-all duration-1000 ${
+                className={`transition-all duration-700 ${
                   isVisible['coaches-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                 }`}
                 style={{transitionDelay: '500ms'}}
               >
                 <div className="mb-12">
                   <div className="flex items-center gap-4 mb-2">
-                    <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em'}}>
+                    <h2 className="text-4xl font-black text-white" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
                       COACHES
                     </h2>
-                    <div className="flex-1 h-1 bg-gradient-to-r from-[#FF5A1F] to-transparent" />
+                    <div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" />
                   </div>
-                  <p className="text-[#FF5A1F] font-black tracking-[0.15em] text-sm">THE LEADERS</p>
+                  <p className="text-orange-500 font-bold tracking-wider text-sm">THE LEADERS</p>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   {teamMembers.coaches.map((member, i) => (
                     <div
                       key={i}
-                      className="group text-center hover:-translate-y-3 transition-all duration-500 animate-fade-in-up"
-                      style={{animationDelay: `${i * 50}ms`}}
+                      className="group text-center hover:scale-105 transition-all duration-300 animate-fade-in-up"
+                      style={{animationDelay: `${i * 40}ms`}}
                     >
                       <TeamMemberCard member={member} size="large" showRookie={false} />
                       <div className="mt-4">
-                        <h3 className="text-white font-bold text-base mb-1 group-hover:text-[#FF5A1F] transition-colors duration-300">{member.name}</h3>
-                        <p className="text-[#FF5A1F] text-xs font-black tracking-[0.1em]">{member.role}</p>
+                        <h3 className="text-white font-bold text-base mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                        <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role}</p>
                       </div>
                     </div>
                   ))}
@@ -1295,33 +1133,444 @@ const App = () => {
       );
     }
 
-    // Continue with robots, sponsors, and contact pages following the same pattern...
-    // (The rest of the pages follow the same branding guidelines with Midnight Navy #132038, Voltage Orange #FF5A1F, Steel Grey #A2A9B1, 45-degree angles, claw marks, etc.)
+    if (currentPage === 'robots') {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
+          <ClawMarkImage opacity={0.06} className="bottom-0 right-0 w-[900px] h-[900px]" />
+          
+          <div className="max-w-7xl mx-auto px-4 relative z-10">
+            <div className="text-center mb-20">
+              <div 
+                id="robots-tag"
+                data-animate
+                className={`inline-block mb-6 transition-all duration-700 ${
+                  isVisible['robots-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                }`}
+              >
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">TECHNICAL SPECS</span>
+                </div>
+              </div>
+              
+              <h1 
+                id="robots-title"
+                data-animate
+                className={`text-6xl md:text-8xl font-black text-white transition-all duration-700 ${
+                  isVisible['robots-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
+              >
+                MATCHSTICK
+              </h1>
+            </div>
 
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white text-2xl">Page content for {currentPage}</div>;
+            <div
+              id="matchstick-detail"
+              data-animate
+              className={`relative transition-all duration-700 ${
+                isVisible['matchstick-detail'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+              }`}
+              style={{transitionDelay: '200ms'}}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-6 translate-y-6"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}} />
+              
+              <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-16 border-4 border-orange-600 overflow-hidden group"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}>
+                <ClawMarkPattern className="top-0 right-0 w-64 h-64" opacity={0.05} />
+                
+                <div className="grid md:grid-cols-2 gap-16 relative z-10">
+                  <div className="space-y-8">
+                    <div 
+                      className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/40 transition-shadow duration-500"
+                      style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}
+                    >
+                      <RobotImage 
+                        src="/data/robots/matchstick-main.jpg" 
+                        alt="Matchstick Robot" 
+                        fallbackText="MS"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-5xl font-bold overflow-hidden hover:scale-105 transition-transform duration-300"
+                          style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}
+                        >
+                          <RobotImage 
+                            src={`/data/robots/matchstick-${i}.jpg`} 
+                            alt={`Matchstick detail ${i}`} 
+                            fallbackText={i.toString()}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-10">
+                    <div>
+                      <h2 className="text-6xl font-black text-white mb-3" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                        MATCHSTICK
+                      </h2>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="h-1 w-24 bg-gradient-to-r from-orange-600 to-transparent" />
+                        <p className="text-orange-500 font-black tracking-widest text-sm">2025-26 DECODE</p>
+                      </div>
+                      <p className="text-gray-300 text-lg leading-relaxed mb-8">
+                        Our first machine. Every component precision-engineered for maximum performance. Built to dominate the competition field from day one.
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { label: 'WEIGHT', value: '28 LBS' },
+                        { label: 'HEIGHT', value: '18 IN' },
+                        { label: 'DRIVETRAIN', value: 'MECANUM' },
+                        { label: 'LANGUAGE', value: 'JAVA 17' }
+                      ].map((spec, idx) => (
+                        <div 
+                          key={idx}
+                          className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-orange-600/50 hover:border-orange-600 hover:scale-105 transition-all duration-300"
+                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
+                        >
+                          <p className="text-orange-500/70 font-bold text-xs mb-2 tracking-wider">{spec.label}</p>
+                          <p className="text-white text-2xl font-black">{spec.value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/30 p-8 border-2 border-blue-500/50 hover:border-blue-500 transition-colors duration-300"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
+                      <div className="flex items-center gap-3 mb-6">
+                        <Award className="text-orange-500" size={28} />
+                        <h3 className="text-white font-black text-2xl">ACHIEVEMENTS</h3>
+                      </div>
+                      <ul className="space-y-3">
+                        {[
+                          '5-0-1 COMPETITION RECORD',
+                          '#2 OPR & RANK - LEAGUE MEET 3',
+                          'TEAM 33791 INAUGURAL ROBOT'
+                        ].map((achievement, idx) => (
+                          <li key={idx} className="flex items-center gap-3 text-gray-300">
+                            <div className="w-2 h-2 bg-orange-600 transform rotate-45" />
+                            <span className="font-semibold">{achievement}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-orange-900/30 to-orange-950/30 p-8 border-2 border-orange-500/50 hover:border-orange-500 transition-colors duration-300"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
+                      <h3 className="text-white font-black text-2xl mb-6">KEY FEATURES</h3>
+                      <ul className="space-y-3">
+                        {[
+                          '12 & 6 BALL AUTONOMOUS MODES',
+                          '1 SECOND CYCLE TIME',
+                          'AUTO-ADJUSTING AIMING SYSTEM',
+                          'REINFORCED ALUMINUM CHASSIS'
+                        ].map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-3 text-gray-300">
+                            <div className="w-2 h-2 bg-orange-600 transform rotate-45" />
+                            <span className="font-semibold">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === 'sponsors') {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
+          <ClawMarkImage opacity={0.05} className="bottom-0 right-0 w-[750px] h-[750px]" />
+          
+          <div className="max-w-7xl mx-auto px-4 relative z-10">
+            <div className="text-center mb-20">
+              <div 
+                id="sponsors-tag"
+                data-animate
+                className={`inline-block mb-6 transition-all duration-700 ${
+                  isVisible['sponsors-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                }`}
+              >
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">SUPPORTERS</span>
+                </div>
+              </div>
+              
+              <h1 
+                id="sponsors-title"
+                data-animate
+                className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${
+                  isVisible['sponsors-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
+              >
+                OUR SPONSORS
+              </h1>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay: '200ms'}}>
+                Their support makes innovation possible. Together, we're building the future of robotics.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto mb-20">
+              {[
+                { name: 'Wakeland High School', image: '/data/sponsors/wakeland-high-school.jpg' },
+                { name: 'Wakeland High School NHS', image: '/data/sponsors/wakeland-nhs.jpg' }
+              ].map((sponsor, idx) => (
+                <div
+                  key={idx}
+                  id={`sponsor-${idx}`}
+                  data-animate
+                  className={`relative group transition-all duration-700 ${
+                    isVisible[`sponsor-${idx}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                  }`}
+                  style={{ transitionDelay: `${idx * 150}ms` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-4 translate-y-4"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}} />
+                  
+                  <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600/50 hover:border-orange-600 transition-colors duration-300"
+                       style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}}>
+                    <SponsorCard sponsor={sponsor} />
+                    <h3 className="text-white font-black text-2xl text-center group-hover:text-orange-500 transition-colors duration-300">{sponsor.name}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div
+              id="become-sponsor"
+              data-animate
+              className={`relative max-w-4xl mx-auto transition-all duration-700 ${
+                isVisible['become-sponsor'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+              }`}
+              style={{transitionDelay: '300ms'}}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 to-blue-900/30 transform translate-x-4 translate-y-4"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
+              
+              <div className="relative bg-gradient-to-br from-orange-900/40 to-blue-900/40 p-12 md:p-16 text-center border-4 border-orange-600"
+                   style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
+                <h2 className="text-5xl font-black text-white mb-6" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                  BECOME A SPONSOR
+                </h2>
+                <p className="text-gray-200 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+                  Join us in empowering the next generation of engineers and innovators. Your support directly impacts our ability to compete and excel.
+                </p>
+                <AngleButton onClick={() => setCurrentPage('contact')} variant="primary" className="text-lg px-12 py-5">
+                  PARTNER WITH US <ChevronRight size={24} />
+                </AngleButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === 'contact') {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
+          <ClawMarkImage opacity={0.06} className="bottom-0 right-0 w-[850px] h-[850px]" />
+          
+          <div className="max-w-5xl mx-auto px-4 relative z-10">
+            <div className="text-center mb-20">
+              <div 
+                id="contact-tag"
+                data-animate
+                className={`inline-block mb-6 transition-all duration-700 ${
+                  isVisible['contact-tag'] ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                }`}
+              >
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">CONNECT</span>
+                </div>
+              </div>
+              
+              <h1 
+                id="contact-title"
+                data-animate
+                className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${
+                  isVisible['contact-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
+              >
+                GET IN TOUCH
+              </h1>
+              <p className="text-xl text-gray-400 max-w-2xl mx-auto animate-fade-in-up" style={{animationDelay: '200ms'}}>
+                Questions? Sponsorship opportunities? Let's talk.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-10">
+              <div
+                id="contact-info"
+                data-animate
+                className={`space-y-6 transition-all duration-700 ${
+                  isVisible['contact-info'] ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'
+                }`}
+                style={{transitionDelay: '300ms'}}
+              >
+                {[
+                  {
+                    icon: Mail,
+                    title: 'EMAIL',
+                    content: 'wolverine.robotics.33791@gmail.com',
+                    color: 'orange'
+                  },
+                  {
+                    icon: MapPin,
+                    title: 'LOCATION',
+                    content: 'Wakeland High School\nFrisco, Texas',
+                    color: 'orange'
+                  },
+                  {
+                    icon: Users,
+                    title: 'SOCIAL MEDIA',
+                    content: null,
+                    color: 'orange'
+                  }
+                ].map((item, idx) => (
+                  <div 
+                    key={idx}
+                    className="relative group"
+                    style={{
+                      animation: `fadeInUp 0.6s ease-out forwards`,
+                      animationDelay: `${idx * 100}ms`,
+                      opacity: 0
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
+                    
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600/50 hover:border-orange-600 transition-colors duration-300"
+                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
+                      <item.icon className="text-orange-500 mb-4" size={32} />
+                      <h3 className="text-white font-black text-lg mb-3 tracking-wider">{item.title}</h3>
+                      {item.content ? (
+                        <p className="text-gray-300 whitespace-pre-line">{item.content}</p>
+                      ) : (
+                        <div className="flex gap-4">
+                          <a 
+                            href="https://github.com/wolverine-robotics" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                          >
+                            <Github className="text-white" size={20} />
+                          </a>
+                          <a 
+                            href="https://www.linkedin.com/company/wolverine-robotics/" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                          >
+                            <Linkedin className="text-white" size={20} />
+                          </a>
+                          <a 
+                            href="https://www.instagram.com/wolverine_robotics/" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                            style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
+                          >
+                            <Instagram className="text-white" size={20} />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                id="contact-form"
+                data-animate
+                className={`relative transition-all duration-700 ${
+                  isVisible['contact-form'] ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20'
+                }`}
+                style={{transitionDelay: '400ms'}}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-3 translate-y-3"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}} />
+                
+                <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600"
+                     style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
+                  <form className="space-y-6">
+                    <div className="animate-fade-in-up" style={{animationDelay: '500ms'}}>
+                      <label className="block text-white font-bold text-sm mb-2 tracking-wider">NAME</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-orange-600/50 focus:border-orange-600 focus:outline-none transition-colors duration-300"
+                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
+                      />
+                    </div>
+
+                    <div className="animate-fade-in-up" style={{animationDelay: '600ms'}}>
+                      <label className="block text-white font-bold text-sm mb-2 tracking-wider">EMAIL</label>
+                      <input
+                        type="email"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-orange-600/50 focus:border-orange-600 focus:outline-none transition-colors duration-300"
+                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
+                      />
+                    </div>
+
+                    <div className="animate-fade-in-up" style={{animationDelay: '700ms'}}>
+                      <label className="block text-white font-bold text-sm mb-2 tracking-wider">MESSAGE</label>
+                      <textarea
+                        rows="6"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-orange-600/50 focus:border-orange-600 focus:outline-none transition-colors duration-300 resize-none"
+                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
+                      />
+                    </div>
+
+                    <div className="animate-fade-in-up" style={{animationDelay: '800ms'}}>
+                      <AngleButton variant="primary" className="w-full text-lg py-4">
+                        SEND MESSAGE <ChevronRight size={20} />
+                      </AngleButton>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
-
-  if (showOpening) {
-    return <OpeningAnimation onComplete={handleOpeningComplete} />;
-  }
 
   return (
     <div className="min-h-[100dvh] bg-black overflow-x-hidden">
-      <nav className="fixed top-0 w-full bg-[#132038]/95 backdrop-blur-md border-b-2 border-[#FF5A1F] z-50">
+      <nav className="fixed top-0 w-full bg-[#132038]/95 backdrop-blur-md border-b-2 border-orange-600 z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
             <div 
               className="flex items-center gap-3 cursor-pointer group" 
               onClick={() => setCurrentPage('home')}
             >
-              <div className="transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+              <div className="transform group-hover:scale-110 transition-transform duration-300">
                 <LogoImage />
               </div>
               <div>
-                <h1 className="text-white font-black text-lg tracking-[0.1em] group-hover:text-[#FF5A1F] transition-colors duration-300" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                <h1 className="text-white font-black text-lg tracking-wider group-hover:text-orange-500 transition-colors duration-300" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
                   WOLVERINE
                 </h1>
-                <p className="text-[#FF5A1F] text-xs font-black tracking-[0.2em]">TEAM 33791</p>
+                <p className="text-orange-500 text-xs font-black tracking-widest">TEAM 33791</p>
               </div>
             </div>
 
@@ -1330,14 +1579,14 @@ const App = () => {
                 <button
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
-                  className={`text-sm font-black tracking-[0.15em] transition-all duration-500 relative group ${
+                  className={`text-sm font-black tracking-wider transition-colors duration-300 relative group ${
                     currentPage === item.id
-                      ? 'text-[#FF5A1F]'
-                      : 'text-white hover:text-[#FF5A1F]'
+                      ? 'text-orange-500'
+                      : 'text-white hover:text-orange-500'
                   }`}
                 >
                   {item.name}
-                  <div className={`absolute bottom-0 left-0 h-0.5 bg-[#FF5A1F] transition-all duration-500 ${
+                  <div className={`absolute bottom-0 left-0 h-0.5 bg-orange-600 transition-all duration-300 ${
                     currentPage === item.id ? 'w-full' : 'w-0 group-hover:w-full'
                   }`} />
                 </button>
@@ -1346,7 +1595,7 @@ const App = () => {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white hover:text-[#FF5A1F] transition-all duration-300 hover:scale-110"
+              className="md:hidden text-white hover:text-orange-500 transition-colors duration-300"
             >
               {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -1354,7 +1603,7 @@ const App = () => {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#0f1629] border-t-2 border-[#FF5A1F] animate-slide-in-right">
+          <div className="md:hidden bg-[#0f1629] border-t-2 border-orange-600">
             <div className="flex flex-col">
               {navigation.map((item, idx) => (
                 <button
@@ -1363,15 +1612,12 @@ const App = () => {
                     setCurrentPage(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`px-6 py-5 text-left font-black tracking-[0.15em] transition-all duration-500 ${
+                  className={`px-6 py-4 text-left font-black tracking-wider transition-all duration-300 border-b border-orange-600/20 ${
                     currentPage === item.id
-                      ? 'text-[#FF5A1F] bg-[#FF5A1F]/10 border-l-4 border-[#FF5A1F]'
-                      : 'text-white hover:bg-[#FF5A1F]/5 hover:text-[#FF5A1F] hover:border-l-4 hover:border-[#FF5A1F]/50'
+                      ? 'text-orange-500 bg-orange-600/10'
+                      : 'text-white hover:bg-orange-600/5'
                   }`}
-                  style={{
-                    animation: `slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-                    animationDelay: `${idx * 50}ms`
-                  }}
+                  style={{animationDelay: `${idx * 50}ms`}}
                 >
                   {item.name}
                 </button>
@@ -1383,40 +1629,36 @@ const App = () => {
 
       <div className="pt-20">{renderPage()}</div>
 
-      <footer className="bg-[#0f1629] border-t-2 border-[#FF5A1F] py-16 relative overflow-hidden">
-        <ClawMarkImage opacity={0.08} className="bottom-0 left-0 w-[500px] h-[500px]" />
-        
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="grid md:grid-cols-3 gap-12 mb-12">
-            <div className="animate-fade-in-up">
-              <h3 className="text-white font-black text-xl mb-4 tracking-[0.1em]">WOLVERINE ROBOTICS</h3>
-              <p className="text-[#A2A9B1] font-bold">FTC TEAM 33791</p>
-              <p className="text-[#A2A9B1]">FRISCO, TEXAS</p>
+      <footer className="bg-black border-t-2 border-orange-600 py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="text-white font-black text-xl mb-4">WOLVERINE ROBOTICS</h3>
+              <p className="text-gray-400">FTC Team 33791</p>
+              <p className="text-gray-400">Frisco, Texas</p>
             </div>
-            
-            <div className="animate-fade-in-up" style={{animationDelay: '100ms'}}>
-              <h3 className="text-white font-black text-xl mb-4 tracking-[0.1em]">QUICK LINKS</h3>
+            <div>
+              <h3 className="text-white font-black text-xl mb-4">QUICK LINKS</h3>
               <div className="flex flex-col gap-2">
                 {navigation.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setCurrentPage(item.id)}
-                    className="text-[#A2A9B1] hover:text-[#FF5A1F] text-left transition-colors font-bold tracking-wide"
+                    className="text-gray-400 hover:text-orange-500 text-left transition-colors duration-300"
                   >
                     {item.name}
                   </button>
                 ))}
               </div>
             </div>
-            
-            <div className="animate-fade-in-up" style={{animationDelay: '200ms'}}>
-              <h3 className="text-white font-black text-xl mb-4 tracking-[0.1em]">CONNECT</h3>
+            <div>
+              <h3 className="text-white font-black text-xl mb-4">CONNECT</h3>
               <div className="flex gap-4">
                 <a 
                   href="https://github.com/wolverine-robotics" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="w-12 h-12 bg-[#FF5A1F] hover:bg-[#FF5A1F]/80 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
                   style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                 >
                   <Github className="text-white" size={20} />
@@ -1425,7 +1667,7 @@ const App = () => {
                   href="https://www.linkedin.com/company/wolverine-robotics/" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="w-12 h-12 bg-[#FF5A1F] hover:bg-[#FF5A1F]/80 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
                   style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                 >
                   <Linkedin className="text-white" size={20} />
@@ -1434,7 +1676,7 @@ const App = () => {
                   href="https://www.instagram.com/wolverine_robotics/" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="w-12 h-12 bg-[#FF5A1F] hover:bg-[#FF5A1F]/80 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
                   style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                 >
                   <Instagram className="text-white" size={20} />
@@ -1442,12 +1684,11 @@ const App = () => {
               </div>
             </div>
           </div>
-          
-          <div className="border-t-2 border-[#FF5A1F]/30 pt-8 space-y-2">
-            <p className="text-[#A2A9B1] text-sm font-bold text-center tracking-wide">
-              © 2025 WOLVERINE ROBOTICS. ALL RIGHTS RESERVED.
+          <div className="border-t-2 border-gray-800 pt-8 text-center">
+            <p className="text-gray-500 text-sm">
+              © 2025 Wolverine Robotics. All rights reserved.
             </p>
-            <p className="text-[#A2A9B1]/70 text-xs text-center">
+            <p className="text-gray-600 text-xs mt-2">
               Website developed by Sahejdeep Singh: sahej.robotics@outlook.com
             </p>
           </div>
