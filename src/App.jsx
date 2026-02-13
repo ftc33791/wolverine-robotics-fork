@@ -536,7 +536,7 @@ const InitialLoadAnimation = ({ onComplete }) => {
       setClawImageError(true);
       setClawImageLoaded(true);
     };
-    img.src = '/claw.png';
+    img.src = '/data/logo.svg';
   }, []);
   
   useEffect(() => {
@@ -619,27 +619,9 @@ const App = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
+  const [pageTransition, setPageTransition] = useState(false);
+  const [transitionOut, setTransitionOut] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Set favicon on mount
-  useEffect(() => {
-    const setFavicon = () => {
-      // Remove any existing favicon
-      const existingFavicon = document.querySelector("link[rel*='icon']");
-      if (existingFavicon) {
-        existingFavicon.parentNode.removeChild(existingFavicon);
-      }
-      
-      // Create new favicon
-      const favicon = document.createElement('link');
-      favicon.rel = 'icon';
-      favicon.type = 'image/svg+xml';
-      favicon.href = '/data/logo.svg';
-      document.head.appendChild(favicon);
-    };
-    
-    setFavicon();
-  }, []);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -743,6 +725,22 @@ const App = () => {
           transform: scale(1);
         }
       }
+      @keyframes diagonalWipeIn {
+        from {
+          clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+      @keyframes diagonalWipeOut {
+        from {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+        }
+      }
       .animate-fade-in-up {
         animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
@@ -781,6 +779,12 @@ const App = () => {
         animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
+      .page-transition-wipe-in {
+        animation: diagonalWipeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .page-transition-wipe-out {
+        animation: diagonalWipeOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
     `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
@@ -792,38 +796,57 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // FIXED: Immediate scroll to top on page change, reset visibility
   useEffect(() => {
     if (currentPage === 'home' && isInitialLoad) {
       return;
     }
     
-    // Immediate scroll to top
     window.scrollTo(0, 0);
-    
-    // Reset visibility
     setIsVisible({});
+    
+    // Start exit animation
+    setTransitionOut(true);
+    
+    // After exit animation, switch page
+    const exitTimer = setTimeout(() => {
+      setTransitionOut(false);
+      setPageTransition(true);
+    }, 400);
+    
+    // Show new page content
+    const transitionTimer = setTimeout(() => {
+      setPageTransition(false);
+      
+      const elements = document.querySelectorAll('[data-animate]');
+      const visibilityMap = {};
+      elements.forEach((el) => {
+        if (el.id) {
+          visibilityMap[el.id] = true;
+        }
+      });
+      setIsVisible(visibilityMap);
+    }, 500);
+    
+    return () => {
+      clearTimeout(exitTimer);
+      clearTimeout(transitionTimer);
+    };
   }, [currentPage, isInitialLoad]);
 
-  // FIXED: Scroll-based intersection observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.target.id) {
+          if (entry.isIntersecting) {
             setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }));
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -80px 0px' }
     );
 
     const timeoutId = setTimeout(() => {
-      document.querySelectorAll('[data-animate]').forEach((el) => {
-        if (el.id) {
-          observer.observe(el);
-        }
-      });
+      document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
     }, 100);
 
     return () => {
@@ -870,12 +893,6 @@ const App = () => {
     { name: 'Team Practice', date: 'March 8, 2025', time: '4:00 PM', location: 'Wakeland High School' },
     { name: 'Community Outreach', date: 'March 22, 2025', time: '10:00 AM', location: 'Local STEM Fair' },
   ];
-
-  // FIXED: Function to handle navigation to home and scroll to top
-  const handleLogoClick = () => {
-    setCurrentPage('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   const renderPage = () => {
     if (currentPage === 'home') {
@@ -1931,13 +1948,32 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden">
+      {/* Diagonal Wipe Transition Overlay */}
+      {(transitionOut || pageTransition) && (
+        <div 
+          className={`fixed inset-0 z-[100] bg-gradient-to-br from-[#132038] via-[#1a2847] to-[#0a1628] ${
+            transitionOut ? 'page-transition-wipe-out' : 'page-transition-wipe-in'
+          }`}
+        >
+          {/* Subtle orange glow during transition */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/5 via-transparent to-blue-900/5" />
+          
+          {/* Animated diagonal lines */}
+          <div className="absolute inset-0 overflow-hidden opacity-30">
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/3 transform -skew-y-12" />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/2 transform -skew-y-12" />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-2/3 transform -skew-y-12" />
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
             <div 
               className="flex items-center gap-3 cursor-pointer group" 
-              onClick={handleLogoClick}
+              onClick={() => setCurrentPage('home')}
             >
               <div className="transform group-hover:scale-110 transition-transform duration-300">
                 <LogoImage />
