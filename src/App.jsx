@@ -667,6 +667,7 @@ const App = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [pageTransitioning, setPageTransitioning] = useState(false);
   const [displayPage, setDisplayPage] = useState('home'); // The page actually being rendered
+  const [previousPage, setPreviousPage] = useState('home'); // For transition effect
 
   // Set favicon on mount
   useEffect(() => {
@@ -870,23 +871,23 @@ const App = () => {
     if (currentPage === displayPage) return; // No change needed
     if (currentPage === 'home' && isInitialLoad) return;
     
-    // Start slide-out transition
+    // Save the current page as previous
+    setPreviousPage(displayPage);
+    
+    // Start slide transition
     setPageTransitioning(true);
     
-    // After slide-out animation (200ms), switch page and scroll to top
-    const switchTimer = setTimeout(() => {
-      setDisplayPage(currentPage);
-      window.scrollTo(0, 0); // Instant teleport to top
-      setIsVisible({}); // Reset visibility
-    }, 200);
+    // Immediately switch to new page and scroll to top
+    setDisplayPage(currentPage);
+    window.scrollTo(0, 0); // Instant teleport to top
+    setIsVisible({}); // Reset visibility
     
-    // After slide-in animation completes (400ms total), end transition
+    // End transition after animation completes
     const endTimer = setTimeout(() => {
       setPageTransitioning(false);
-    }, 400);
+    }, 500);
     
     return () => {
-      clearTimeout(switchTimer);
       clearTimeout(endTimer);
     };
   }, [currentPage, displayPage, isInitialLoad]);
@@ -1045,7 +1046,7 @@ const App = () => {
                 className={`flex flex-wrap gap-6 justify-center mb-16 transition-all duration-700 ${
                   isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
-                style={{animationDelay: '0.5s'}}
+                style={{animationDelay: '0.7s'}}
               >
                 <AngleButton onClick={() => setCurrentPage('robots')} variant="primary">
                   VIEW MATCHSTICK <ChevronRight size={20} />
@@ -1062,7 +1063,7 @@ const App = () => {
                 className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-24 transition-all duration-700 ${
                   isVisible['hero-stats'] ? 'animate-slide-down-fade' : 'opacity-0 translate-y-[-100%]'
                 }`}
-                style={{animationDelay: '0.6s'}}
+                style={{animationDelay: '0.5s'}}
               >
                 {[
                   { label: 'RECORD', value: '5-0-1' },
@@ -2019,9 +2020,34 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden">
-      {/* Main Content with slide animation */}
-      <div className={`min-h-[100dvh] ${pageTransitioning ? 'animate-slide-out-left' : 'animate-slide-in-right'}`}>
+    <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden relative">
+      {/* Page Transition Overlay - covers everything during transition */}
+      {pageTransitioning && (
+        <div className="fixed inset-0 z-[200] bg-gradient-to-br from-[#132038] via-[#1a2847] to-[#0a1628] flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/5 via-transparent to-blue-900/5" />
+          <div className="absolute inset-0 overflow-hidden opacity-30">
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/3 transform -skew-y-12 animate-pulse" />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-1/2 transform -skew-y-12 animate-pulse" style={{animationDelay: '0.1s'}} />
+            <div className="absolute h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent w-full top-2/3 transform -skew-y-12 animate-pulse" style={{animationDelay: '0.2s'}} />
+          </div>
+          {/* Loading logo during transition */}
+          <div className="relative z-10">
+            <div className="w-32 h-32 relative mb-4 flex items-center justify-center animate-pulse">
+              <img 
+                src="/data/logo.svg" 
+                alt="Loading" 
+                className="w-full h-full object-contain"
+                style={{ 
+                  filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 30px rgba(255, 90, 31, 0.9))',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="min-h-[100dvh]">
         <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
@@ -2160,7 +2186,6 @@ const App = () => {
           </div>
         </div>
       </footer>
-      </div>
     </div>
   );
 };
