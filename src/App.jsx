@@ -1042,7 +1042,7 @@ const App = () => {
                 className={`flex flex-wrap gap-6 justify-center mb-16 transition-all duration-700 ${
                   isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
-                style={{animationDelay: '0.5s'}}
+                style={{animationDelay: '0.45s'}}
               >
                 <AngleButton onClick={() => setCurrentPage('robots')} variant="primary">
                   VIEW MATCHSTICK <ChevronRight size={20} />
@@ -1059,7 +1059,7 @@ const App = () => {
                 className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-24 transition-all duration-700 ${
                   isVisible['hero-stats'] ? 'animate-slide-down-fade' : 'opacity-0 translate-y-[-100%]'
                 }`}
-                style={{animationDelay: '0.6s'}}
+                style={{animationDelay: '0.65s'}}
               >
                 {[
                   { label: 'RECORD', value: '5-0-1' },
@@ -2017,23 +2017,23 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden relative">
-      {/* Page Transition Overlay - covers everything during transition */}
-      {pageTransitioning && (
-        <div className="fixed inset-0 z-[200] bg-[#132038] transition-opacity duration-300" style={{opacity: pageTransitioning ? 1 : 0}}>
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-24 h-24 relative flex items-center justify-center">
-              <img 
-                src="/data/logo.svg" 
-                alt="Loading" 
-                className="w-full h-full object-contain animate-pulse"
-                style={{ 
-                  filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 30px rgba(255, 90, 31, 0.9))',
-                }}
-              />
-            </div>
-          </div>
+      {/* Page Transition Overlay - simple fade that actually works */}
+      <div 
+        className={`fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center transition-opacity duration-300 pointer-events-none ${
+          pageTransitioning ? 'opacity-100 pointer-events-auto' : 'opacity-0'
+        }`}
+      >
+        <div className="w-24 h-24 relative flex items-center justify-center">
+          <img 
+            src="/data/logo.svg" 
+            alt="Loading" 
+            className="w-full h-full object-contain animate-pulse"
+            style={{ 
+              filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 30px rgba(255, 90, 31, 0.9))',
+            }}
+          />
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
       <div className="min-h-[100dvh]">
