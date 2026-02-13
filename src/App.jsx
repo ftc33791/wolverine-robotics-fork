@@ -876,7 +876,6 @@ const App = () => {
       { name: 'Pratham Erramilli', role: 'Outreach', image: '/data/team/pratham.jpg', initials: 'PE', rookie: true },
       { name: 'Abhi Ravulaparthy', role: 'Outreach', image: '/data/team/member11.jpg', initials: 'AR', rookie: true },
       { name: 'Kavin Murugan', role: 'Outreach', image: '/data/team/kavin.jpg', initials: 'KM', rookie: true },
-      { name: 'Arshaan Husain', role: 'Outreach', image: '/data/team/member13.jpg', initials: 'AH', rookie: true },
       { name: 'Kaiden Lee', role: 'Outreach', image: '/data/team/kaiden.jpg', initials: 'KL', rookie: true },
       { name: 'Jivansh Pandya', role: 'Outreach', image: '/data/team/Jivansh.jpg', initials: 'JP', rookie: true },
     ],
