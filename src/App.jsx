@@ -52,9 +52,9 @@ const ClawMarkImage = ({ opacity = 0.15, className = "" }) => {
 const AngleButton = ({ children, onClick, variant = 'primary', className = '' }) => {
   const baseClasses = "relative px-8 py-4 font-bold transition-all duration-300 overflow-hidden group";
   const variantClasses = {
-    primary: "bg-gradient-to-br from-orange-600 to-orange-700 text-white hover:from-orange-500 hover:to-orange-600 hover:shadow-lg hover:shadow-orange-600/30",
-    secondary: "bg-gradient-to-br from-blue-900 to-blue-950 text-white border-2 border-blue-500 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/20",
-    ghost: "bg-transparent text-white border-2 border-orange-500 hover:bg-orange-500/10 hover:border-orange-400 hover:shadow-lg hover:shadow-orange-500/20"
+    primary: "bg-gradient-to-br from-orange-600 to-orange-700 text-white hover:from-orange-500 hover:to-orange-600 hover:shadow-2xl hover:shadow-orange-600/50 hover:scale-105",
+    secondary: "bg-gradient-to-br from-blue-900 to-blue-950 text-white border-2 border-blue-500 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/40 hover:scale-105",
+    ghost: "bg-transparent text-white border-2 border-orange-500 hover:bg-orange-500/10 hover:border-orange-400 hover:shadow-2xl hover:shadow-orange-500/40 hover:scale-105"
   };
 
   return (
@@ -68,10 +68,10 @@ const AngleButton = ({ children, onClick, variant = 'primary', className = '' })
       {/* Diagonal sweep effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
       
-      {/* Orange edge glow on hover */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      {/* Pulsing glow on hover */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
            style={{
-             boxShadow: 'inset 0 0 20px rgba(255, 90, 31, 0.3)',
+             boxShadow: 'inset 0 0 20px rgba(255, 90, 31, 0.4)',
            }} />
       
       <span className="relative z-10 flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-300">
@@ -105,7 +105,7 @@ const SponsorCard = ({ sponsor }) => {
   
   return (
     <div 
-      className="aspect-video bg-white flex items-center justify-center mb-6 overflow-hidden relative group transition-all duration-500"
+      className="aspect-video bg-white flex items-center justify-center mb-6 overflow-hidden relative group transition-all duration-500 hover:scale-105"
       style={{
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'
       }}
@@ -122,14 +122,14 @@ const SponsorCard = ({ sponsor }) => {
         <img 
           src={sponsor.image} 
           alt={sponsor.name} 
-          className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500" 
+          className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-500" 
         />
       )}
       
       {/* Orange edge glow on hover */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
            style={{
-             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.4)',
+             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
            }} />
     </div>
   );
@@ -164,7 +164,7 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
     <div className="relative">
       {/* CARD CONTAINER - ALL ANIMATIONS APPLY HERE */}
       <div 
-        className={`${sizeClasses} bg-gradient-to-br from-[#132038] to-[#1a2847] mx-auto flex items-center justify-center text-white font-black overflow-hidden relative border-2 border-[#A2A9B1] group transition-all duration-500`}
+        className={`${sizeClasses} bg-gradient-to-br from-[#132038] to-[#1a2847] mx-auto flex items-center justify-center text-white font-black overflow-hidden relative border-2 border-[#A2A9B1] group transition-all duration-500 hover:scale-110 hover:border-orange-600`}
         style={{
           clipPath: size === 'small' 
             ? 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'
@@ -186,9 +186,9 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#132038]/80 via-transparent to-transparent opacity-60" />
         
         {/* Orange edge glow on hover - applies to CARD */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
              style={{
-               boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.5)',
+               boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.6)',
              }} />
         
         {/* Diagonal accent line animation - applies to CARD */}
@@ -525,96 +525,88 @@ void main(){
   return <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />;
 };
 
-// Boot-up Loading Screen Component
-const BootUpLoader = ({ onComplete }) => {
-  const [progress, setProgress] = useState(0);
-  const [showClaw, setShowClaw] = useState(false);
+// New: Enhanced Initial Load Animation
+const InitialLoadAnimation = ({ onComplete }) => {
+  const [phase, setPhase] = useState('grid'); // grid -> logo -> complete
   
   useEffect(() => {
-    // Progress animation
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(onComplete, 300);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 20);
+    // Grid scan phase
+    const gridTimer = setTimeout(() => {
+      setPhase('logo');
+    }, 800);
     
-    // Show claw assembly after brief delay
-    setTimeout(() => setShowClaw(true), 200);
+    // Logo reveal phase
+    const logoTimer = setTimeout(() => {
+      setPhase('complete');
+    }, 1600);
     
-    return () => clearInterval(interval);
+    // Complete and fade out
+    const completeTimer = setTimeout(() => {
+      onComplete();
+    }, 2200);
+    
+    return () => {
+      clearTimeout(gridTimer);
+      clearTimeout(logoTimer);
+      clearTimeout(completeTimer);
+    };
   }, [onComplete]);
   
   return (
-    <div className="fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center">
-      {/* Scanning grid background */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0"
-             style={{
-               backgroundImage: 'linear-gradient(45deg, #FF5A1F 1px, transparent 1px), linear-gradient(-45deg, #FF5A1F 1px, transparent 1px)',
-               backgroundSize: '40px 40px'
-             }} />
+    <div className={`fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center transition-opacity duration-500 ${phase === 'complete' ? 'opacity-0' : 'opacity-100'}`}>
+      {/* Animated grid lines scanning */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Horizontal scanning lines */}
+        <div className={`absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent transition-all duration-700 ${phase === 'grid' ? 'top-1/2' : 'top-0'}`}
+             style={{ boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)' }} />
+        <div className={`absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent transition-all duration-700 delay-150 ${phase === 'grid' ? 'top-1/2' : 'bottom-0'}`}
+             style={{ boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)' }} />
+        
+        {/* Vertical scanning lines */}
+        <div className={`absolute top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-orange-500 to-transparent transition-all duration-700 delay-75 ${phase === 'grid' ? 'left-1/2' : 'left-0'}`}
+             style={{ boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)' }} />
+        <div className={`absolute top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-orange-500 to-transparent transition-all duration-700 delay-200 ${phase === 'grid' ? 'left-1/2' : 'right-0'}`}
+             style={{ boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)' }} />
       </div>
       
-      <div className="relative z-10 text-center">
-        {/* Claw assembly animation */}
-        <div className={`mb-12 transition-all duration-700 ${showClaw ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-          <div className="relative w-32 h-32 mx-auto">
-            {/* Three claw marks assembling */}
-            <div className="absolute w-2 bg-orange-500 transform rotate-45 transition-all duration-500"
+      {/* Logo assembly in center */}
+      <div className={`relative z-10 transition-all duration-700 ${phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+        <div className="relative">
+          {/* Claw marks assembling */}
+          <div className="w-40 h-40 relative mb-6">
+            <div className="absolute w-3 bg-orange-500 transform rotate-45 transition-all duration-500"
                  style={{ 
-                   height: showClaw ? '150%' : '0%',
+                   height: phase === 'logo' || phase === 'complete' ? '180%' : '0%',
                    left: '20%',
+                   boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)',
                    transitionDelay: '0ms'
                  }} />
-            <div className="absolute w-2 bg-orange-500 transform rotate-45 transition-all duration-500"
+            <div className="absolute w-3 bg-orange-500 transform rotate-45 transition-all duration-500"
                  style={{ 
-                   height: showClaw ? '150%' : '0%',
+                   height: phase === 'logo' || phase === 'complete' ? '180%' : '0%',
                    left: '45%',
+                   boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)',
                    transitionDelay: '100ms'
                  }} />
-            <div className="absolute w-2 bg-orange-500 transform rotate-45 transition-all duration-500"
+            <div className="absolute w-3 bg-orange-500 transform rotate-45 transition-all duration-500"
                  style={{ 
-                   height: showClaw ? '150%' : '0%',
+                   height: phase === 'logo' || phase === 'complete' ? '180%' : '0%',
                    left: '70%',
+                   boxShadow: '0 0 20px rgba(255, 90, 31, 0.8)',
                    transitionDelay: '200ms'
                  }} />
             
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-orange-500/20 blur-2xl animate-pulse" />
-          </div>
-        </div>
-        
-        {/* System text */}
-        <div className="mb-8 font-mono text-orange-500 text-sm tracking-wider">
-          <div className="mb-2">WOLVERINE ROBOTICS</div>
-          <div className="text-[#A2A9B1]">SYSTEM INITIALIZING...</div>
-        </div>
-        
-        {/* Progress bar */}
-        <div className="relative w-80 mx-auto">
-          <div 
-            className="h-2 bg-[#1a2847] border-2 border-[#A2A9B1] overflow-hidden"
-            style={{
-              clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'
-            }}
-          >
-            <div 
-              className="h-full bg-gradient-to-r from-orange-600 to-orange-500 transition-all duration-100 relative"
-              style={{ width: `${progress}%` }}
-            >
-              {/* Scanning line effect */}
-              <div className="absolute right-0 top-0 h-full w-1 bg-white shadow-lg shadow-orange-500/50" />
-            </div>
+            {/* Pulsing glow */}
+            <div className="absolute inset-0 bg-orange-500/30 blur-3xl animate-pulse" />
           </div>
           
-          {/* Progress percentage */}
-          <div className="mt-4 font-mono text-white text-sm">
-            {progress}%
+          {/* Team name */}
+          <div className="text-center">
+            <h1 className="text-5xl font-black text-white mb-2 tracking-tight" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+              WOLVERINE
+            </h1>
+            <p className="text-orange-500 font-black text-lg tracking-widest">ROBOTICS</p>
+            <p className="text-[#A2A9B1] font-mono text-sm mt-4 tracking-wider">TEAM 33791</p>
           </div>
         </div>
       </div>
@@ -628,7 +620,7 @@ const App = () => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const [pageTransition, setPageTransition] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -676,14 +668,6 @@ const App = () => {
           transform: translateX(0);
         }
       }
-      @keyframes borderSweep {
-        from {
-          width: 0;
-        }
-        to {
-          width: 100%;
-        }
-      }
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -695,33 +679,49 @@ const App = () => {
       @keyframes scaleIn {
         from {
           opacity: 0;
-          transform: scale(0.9);
+          transform: scale(0.8);
         }
         to {
           opacity: 1;
           transform: scale(1);
         }
       }
-      @keyframes mechanicalReveal {
-        0% {
-          clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
-          filter: brightness(0.3);
+      @keyframes growIn {
+        from {
+          opacity: 0;
+          transform: scale(0.5);
         }
-        50% {
-          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-          filter: brightness(0.3);
-        }
-        100% {
-          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-          filter: brightness(1);
+        to {
+          opacity: 1;
+          transform: scale(1);
         }
       }
-      @keyframes edgeGlow {
+      @keyframes pulseglow {
         0%, 100% {
-          box-shadow: 0 0 5px rgba(255, 90, 31, 0.2);
+          box-shadow: 0 0 5px rgba(255, 90, 31, 0.3);
         }
         50% {
-          box-shadow: 0 0 20px rgba(255, 90, 31, 0.6);
+          box-shadow: 0 0 25px rgba(255, 90, 31, 0.6);
+        }
+      }
+      @keyframes slideDownFade {
+        from {
+          opacity: 0;
+          transform: translateY(-100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes expandFromCenter {
+        from {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
         }
       }
       .animate-fade-in-up {
@@ -736,6 +736,10 @@ const App = () => {
         animation: scaleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
+      .animate-grow-in {
+        animation: growIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        opacity: 0;
+      }
       .animate-slide-diagonal {
         animation: slideInDiagonal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
@@ -748,8 +752,15 @@ const App = () => {
         animation: lockInPlace 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
-      .mechanical-reveal {
-        animation: mechanicalReveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-pulse-glow {
+        animation: pulseglow 2s ease-in-out infinite;
+      }
+      .animate-slide-down-fade {
+        animation: slideDownFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .animate-expand-center {
+        animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        opacity: 0;
       }
     `;
     document.head.appendChild(style);
@@ -763,15 +774,20 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    if (currentPage === 'home' && isInitialLoad) {
+      // Don't trigger transition on initial load
+      return;
+    }
+    
     window.scrollTo(0, 0);
     setIsVisible({});
     setPageTransition(true);
     
+    // Much faster transition - content loads immediately
     const transitionTimer = setTimeout(() => {
       setPageTransition(false);
-    }, 800);
-    
-    const timer = setTimeout(() => {
+      
+      // Immediately show content
       const elements = document.querySelectorAll('[data-animate]');
       const visibilityMap = {};
       elements.forEach((el) => {
@@ -780,13 +796,12 @@ const App = () => {
         }
       });
       setIsVisible(visibilityMap);
-    }, 900);
+    }, 400); // Faster transition
     
     return () => {
-      clearTimeout(timer);
       clearTimeout(transitionTimer);
     };
-  }, [currentPage]);
+  }, [currentPage, isInitialLoad]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -871,32 +886,66 @@ const App = () => {
             
             <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
               <div className="mb-8">
-                <div className="inline-block mb-6 animate-scale-in" style={{animationDelay: '0.1s'}}>
-                  <div className="flex items-center gap-3 px-6 py-3 bg-orange-600/20 border-2 border-orange-600 transition-all duration-300 hover:bg-orange-600/30"
+                <div 
+                  id="hero-badge"
+                  data-animate
+                  className={`inline-block mb-6 transition-all duration-700 ${
+                    isVisible['hero-badge'] ? 'animate-expand-center' : 'opacity-0 scale-[0.3]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 px-6 py-3 bg-orange-600/20 border-2 border-orange-600 transition-all duration-300 hover:bg-orange-600/30 hover:scale-105 hover:shadow-2xl hover:shadow-orange-600/50"
                        style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
                     <Zap className="text-orange-500" size={20} />
                     <span className="text-orange-500 font-black text-sm tracking-wider">FTC TEAM 33791</span>
                   </div>
                 </div>
                 
-                <h1 className="text-7xl md:text-9xl font-black text-white mb-4 animate-lock-in tracking-tight" style={{animationDelay: '0.2s', fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.02em'}}>
+                <h1 
+                  id="hero-title-1"
+                  data-animate
+                  className={`text-7xl md:text-9xl font-black text-white mb-4 tracking-tight transition-all duration-700 ${
+                    isVisible['hero-title-1'] ? 'animate-lock-in' : 'opacity-0 translate-x-[-40px]'
+                  }`}
+                  style={{animationDelay: '0.1s', fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.02em'}}
+                >
                   WOLVERINE
                 </h1>
-                <h2 className="text-5xl md:text-8xl font-black text-orange-500 mb-8 animate-lock-in" style={{animationDelay: '0.35s', fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+                <h2 
+                  id="hero-title-2"
+                  data-animate
+                  className={`text-5xl md:text-8xl font-black text-orange-500 mb-8 transition-all duration-700 ${
+                    isVisible['hero-title-2'] ? 'animate-lock-in' : 'opacity-0 translate-x-[-40px]'
+                  }`}
+                  style={{animationDelay: '0.25s', fontFamily: 'system-ui, -apple-system, sans-serif'}}
+                >
                   ROBOTICS
                 </h2>
               </div>
               
-              <div className="max-w-2xl mx-auto mb-12 space-y-4">
-                <p className="text-lg md:text-xl text-gray-300 animate-fade-in-up leading-relaxed" style={{animationDelay: '0.5s'}}>
+              <div 
+                id="hero-description"
+                data-animate
+                className={`max-w-2xl mx-auto mb-12 space-y-4 transition-all duration-700 ${
+                  isVisible['hero-description'] ? 'animate-fade-in-up' : 'opacity-0 translate-y-[30px]'
+                }`}
+                style={{animationDelay: '0.4s'}}
+              >
+                <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
                   First-year FTC team from Frisco, TX pushing the boundaries of what rookies can achieve.
                 </p>
-                <p className="text-base md:text-lg text-gray-400 animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+                <p className="text-base md:text-lg text-gray-400">
                   Built with precision. Engineered for excellence. Driven by innovation.
                 </p>
               </div>
               
-              <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up" style={{animationDelay: '0.7s'}}>
+              <div 
+                id="hero-buttons"
+                data-animate
+                className={`flex flex-wrap gap-6 justify-center mb-16 transition-all duration-700 ${
+                  isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                }`}
+                style={{animationDelay: '0.5s'}}
+              >
                 <AngleButton onClick={() => setCurrentPage('robots')} variant="primary">
                   VIEW MATCHSTICK <ChevronRight size={20} />
                 </AngleButton>
@@ -906,19 +955,26 @@ const App = () => {
               </div>
 
               {/* Stats Bar */}
-              <div className="grid grid-cols-3 gap-6 mt-20 max-w-3xl mx-auto animate-scale-in" style={{animationDelay: '0.8s'}}>
+              <div 
+                id="hero-stats"
+                data-animate
+                className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto transition-all duration-700 ${
+                  isVisible['hero-stats'] ? 'animate-slide-down-fade' : 'opacity-0 translate-y-[-100%]'
+                }`}
+                style={{animationDelay: '0.6s'}}
+              >
                 {[
                   { label: 'RECORD', value: '5-0-1' },
                   { label: 'TEAM SIZE', value: '17' },
                   { label: 'SEASON', value: '2025' }
                 ].map((stat, idx) => (
                   <div key={idx} className="relative group">
-                    <div className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] backdrop-blur-sm hover:border-orange-600 transition-all duration-500 group-hover:scale-105"
+                    <div className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] backdrop-blur-sm hover:border-orange-600 transition-all duration-500 group-hover:scale-110"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                      {/* Orange edge glow on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      {/* Pulsing glow on hover */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                            style={{
-                             boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.4)',
+                             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
                            }} />
                       <div className="text-3xl md:text-4xl font-black text-white mb-1 relative z-10">{stat.value}</div>
                       <div className="text-xs text-orange-500 font-bold tracking-widest relative z-10">{stat.label}</div>
@@ -939,10 +995,10 @@ const App = () => {
                   id="robot-section"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['robot-section'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                    isVisible['robot-section'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                   }`}
                 >
-                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
                     <span className="text-orange-500 font-black text-sm tracking-widest">OUR MACHINE</span>
                   </div>
@@ -974,27 +1030,27 @@ const App = () => {
                 id="robot-card"
                 data-animate
                 className={`relative transition-all duration-700 ${
-                  isVisible['robot-card'] ? 'animate-slide-diagonal' : 'opacity-0 translate-x-[-60px] translate-y-[60px]'
+                  isVisible['robot-card'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                 }`}
                 style={{transitionDelay: '300ms'}}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-4 translate-y-4"
                      style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
                 
-                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500"
+                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500 hover:scale-105"
                      style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
                   <ClawMarkPattern className="top-0 right-0 w-48 h-48" opacity={0.08} />
                   
-                  {/* Orange edge glow on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  {/* Pulsing glow on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                        style={{
-                         boxShadow: 'inset 0 0 40px rgba(255, 90, 31, 0.3)',
+                         boxShadow: 'inset 0 0 50px rgba(255, 90, 31, 0.4)',
                        }} />
                   
                   <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
                     <div className="space-y-6">
                       <div 
-                        className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/30 transition-all duration-500 border-2 border-[#A2A9B1] hover:border-orange-600"
+                        className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/50 transition-all duration-500 border-2 border-[#A2A9B1] hover:border-orange-600 group hover:scale-105"
                         style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}
                       >
                         <RobotImage 
@@ -1008,7 +1064,7 @@ const App = () => {
                         {[1, 2, 3, 4].map((i) => (
                           <div
                             key={i}
-                            className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden hover:scale-105 transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600"
+                            className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden hover:scale-110 transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600 group"
                             style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
                           >
                             <RobotImage 
@@ -1016,6 +1072,11 @@ const App = () => {
                               alt={`Matchstick detail ${i}`} 
                               fallbackText={i.toString()}
                             />
+                            {/* Glow effect */}
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                 style={{
+                                   boxShadow: 'inset 0 0 20px rgba(255, 90, 31, 0.5)',
+                                 }} />
                           </div>
                         ))}
                       </div>
@@ -1044,13 +1105,13 @@ const App = () => {
                         ].map((spec, idx) => (
                           <div 
                             key={idx}
-                            className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-4 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-105 transition-all duration-300 group"
+                            className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-4 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-110 transition-all duration-300 group relative"
                             style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                           >
-                            {/* Orange edge glow on hover */}
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            {/* Pulsing glow on hover */}
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
                                  style={{
-                                   boxShadow: 'inset 0 0 20px rgba(255, 90, 31, 0.3)',
+                                   boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.4)',
                                  }} />
                             <p className="text-orange-500/70 font-bold text-xs mb-1 tracking-wider relative z-10">{spec.label}</p>
                             <p className="text-white text-xl font-black relative z-10">{spec.value}</p>
@@ -1078,10 +1139,10 @@ const App = () => {
                   id="events-tag"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['events-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                    isVisible['events-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                   }`}
                 >
-                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
                     <span className="text-orange-500 font-black text-sm tracking-widest">UPCOMING</span>
                   </div>
@@ -1106,21 +1167,21 @@ const App = () => {
                     id={`event-${idx}`}
                     data-animate
                     className={`relative group transition-all duration-700 ${
-                      isVisible[`event-${idx}`] ? 'animate-slide-diagonal' : 'opacity-0 translate-x-[-60px] translate-y-[60px]'
+                      isVisible[`event-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                     }`}
                     style={{ transitionDelay: `${idx * 100}ms` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
                     
-                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 overflow-hidden hover:scale-105"
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 overflow-hidden hover:scale-110"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
                       <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-600/10 to-transparent transform translate-x-8 -translate-y-8 rotate-45" />
                       
-                      {/* Orange edge glow on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      {/* Pulsing glow on hover */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                            style={{
-                             boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.4)',
+                             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
                            }} />
                       
                       <Calendar className="text-orange-500 mb-6 relative z-10" size={36} />
@@ -1157,10 +1218,10 @@ const App = () => {
                   id="team-tag"
                   data-animate
                   className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['team-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                    isVisible['team-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                   }`}
                 >
-                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
+                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
                        style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
                     <span className="text-orange-500 font-black text-sm tracking-widest">THE PACK</span>
                   </div>
@@ -1195,18 +1256,25 @@ const App = () => {
                     id={`member-preview-${idx}`}
                     data-animate
                     className={`text-center transition-all duration-700 ${
-                      isVisible[`member-preview-${idx}`] ? (idx % 2 === 0 ? 'animate-slide-diagonal' : 'animate-slide-diagonal-reverse') : `opacity-0 ${idx % 2 === 0 ? 'translate-x-[-60px] translate-y-[60px]' : 'translate-x-[60px] translate-y-[-60px]'}`
+                      isVisible[`member-preview-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                     }`}
                     style={{ transitionDelay: `${idx * 75}ms` }}
                   >
                     <TeamMemberCard member={member} size="small" showRookie={false} />
-                    <h3 className="text-white font-bold text-base mt-4 mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                    <h3 className="text-white font-bold text-base mt-4 mb-1 hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
                     <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role.split(',')[0]}</p>
                   </div>
                 ))}
               </div>
               
-              <div className="text-center animate-fade-in-up" style={{animationDelay: '0.5s'}}>
+              <div 
+                id="team-cta"
+                data-animate
+                className={`text-center transition-all duration-700 ${
+                  isVisible['team-cta'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
+                }`}
+                style={{transitionDelay: '0.4s'}}
+              >
                 <AngleButton onClick={() => setCurrentPage('about')} variant="secondary">
                   FULL ROSTER <ChevronRight size={20} />
                 </AngleButton>
@@ -1228,7 +1296,7 @@ const App = () => {
                 id="about-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['about-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                  isVisible['about-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1257,7 +1325,7 @@ const App = () => {
               id="students-section"
               data-animate
               className={`mb-24 transition-all duration-700 ${
-                isVisible['students-section'] ? 'animate-slide-diagonal' : 'opacity-0 translate-x-[-60px] translate-y-[60px]'
+                isVisible['students-section'] ? 'animate-fade-in' : 'opacity-0'
               }`}
               style={{transitionDelay: '300ms'}}
             >
@@ -1277,14 +1345,14 @@ const App = () => {
                     key={i}
                     className="text-center transition-all duration-300"
                     style={{
-                      animation: `slideInDiagonal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+                      animation: `growIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
                       animationDelay: `${i * 40}ms`,
                       opacity: 0
                     }}
                   >
                     <TeamMemberCard member={member} size="large" showRookie={true} />
                     <div className="mt-4">
-                      <h3 className="text-white font-bold text-base mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                      <h3 className="text-white font-bold text-base mb-1 hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
                       <p className="text-orange-500 text-xs font-bold tracking-wider leading-relaxed">{member.role}</p>
                     </div>
                   </div>
@@ -1298,7 +1366,7 @@ const App = () => {
                 id="mentors-section"
                 data-animate
                 className={`mb-24 transition-all duration-700 ${
-                  isVisible['mentors-section'] ? 'animate-slide-diagonal-reverse' : 'opacity-0 translate-x-[60px] translate-y-[-60px]'
+                  isVisible['mentors-section'] ? 'animate-fade-in' : 'opacity-0'
                 }`}
                 style={{transitionDelay: '400ms'}}
               >
@@ -1316,12 +1384,12 @@ const App = () => {
                   {teamMembers.mentors.map((member, i) => (
                     <div
                       key={i}
-                      className="text-center animate-fade-in-up"
+                      className="text-center animate-grow-in"
                       style={{animationDelay: `${i * 40}ms`}}
                     >
                       <TeamMemberCard member={member} size="large" showRookie={false} />
                       <div className="mt-4">
-                        <h3 className="text-white font-bold text-base mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                        <h3 className="text-white font-bold text-base mb-1 hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
                         <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role}</p>
                       </div>
                     </div>
@@ -1336,7 +1404,7 @@ const App = () => {
                 id="coaches-section"
                 data-animate
                 className={`transition-all duration-700 ${
-                  isVisible['coaches-section'] ? 'animate-slide-diagonal' : 'opacity-0 translate-x-[-60px] translate-y-[60px]'
+                  isVisible['coaches-section'] ? 'animate-fade-in' : 'opacity-0'
                 }`}
                 style={{transitionDelay: '500ms'}}
               >
@@ -1354,12 +1422,12 @@ const App = () => {
                   {teamMembers.coaches.map((member, i) => (
                     <div
                       key={i}
-                      className="text-center animate-fade-in-up"
+                      className="text-center animate-grow-in"
                       style={{animationDelay: `${i * 40}ms`}}
                     >
                       <TeamMemberCard member={member} size="large" showRookie={false} />
                       <div className="mt-4">
-                        <h3 className="text-white font-bold text-base mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                        <h3 className="text-white font-bold text-base mb-1 hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
                         <p className="text-orange-500 text-xs font-bold tracking-wider">{member.role}</p>
                       </div>
                     </div>
@@ -1383,7 +1451,7 @@ const App = () => {
                 id="robots-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['robots-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                  isVisible['robots-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1408,27 +1476,27 @@ const App = () => {
               id="matchstick-detail"
               data-animate
               className={`relative transition-all duration-700 ${
-                isVisible['matchstick-detail'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                isVisible['matchstick-detail'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
               }`}
               style={{transitionDelay: '200ms'}}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-6 translate-y-6"
                    style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}} />
               
-              <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-16 border-4 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500"
+              <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-16 border-4 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500 hover:scale-105"
                    style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}>
                 <ClawMarkPattern className="top-0 right-0 w-64 h-64" opacity={0.05} />
                 
-                {/* Orange edge glow on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                {/* Pulsing glow on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                      style={{
-                       boxShadow: 'inset 0 0 50px rgba(255, 90, 31, 0.3)',
+                       boxShadow: 'inset 0 0 60px rgba(255, 90, 31, 0.5)',
                      }} />
                 
                 <div className="grid md:grid-cols-2 gap-16 relative z-10">
                   <div className="space-y-8">
                     <div 
-                      className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/40 transition-all duration-500 border-4 border-[#A2A9B1] hover:border-orange-600"
+                      className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/60 transition-all duration-500 border-4 border-[#A2A9B1] hover:border-orange-600 hover:scale-110"
                       style={{clipPath: 'polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%)'}}
                     >
                       <RobotImage 
@@ -1442,7 +1510,7 @@ const App = () => {
                       {[1, 2, 3, 4].map((i) => (
                         <div
                           key={i}
-                          className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-5xl font-bold overflow-hidden hover:scale-105 transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600"
+                          className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-5xl font-bold overflow-hidden hover:scale-110 transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600 group relative"
                           style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}
                         >
                           <RobotImage 
@@ -1450,6 +1518,11 @@ const App = () => {
                             alt={`Matchstick detail ${i}`} 
                             fallbackText={i.toString()}
                           />
+                          {/* Glow effect */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
+                               style={{
+                                 boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.6)',
+                               }} />
                         </div>
                       ))}
                     </div>
@@ -1478,13 +1551,13 @@ const App = () => {
                       ].map((spec, idx) => (
                         <div 
                           key={idx}
-                          className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-105 transition-all duration-300 group relative"
+                          className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-110 transition-all duration-300 group relative"
                           style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
                         >
-                          {/* Orange edge glow on hover */}
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          {/* Pulsing glow on hover */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
                                style={{
-                                 boxShadow: 'inset 0 0 20px rgba(255, 90, 31, 0.3)',
+                                 boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.5)',
                                }} />
                           <p className="text-orange-500/70 font-bold text-xs mb-2 tracking-wider relative z-10">{spec.label}</p>
                           <p className="text-white text-2xl font-black relative z-10">{spec.value}</p>
@@ -1492,12 +1565,12 @@ const App = () => {
                       ))}
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/30 p-8 border-2 border-[#A2A9B1] hover:border-blue-500 transition-all duration-300 group relative"
+                    <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/30 p-8 border-2 border-[#A2A9B1] hover:border-blue-500 transition-all duration-300 group relative hover:scale-105"
                          style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
-                      {/* Orange edge glow on hover */}
+                      {/* Glow on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                            style={{
-                             boxShadow: 'inset 0 0 25px rgba(66, 153, 225, 0.3)',
+                             boxShadow: 'inset 0 0 30px rgba(66, 153, 225, 0.4)',
                            }} />
                       <div className="flex items-center gap-3 mb-6 relative z-10">
                         <Award className="text-orange-500" size={28} />
@@ -1517,12 +1590,12 @@ const App = () => {
                       </ul>
                     </div>
 
-                    <div className="bg-gradient-to-br from-orange-900/30 to-orange-950/30 p-8 border-2 border-[#A2A9B1] hover:border-orange-500 transition-all duration-300 group relative"
+                    <div className="bg-gradient-to-br from-orange-900/30 to-orange-950/30 p-8 border-2 border-[#A2A9B1] hover:border-orange-500 transition-all duration-300 group relative hover:scale-105"
                          style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
-                      {/* Orange edge glow on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      {/* Pulsing glow on hover */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
                            style={{
-                             boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.3)',
+                             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
                            }} />
                       <h3 className="text-white font-black text-2xl mb-6 relative z-10">KEY FEATURES</h3>
                       <ul className="space-y-3 relative z-10">
@@ -1559,7 +1632,7 @@ const App = () => {
                 id="sponsors-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['sponsors-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                  isVisible['sponsors-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1593,19 +1666,19 @@ const App = () => {
                   id={`sponsor-${idx}`}
                   data-animate
                   className={`relative group transition-all duration-700 ${
-                    isVisible[`sponsor-${idx}`] ? (idx % 2 === 0 ? 'animate-slide-diagonal' : 'animate-slide-diagonal-reverse') : `opacity-0 ${idx % 2 === 0 ? 'translate-x-[-60px] translate-y-[60px]' : 'translate-x-[60px] translate-y-[-60px]'}`
+                    isVisible[`sponsor-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                   }`}
                   style={{ transitionDelay: `${idx * 150}ms` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-4 translate-y-4"
                        style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}} />
                   
-                  <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-105"
+                  <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-110"
                        style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)'}}>
-                    {/* Orange edge glow on hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    {/* Pulsing glow on hover */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                          style={{
-                           boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.3)',
+                           boxShadow: 'inset 0 0 35px rgba(255, 90, 31, 0.4)',
                          }} />
                     <div className="relative z-10">
                       <SponsorCard sponsor={sponsor} />
@@ -1620,19 +1693,19 @@ const App = () => {
               id="become-sponsor"
               data-animate
               className={`relative max-w-4xl mx-auto transition-all duration-700 ${
-                isVisible['become-sponsor'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                isVisible['become-sponsor'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
               }`}
               style={{transitionDelay: '300ms'}}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 to-blue-900/30 transform translate-x-4 translate-y-4"
                    style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
               
-              <div className="relative bg-gradient-to-br from-orange-900/40 to-blue-900/40 p-12 md:p-16 text-center border-4 border-orange-600 group hover:border-orange-500 transition-all duration-500"
+              <div className="relative bg-gradient-to-br from-orange-900/40 to-blue-900/40 p-12 md:p-16 text-center border-4 border-orange-600 group hover:border-orange-500 transition-all duration-500 hover:scale-105"
                    style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
-                {/* Orange edge glow on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                {/* Pulsing glow on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                      style={{
-                       boxShadow: 'inset 0 0 40px rgba(255, 90, 31, 0.4)',
+                       boxShadow: 'inset 0 0 50px rgba(255, 90, 31, 0.5)',
                      }} />
                 <div className="relative z-10">
                   <h2 className="text-5xl font-black text-white mb-6" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
@@ -1663,7 +1736,7 @@ const App = () => {
                 id="contact-tag"
                 data-animate
                 className={`inline-block mb-6 transition-all duration-700 ${
-                  isVisible['contact-tag'] ? 'animate-scale-in' : 'opacity-0 scale-90'
+                  isVisible['contact-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                 }`}
               >
                 <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600"
@@ -1692,7 +1765,7 @@ const App = () => {
                 id="contact-info"
                 data-animate
                 className={`space-y-6 transition-all duration-700 ${
-                  isVisible['contact-info'] ? 'animate-slide-diagonal' : 'opacity-0 translate-x-[-60px] translate-y-[60px]'
+                  isVisible['contact-info'] ? 'animate-fade-in' : 'opacity-0'
                 }`}
                 style={{transitionDelay: '300ms'}}
               >
@@ -1720,7 +1793,7 @@ const App = () => {
                     key={idx}
                     className="relative group"
                     style={{
-                      animation: `slideInDiagonal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+                      animation: `growIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
                       animationDelay: `${idx * 100}ms`,
                       opacity: 0
                     }}
@@ -1728,12 +1801,12 @@ const App = () => {
                     <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
                     
-                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-105"
+                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 hover:scale-110"
                          style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                      {/* Orange edge glow on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      {/* Pulsing glow on hover */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                            style={{
-                             boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.4)',
+                             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
                            }} />
                       <div className="relative z-10">
                         <item.icon className="text-orange-500 mb-4" size={32} />
@@ -1746,12 +1819,12 @@ const App = () => {
                               href="https://github.com/wolverine-robotics" 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110 relative group"
+                              className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-125 relative group"
                               style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                             >
                               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                    style={{
-                                     boxShadow: '0 0 20px rgba(255, 90, 31, 0.6)',
+                                     boxShadow: '0 0 25px rgba(255, 90, 31, 0.8)',
                                    }} />
                               <Github className="text-white relative z-10" size={20} />
                             </a>
@@ -1759,12 +1832,12 @@ const App = () => {
                               href="https://www.linkedin.com/company/wolverine-robotics/" 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110 relative group"
+                              className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-125 relative group"
                               style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                             >
                               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                    style={{
-                                     boxShadow: '0 0 20px rgba(255, 90, 31, 0.6)',
+                                     boxShadow: '0 0 25px rgba(255, 90, 31, 0.8)',
                                    }} />
                               <Linkedin className="text-white relative z-10" size={20} />
                             </a>
@@ -1772,12 +1845,12 @@ const App = () => {
                               href="https://www.instagram.com/wolverine_robotics/" 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110 relative group"
+                              className="w-12 h-12 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-125 relative group"
                               style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                             >
                               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                    style={{
-                                     boxShadow: '0 0 20px rgba(255, 90, 31, 0.6)',
+                                     boxShadow: '0 0 25px rgba(255, 90, 31, 0.8)',
                                    }} />
                               <Instagram className="text-white relative z-10" size={20} />
                             </a>
@@ -1793,26 +1866,26 @@ const App = () => {
                 id="contact-form"
                 data-animate
                 className={`relative transition-all duration-700 ${
-                  isVisible['contact-form'] ? 'animate-slide-diagonal-reverse' : 'opacity-0 translate-x-[60px] translate-y-[-60px]'
+                  isVisible['contact-form'] ? 'animate-grow-in' : 'opacity-0 scale-[0.5]'
                 }`}
                 style={{transitionDelay: '400ms'}}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-3 translate-y-3"
                      style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}} />
                 
-                <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600 group hover:border-orange-500 transition-all duration-500"
+                <div className="relative bg-[#1a2847] p-8 border-2 border-orange-600 group hover:border-orange-500 transition-all duration-500 hover:scale-105"
                      style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'}}>
-                  {/* Orange edge glow on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  {/* Pulsing glow on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
                        style={{
-                         boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.3)',
+                         boxShadow: 'inset 0 0 35px rgba(255, 90, 31, 0.4)',
                        }} />
                   <form className="space-y-6 relative z-10">
                     <div className="animate-fade-in-up" style={{animationDelay: '500ms'}}>
                       <label className="block text-white font-bold text-sm mb-2 tracking-wider">NAME</label>
                       <input
                         type="text"
-                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 focus:scale-105"
                         style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
@@ -1821,7 +1894,7 @@ const App = () => {
                       <label className="block text-white font-bold text-sm mb-2 tracking-wider">EMAIL</label>
                       <input
                         type="email"
-                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 focus:scale-105"
                         style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
@@ -1830,7 +1903,7 @@ const App = () => {
                       <label className="block text-white font-bold text-sm mb-2 tracking-wider">MESSAGE</label>
                       <textarea
                         rows="6"
-                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 resize-none"
+                        className="w-full px-4 py-4 bg-[#0f1629] text-white border-2 border-[#A2A9B1] focus:border-orange-600 focus:outline-none transition-colors duration-300 resize-none focus:scale-105"
                         style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
                       />
                     </div>
@@ -1852,19 +1925,18 @@ const App = () => {
     return null;
   };
 
-  if (isLoading) {
-    return <BootUpLoader onComplete={() => setIsLoading(false)} />;
+  if (isInitialLoad) {
+    return <InitialLoadAnimation onComplete={() => setIsInitialLoad(false)} />;
   }
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden">
-      {/* Page transition overlay */}
+      {/* Smooth page transition overlay - orange fade */}
       {pageTransition && (
-        <div className="fixed inset-0 z-[100] bg-[#132038] mechanical-reveal" />
+        <div className="fixed inset-0 z-[100] bg-gradient-to-br from-orange-600/30 to-[#132038] animate-fade-in" />
       )}
 
       {/* Main Content */}
-      <div className={pageTransition ? 'opacity-0' : 'opacity-100 transition-opacity duration-300'}>
       <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
@@ -1888,10 +1960,10 @@ const App = () => {
                 <button
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
-                  className={`text-sm font-black tracking-wider transition-colors duration-300 relative group ${
+                  className={`text-sm font-black tracking-wider transition-all duration-300 relative group ${
                     currentPage === item.id
-                      ? 'text-orange-500'
-                      : 'text-white hover:text-orange-500'
+                      ? 'text-orange-500 scale-110'
+                      : 'text-white hover:text-orange-500 hover:scale-110'
                   }`}
                 >
                   {item.name}
@@ -1904,7 +1976,7 @@ const App = () => {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white hover:text-orange-500 transition-colors duration-300"
+              className="md:hidden text-white hover:text-orange-500 transition-colors duration-300 hover:scale-110"
             >
               {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -1953,7 +2025,7 @@ const App = () => {
                   <button
                     key={item.id}
                     onClick={() => setCurrentPage(item.id)}
-                    className="text-gray-400 hover:text-orange-500 text-left transition-colors duration-300"
+                    className="text-gray-400 hover:text-orange-500 text-left transition-colors duration-300 hover:translate-x-2"
                   >
                     {item.name}
                   </button>
@@ -1967,7 +2039,7 @@ const App = () => {
                   href="https://github.com/wolverine-robotics" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-125"
                   style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                 >
                   <Github className="text-white" size={20} />
@@ -1976,7 +2048,7 @@ const App = () => {
                   href="https://www.linkedin.com/company/wolverine-robotics/" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-125"
                   style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                 >
                   <Linkedin className="text-white" size={20} />
@@ -1985,7 +2057,7 @@ const App = () => {
                   href="https://www.instagram.com/wolverine_robotics/" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-10 h-10 bg-orange-600 hover:bg-orange-500 flex items-center justify-center transition-all duration-300 hover:scale-125"
                   style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'}}
                 >
                   <Instagram className="text-white" size={20} />
@@ -2003,7 +2075,6 @@ const App = () => {
           </div>
         </div>
       </footer>
-      </div>
     </div>
   );
 };
