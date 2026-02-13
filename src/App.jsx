@@ -12,7 +12,7 @@ const ClawMarkPattern = ({ className = "", opacity = 0.1 }) => (
   </div>
 );
 
-const ClawMarkImage = ({ opacity = 0.08, className = "" }) => {
+const ClawMarkImage = ({ opacity = 0.15, className = "" }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const hasChecked = useRef(false);
@@ -40,6 +40,7 @@ const ClawMarkImage = ({ opacity = 0.08, className = "" }) => {
           src="/claw.png" 
           alt="Wolverine Claw" 
           className="w-full h-full object-contain"
+          style={{ filter: 'brightness(1.3) contrast(1.2)' }}
         />
       ) : (
         <ClawMarkPattern className="w-full h-full" opacity={1} />
@@ -148,11 +149,12 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
   return (
     <div className="relative">
       <div 
-        className={`${sizeClasses} bg-gradient-to-br from-orange-600 to-orange-800 mx-auto flex items-center justify-center text-white font-black overflow-hidden relative group`}
+        className={`${sizeClasses} bg-gradient-to-br from-orange-600 to-orange-800 mx-auto flex items-center justify-center text-white font-black overflow-hidden relative shadow-lg border-2 border-orange-600/30`}
         style={{
           clipPath: size === 'small' 
             ? 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'
-            : 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)'
+            : 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)',
+          boxShadow: '0 10px 30px -5px rgba(255, 90, 31, 0.3)'
         }}
       >
         {!imageLoaded || imageError ? (
@@ -165,12 +167,16 @@ const TeamMemberCard = ({ member, size = 'small', showRookie = false }) => {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        {/* Card shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       {showRookie && member.rookie && (
         <div 
-          className="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-black px-3 py-1 shadow-lg z-10 animate-pulse"
+          className="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-black px-3 py-1 shadow-lg z-10 animate-pulse border border-orange-400"
           style={{
-            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)'
+            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)',
+            boxShadow: '0 4px 15px rgba(255, 90, 31, 0.5)'
           }}
         >
           ROOKIE
@@ -499,6 +505,7 @@ const App = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
+  const [pageTransition, setPageTransition] = useState(false);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -531,6 +538,27 @@ const App = () => {
           transform: scale(1);
         }
       }
+      @keyframes clawSlash {
+        0% {
+          clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+        }
+        100% {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+      @keyframes clawReveal {
+        0% {
+          transform: translateX(-120%) rotate(-15deg) scale(1.5);
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(120%) rotate(-15deg) scale(1.5);
+          opacity: 0;
+        }
+      }
       .animate-fade-in-up {
         animation: fadeInUp 0.6s ease-out forwards;
         opacity: 0;
@@ -542,6 +570,12 @@ const App = () => {
       .animate-scale-in {
         animation: scaleIn 0.6s ease-out forwards;
         opacity: 0;
+      }
+      .page-transition-enter {
+        animation: clawSlash 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .claw-slash-overlay {
+        animation: clawReveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
     `;
     document.head.appendChild(style);
@@ -557,6 +591,11 @@ const App = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     setIsVisible({});
+    setPageTransition(true);
+    
+    const transitionTimer = setTimeout(() => {
+      setPageTransition(false);
+    }, 800);
     
     const timer = setTimeout(() => {
       const elements = document.querySelectorAll('[data-animate]');
@@ -567,9 +606,12 @@ const App = () => {
         }
       });
       setIsVisible(visibilityMap);
-    }, 100);
+    }, 900);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(transitionTimer);
+    };
   }, [currentPage]);
 
   useEffect(() => {
@@ -581,7 +623,7 @@ const App = () => {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.15, rootMargin: '0px 0px -100px 0px' }
     );
 
     const timeoutId = setTimeout(() => {
@@ -641,7 +683,7 @@ const App = () => {
           {/* Hero Section */}
           <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-[#132038]">
             <GridScan />
-            <ClawMarkImage opacity={0.06} className="bottom-0 right-0 w-[600px] h-[600px]" />
+            <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[600px] h-[600px]" />
             
             <div
               className="absolute inset-0 opacity-5"
@@ -709,7 +751,7 @@ const App = () => {
 
           {/* Robot Showcase */}
           <div className="py-32 bg-gradient-to-b from-[#132038] to-black relative overflow-hidden">
-            <ClawMarkImage opacity={0.04} className="top-1/4 left-0 w-[500px] h-[500px]" />
+            <ClawMarkImage opacity={0.08} className="top-1/4 left-0 w-[500px] h-[500px]" />
             
             <div className="max-w-7xl mx-auto px-4 relative z-10">
               <div className="text-center mb-20">
@@ -837,7 +879,7 @@ const App = () => {
 
           {/* Events Section */}
           <div className="py-32 bg-black relative overflow-hidden">
-            <ClawMarkImage opacity={0.05} className="bottom-0 right-0 w-[700px] h-[700px]" />
+            <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[700px] h-[700px]" />
             
             <div className="max-w-7xl mx-auto px-4 relative z-10">
               <div className="text-center mb-20">
@@ -910,7 +952,7 @@ const App = () => {
           {/* Team Preview */}
           <div className="py-32 bg-gradient-to-b from-black to-[#132038] relative overflow-hidden">
             <GridScan sensitivity={0.3} scanOpacity={0.2} />
-            <ClawMarkImage opacity={0.04} className="top-1/3 left-1/4 w-[550px] h-[550px]" />
+            <ClawMarkImage opacity={0.08} className="top-1/3 left-1/4 w-[550px] h-[550px]" />
             
             <div className="max-w-7xl mx-auto px-4 relative z-10">
               <div className="text-center mb-20">
@@ -981,7 +1023,7 @@ const App = () => {
     if (currentPage === 'about') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
-          <ClawMarkImage opacity={0.05} className="bottom-0 right-0 w-[800px] h-[800px]" />
+          <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[800px] h-[800px]" />
           
           <div className="max-w-7xl mx-auto px-4 relative z-10">
             <div className="text-center mb-20">
@@ -1136,7 +1178,7 @@ const App = () => {
     if (currentPage === 'robots') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
-          <ClawMarkImage opacity={0.06} className="bottom-0 right-0 w-[900px] h-[900px]" />
+          <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[900px] h-[900px]" />
           
           <div className="max-w-7xl mx-auto px-4 relative z-10">
             <div className="text-center mb-20">
@@ -1291,7 +1333,7 @@ const App = () => {
     if (currentPage === 'sponsors') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
-          <ClawMarkImage opacity={0.05} className="bottom-0 right-0 w-[750px] h-[750px]" />
+          <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[750px] h-[750px]" />
           
           <div className="max-w-7xl mx-auto px-4 relative z-10">
             <div className="text-center mb-20">
@@ -1381,7 +1423,7 @@ const App = () => {
     if (currentPage === 'contact') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#132038] to-black py-32 relative overflow-hidden">
-          <ClawMarkImage opacity={0.06} className="bottom-0 right-0 w-[850px] h-[850px]" />
+          <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[850px] h-[850px]" />
           
           <div className="max-w-5xl mx-auto px-4 relative z-10">
             <div className="text-center mb-20">
@@ -1556,7 +1598,56 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-black overflow-x-hidden">
-      <nav className="fixed top-0 w-full bg-[#132038]/95 backdrop-blur-md border-b-2 border-orange-600 z-50">
+      {/* Claw Slash Transition Overlay */}
+      {pageTransition && (
+        <>
+          <div 
+            className="fixed inset-0 z-[100] pointer-events-none claw-slash-overlay"
+            style={{
+              background: 'linear-gradient(135deg, #FF5A1F 0%, #FF8C42 100%)',
+              mixBlendMode: 'screen'
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative w-full h-full">
+                {/* Three claw marks */}
+                <div 
+                  className="absolute w-3 bg-white transform rotate-[-20deg] shadow-2xl"
+                  style={{ 
+                    height: '150%', 
+                    left: '35%',
+                    top: '-25%',
+                    boxShadow: '0 0 40px rgba(255, 255, 255, 0.8)'
+                  }} 
+                />
+                <div 
+                  className="absolute w-3 bg-white transform rotate-[-20deg] shadow-2xl"
+                  style={{ 
+                    height: '150%', 
+                    left: '47.5%',
+                    top: '-25%',
+                    boxShadow: '0 0 40px rgba(255, 255, 255, 0.8)'
+                  }} 
+                />
+                <div 
+                  className="absolute w-3 bg-white transform rotate-[-20deg] shadow-2xl"
+                  style={{ 
+                    height: '150%', 
+                    left: '60%',
+                    top: '-25%',
+                    boxShadow: '0 0 40px rgba(255, 255, 255, 0.8)'
+                  }} 
+                />
+              </div>
+            </div>
+          </div>
+          <div className="fixed inset-0 z-[99] bg-black" />
+        </>
+      )}
+
+      {/* Main Content with page transition animation */}
+      <div className={pageTransition ? 'page-transition-enter' : ''}>
+      <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
             <div 
@@ -1694,6 +1785,7 @@ const App = () => {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 };
