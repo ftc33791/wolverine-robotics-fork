@@ -536,7 +536,7 @@ const InitialLoadAnimation = ({ onComplete }) => {
       setClawImageError(true);
       setClawImageLoaded(true);
     };
-    img.src = '/claw.png';
+    img.src = '/logo.svg';
   }, []);
   
   useEffect(() => {
