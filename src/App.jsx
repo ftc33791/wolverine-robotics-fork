@@ -259,7 +259,7 @@ const LogoImage = () => {
       setImageError(true);
       setImageLoaded(true);
     };
-    img.src = '/data/logo.png';
+    img.src = '/data/logo.svg';
   }, []);
   
   return (
@@ -275,7 +275,7 @@ const LogoImage = () => {
         </div>
       ) : (
         <img 
-          src="/data/logo.png" 
+          src="/data/logo.svg" 
           alt="Wolverine Robotics Logo" 
           className="w-full h-full object-contain" 
         />
