@@ -851,11 +851,11 @@ const App = () => {
         opacity: 0;
       }
       .animate-claw-slash-out {
-        animation: clawSlashOut 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+        animation: clawSlashOut 0.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
         will-change: clip-path, opacity;
       }
       .animate-claw-slash-in {
-        animation: clawSlashIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation: clawSlashIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         will-change: clip-path, opacity;
       }
     `;
@@ -874,25 +874,30 @@ const App = () => {
     if (currentPage === displayPage) return; // No change needed
     if (currentPage === 'home' && isInitialLoad) return;
     
-    // Phase 1: Claw slashes page away (right to left)
+    // Phase 1: Claw slashes current page away
     setPageTransitioning(true);
     setTransitionPhase('out');
     
-    // Phase 2: After slash-out, switch page and slash new page in (left to right)
+    // Phase 2: Mid-transition - scroll to top while slash is covering screen
+    const scrollTimer = setTimeout(() => {
+      window.scrollTo(0, 0); // INSTANT teleport while slash covers the screen
+    }, 350); // Slightly later for better masking
+    
+    // Phase 3: After slash-out, switch page and slash new page in
     const switchTimer = setTimeout(() => {
       setDisplayPage(currentPage);
-      window.scrollTo(0, 0); // INSTANT teleport to top
       setIsVisible({}); // Reset all visibility
       setTransitionPhase('in');
-    }, 500); // Wait for slash-out to complete
+    }, 600); // Longer slash-out for better masking
     
-    // Phase 3: End transition after slash-in completes
+    // Phase 4: End transition after slash-in completes
     const endTimer = setTimeout(() => {
       setPageTransitioning(false);
       setTransitionPhase('none');
-    }, 1000); // Total: 500ms out + 500ms in
+    }, 1200); // Total: 600ms out + 600ms in
     
     return () => {
+      clearTimeout(scrollTimer);
       clearTimeout(switchTimer);
       clearTimeout(endTimer);
     };
@@ -2032,7 +2037,7 @@ const App = () => {
         <div className="fixed inset-0 z-[150] pointer-events-none overflow-hidden">
           {/* Main slash line - brightest and thickest */}
           <div 
-            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-all duration-500 ${
+            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-all duration-600 ${
               transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
             }`}
             style={{ 
@@ -2045,7 +2050,7 @@ const App = () => {
           />
           {/* Secondary slash line - upper */}
           <div 
-            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-75 ${
+            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-600 delay-75 ${
               transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
             }`}
             style={{ 
@@ -2058,7 +2063,7 @@ const App = () => {
           />
           {/* Third slash line - lower */}
           <div 
-            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-100 ${
+            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-600 delay-100 ${
               transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
             }`}
             style={{ 
