@@ -618,8 +618,8 @@ const InitialLoadAnimation = ({ onComplete }) => {
       {/* Logo assembly in center - ALWAYS IN FRONT */}
       <div className={`relative z-20 transition-all duration-700 ${phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
         <div className="relative">
-          {/* MASSIVE claw image - 500px for dramatic effect */}
-          <div className="w-[500px] h-[500px] relative mb-8 flex items-center justify-center">
+          {/* 320px claw image with slash reveal */}
+          <div className="w-80 h-80 relative mb-8 flex items-center justify-center">
             {/* Opaque background so slash doesn't show through */}
             <div className="absolute inset-0 bg-[#132038] z-0" />
             
@@ -668,6 +668,7 @@ const App = () => {
   const [pageTransitioning, setPageTransitioning] = useState(false);
   const [displayPage, setDisplayPage] = useState('home'); // The page actually being rendered
   const [previousPage, setPreviousPage] = useState('home'); // For transition effect
+  const [transitionPhase, setTransitionPhase] = useState('none'); // 'out' or 'in' or 'none'
 
   // Set favicon on mount
   useEffect(() => {
@@ -791,20 +792,24 @@ const App = () => {
           transform: scale(1);
         }
       }
-      @keyframes slideInFromRight {
+      @keyframes slideOutDown {
         from {
-          transform: translateX(100%);
+          transform: translateY(0);
+          opacity: 1;
         }
         to {
-          transform: translateX(0);
+          transform: translateY(100%);
+          opacity: 0;
         }
       }
-      @keyframes slideOutToLeft {
+      @keyframes slideInUp {
         from {
-          transform: translateX(0);
+          transform: translateY(100%);
+          opacity: 0;
         }
         to {
-          transform: translateX(-100%);
+          transform: translateY(0);
+          opacity: 1;
         }
       }
       .animate-fade-in-up {
@@ -845,11 +850,11 @@ const App = () => {
         animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
-      .animate-slide-in-from-right {
-        animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-slide-out-down {
+        animation: slideOutDown 0.4s cubic-bezier(0.4, 0, 0.6, 1) forwards;
       }
-      .animate-slide-out-to-left {
-        animation: slideOutToLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-slide-in-up {
+        animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
     `;
     document.head.appendChild(style);
@@ -862,25 +867,31 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Page change effect - clean transition without double-trigger
+  // Page change effect - card slide transition
   useEffect(() => {
     if (currentPage === displayPage) return; // No change needed
     if (currentPage === 'home' && isInitialLoad) return;
     
-    // Start transition
+    // Phase 1: Slide current page down
     setPageTransitioning(true);
+    setTransitionPhase('out');
     
-    // Switch page immediately and teleport to top
-    setDisplayPage(currentPage);
-    window.scrollTo(0, 0); // INSTANT teleport to top
-    setIsVisible({}); // Reset all visibility
+    // Phase 2: After slide-down, switch page and slide new page up
+    const switchTimer = setTimeout(() => {
+      setDisplayPage(currentPage);
+      window.scrollTo(0, 0); // INSTANT teleport to top
+      setIsVisible({}); // Reset all visibility
+      setTransitionPhase('in');
+    }, 400); // Wait for slide-down to complete
     
-    // End transition after overlay fades
+    // Phase 3: End transition after slide-up completes
     const endTimer = setTimeout(() => {
       setPageTransitioning(false);
-    }, 400); // Transition duration
+      setTransitionPhase('none');
+    }, 800); // Total: 400ms down + 400ms up
     
     return () => {
+      clearTimeout(switchTimer);
       clearTimeout(endTimer);
     };
   }, [currentPage, isInitialLoad]); // Remove displayPage from dependencies to prevent double-trigger
@@ -910,10 +921,10 @@ const App = () => {
       return () => {
         observer.disconnect();
       };
-    }, 150); // Slightly longer delay to ensure page has switched
+    }, isInitialLoad ? 200 : 150); // Longer delay on initial load to ensure everything is ready
     
     return () => clearTimeout(setupTimer);
-  }, [displayPage]); // Only depend on displayPage, not isInitialLoad
+  }, [displayPage, isInitialLoad]); // Track both displayPage and isInitialLoad
 
   const navigation = [
     { name: 'HOME', id: 'home' },
@@ -2013,27 +2024,15 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden relative">
-      {/* Page Transition Overlay - simple fade that actually works */}
+    <div className="min-h-[100dvh] bg-[#0a1628] overflow-hidden relative">
+      {/* Main Content with card slide animations */}
       <div 
-        className={`fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center pointer-events-none transition-opacity duration-400 ${
-          pageTransitioning ? 'opacity-100 pointer-events-auto' : 'opacity-0'
+        className={`min-h-[100dvh] ${
+          transitionPhase === 'out' ? 'animate-slide-out-down' : 
+          transitionPhase === 'in' ? 'animate-slide-in-up' : 
+          ''
         }`}
       >
-        <div className="w-32 h-32 relative flex items-center justify-center">
-          <img 
-            src="/data/logo.svg" 
-            alt="Loading" 
-            className="w-full h-full object-contain animate-pulse"
-            style={{ 
-              filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 30px rgba(255, 90, 31, 0.9))',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="min-h-[100dvh]">
         <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-20">
