@@ -792,23 +792,23 @@ const App = () => {
           transform: scale(1);
         }
       }
-      @keyframes slideOutDown {
-        from {
-          transform: translateY(0);
+      @keyframes clawSlashOut {
+        0% {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
           opacity: 1;
         }
-        to {
-          transform: translateY(100%);
+        100% {
+          clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
           opacity: 0;
         }
       }
-      @keyframes slideInUp {
-        from {
-          transform: translateY(100%);
+      @keyframes clawSlashIn {
+        0% {
+          clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
           opacity: 0;
         }
-        to {
-          transform: translateY(0);
+        100% {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
           opacity: 1;
         }
       }
@@ -850,11 +850,11 @@ const App = () => {
         animation: expandFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         opacity: 0;
       }
-      .animate-slide-out-down {
-        animation: slideOutDown 0.4s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+      .animate-claw-slash-out {
+        animation: clawSlashOut 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
       }
-      .animate-slide-in-up {
-        animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      .animate-claw-slash-in {
+        animation: clawSlashIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
     `;
     document.head.appendChild(style);
@@ -867,28 +867,28 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Page change effect - card slide transition
+  // Page change effect - claw slash transition
   useEffect(() => {
     if (currentPage === displayPage) return; // No change needed
     if (currentPage === 'home' && isInitialLoad) return;
     
-    // Phase 1: Slide current page down
+    // Phase 1: Claw slashes page away (right to left)
     setPageTransitioning(true);
     setTransitionPhase('out');
     
-    // Phase 2: After slide-down, switch page and slide new page up
+    // Phase 2: After slash-out, switch page and slash new page in (left to right)
     const switchTimer = setTimeout(() => {
       setDisplayPage(currentPage);
       window.scrollTo(0, 0); // INSTANT teleport to top
       setIsVisible({}); // Reset all visibility
       setTransitionPhase('in');
-    }, 400); // Wait for slide-down to complete
+    }, 500); // Wait for slash-out to complete
     
-    // Phase 3: End transition after slide-up completes
+    // Phase 3: End transition after slash-in completes
     const endTimer = setTimeout(() => {
       setPageTransitioning(false);
       setTransitionPhase('none');
-    }, 800); // Total: 400ms down + 400ms up
+    }, 1000); // Total: 500ms out + 500ms in
     
     return () => {
       clearTimeout(switchTimer);
@@ -2025,11 +2025,47 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-hidden relative">
-      {/* Main Content with card slide animations */}
+      {/* Claw Slash Overlay - diagonal orange line */}
+      {pageTransitioning && (
+        <div className="fixed inset-0 z-[150] pointer-events-none overflow-hidden">
+          <div 
+            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-all duration-500 ${
+              transitionPhase === 'out' ? 'left-[-100%] top-1/2' : 'left-full top-1/2'
+            }`}
+            style={{ 
+              boxShadow: '0 0 40px rgba(255, 90, 31, 1)',
+              transform: 'rotate(-45deg)',
+              transformOrigin: 'center',
+            }}
+          />
+          <div 
+            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-75 ${
+              transitionPhase === 'out' ? 'left-[-100%] top-1/2' : 'left-full top-1/2'
+            }`}
+            style={{ 
+              boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
+              transform: 'rotate(-45deg) translateY(10px)',
+              transformOrigin: 'center',
+            }}
+          />
+          <div 
+            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-100 ${
+              transitionPhase === 'out' ? 'left-[-100%] top-1/2' : 'left-full top-1/2'
+            }`}
+            style={{ 
+              boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
+              transform: 'rotate(-45deg) translateY(-10px)',
+              transformOrigin: 'center',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Main Content with claw slash animations */}
       <div 
         className={`min-h-[100dvh] ${
-          transitionPhase === 'out' ? 'animate-slide-out-down' : 
-          transitionPhase === 'in' ? 'animate-slide-in-up' : 
+          transitionPhase === 'out' ? 'animate-claw-slash-out' : 
+          transitionPhase === 'in' ? 'animate-claw-slash-in' : 
           ''
         }`}
       >
