@@ -617,9 +617,9 @@ const InitialLoadAnimation = ({ onComplete }) => {
       
       {/* Logo assembly in center - ALWAYS IN FRONT */}
       <div className={`relative z-20 transition-all duration-700 ${phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-        <div className="relative">
-          {/* 320px claw image with slash reveal */}
-          <div className="w-80 h-80 relative mb-8 flex items-center justify-center">
+        <div className="relative flex flex-col items-center">
+          {/* 320px claw image with slash reveal - centered */}
+          <div className="w-80 h-80 relative mb-8 flex items-center justify-center mx-auto">
             {/* Opaque background so slash doesn't show through */}
             <div className="absolute inset-0 bg-[#132038] z-0" />
             
@@ -641,12 +641,12 @@ const InitialLoadAnimation = ({ onComplete }) => {
               }`}>⚡</div>
             )}
             
-            {/* Pulsing glow */}
-            <div className="absolute inset-0 bg-orange-500/40 blur-[100px] animate-pulse z-5" />
+            {/* Pulsing glow - optimized blur */}
+            <div className="absolute inset-0 bg-orange-500/40 blur-3xl animate-pulse z-5" />
           </div>
           
           {/* Team name */}
-          <div className="text-center">
+          <div className="text-center w-full">
             <h1 className="text-7xl font-black text-white mb-3 tracking-tight" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
               WOLVERINE
             </h1>
@@ -852,9 +852,11 @@ const App = () => {
       }
       .animate-claw-slash-out {
         animation: clawSlashOut 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+        will-change: clip-path, opacity;
       }
       .animate-claw-slash-in {
         animation: clawSlashIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        will-change: clip-path, opacity;
       }
     `;
     document.head.appendChild(style);
@@ -1050,7 +1052,7 @@ const App = () => {
                 className={`flex flex-wrap gap-6 justify-center mb-16 transition-all duration-700 ${
                   isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
-                style={{animationDelay: '0.45s'}}
+                style={{animationDelay: '0.5s'}}
               >
                 <AngleButton onClick={() => setCurrentPage('robots')} variant="primary">
                   VIEW MATCHSTICK <ChevronRight size={20} />
@@ -1060,14 +1062,14 @@ const App = () => {
                 </AngleButton>
               </div>
 
-              {/* FIXED: Stats Bar - added more bottom margin to prevent overlap */}
+              {/* Stats Bar - appears AFTER buttons */}
               <div 
                 id="hero-stats"
                 data-animate
                 className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-24 transition-all duration-700 ${
                   isVisible['hero-stats'] ? 'animate-slide-down-fade' : 'opacity-0 translate-y-[-100%]'
                 }`}
-                style={{animationDelay: '0.65s'}}
+                style={{animationDelay: '0.7s'}}
               >
                 {[
                   { label: 'RECORD', value: '5-0-1' },
@@ -2025,49 +2027,46 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-hidden relative">
-      {/* Claw Slash Overlay - diagonal orange line */}
+      {/* Claw Slash Overlay - optimized with GPU acceleration */}
       {pageTransitioning && (
         <div className="fixed inset-0 z-[150] pointer-events-none overflow-hidden">
+          {/* Main slash line */}
           <div 
-            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-all duration-500 ${
-              transitionPhase === 'out' ? 'left-[-100%] top-1/2' : 'left-full top-1/2'
+            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-transform duration-500 ${
+              transitionPhase === 'out' ? '-translate-x-full' : 'translate-x-full'
             }`}
             style={{ 
               boxShadow: '0 0 40px rgba(255, 90, 31, 1)',
-              transform: 'rotate(-45deg)',
-              transformOrigin: 'center',
+              transform: `rotate(-45deg) translate3d(${transitionPhase === 'out' ? '-100%' : '100%'}, -50%, 0)`,
+              top: '50%',
+              left: transitionPhase === 'out' ? '-100%' : '100%',
+              willChange: 'transform',
             }}
           />
+          {/* Secondary slash lines for depth */}
           <div 
-            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-75 ${
-              transitionPhase === 'out' ? 'left-[-100%] top-1/2' : 'left-full top-1/2'
-            }`}
+            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-transform duration-500 delay-75`}
             style={{ 
               boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
-              transform: 'rotate(-45deg) translateY(10px)',
-              transformOrigin: 'center',
-            }}
-          />
-          <div 
-            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-100 ${
-              transitionPhase === 'out' ? 'left-[-100%] top-1/2' : 'left-full top-1/2'
-            }`}
-            style={{ 
-              boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
-              transform: 'rotate(-45deg) translateY(-10px)',
-              transformOrigin: 'center',
+              transform: `rotate(-45deg) translate3d(${transitionPhase === 'out' ? '-100%' : '100%'}, calc(-50% + 10px), 0)`,
+              top: '50%',
+              left: transitionPhase === 'out' ? '-100%' : '100%',
+              willChange: 'transform',
             }}
           />
         </div>
       )}
 
-      {/* Main Content with claw slash animations */}
+      {/* Main Content with claw slash animations - optimized */}
       <div 
         className={`min-h-[100dvh] ${
           transitionPhase === 'out' ? 'animate-claw-slash-out' : 
           transitionPhase === 'in' ? 'animate-claw-slash-in' : 
           ''
         }`}
+        style={{
+          willChange: transitionPhase !== 'none' ? 'clip-path, opacity' : 'auto'
+        }}
       >
         <nav className="fixed top-0 w-full bg-[#0a1628]/98 backdrop-blur-md border-b-2 border-orange-600 z-50 shadow-lg shadow-orange-600/20">
         <div className="max-w-7xl mx-auto px-4">
