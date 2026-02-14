@@ -2027,31 +2027,46 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-hidden relative">
-      {/* Claw Slash Overlay - optimized with GPU acceleration */}
+      {/* Claw Slash Overlay - triple slash effect with GPU acceleration */}
       {pageTransitioning && (
         <div className="fixed inset-0 z-[150] pointer-events-none overflow-hidden">
-          {/* Main slash line */}
+          {/* Main slash line - brightest and thickest */}
           <div 
-            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-transform duration-500 ${
-              transitionPhase === 'out' ? '-translate-x-full' : 'translate-x-full'
+            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-all duration-500 ${
+              transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
             }`}
             style={{ 
               boxShadow: '0 0 40px rgba(255, 90, 31, 1)',
-              transform: `rotate(-45deg) translate3d(${transitionPhase === 'out' ? '-100%' : '100%'}, -50%, 0)`,
+              transform: 'rotate(-45deg)',
               top: '50%',
-              left: transitionPhase === 'out' ? '-100%' : '100%',
-              willChange: 'transform',
+              transformOrigin: 'center',
+              willChange: 'left',
             }}
           />
-          {/* Secondary slash lines for depth */}
+          {/* Secondary slash line - upper */}
           <div 
-            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-transform duration-500 delay-75`}
+            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-75 ${
+              transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
+            }`}
             style={{ 
               boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
-              transform: `rotate(-45deg) translate3d(${transitionPhase === 'out' ? '-100%' : '100%'}, calc(-50% + 10px), 0)`,
+              transform: 'rotate(-45deg) translateY(-10px)',
               top: '50%',
-              left: transitionPhase === 'out' ? '-100%' : '100%',
-              willChange: 'transform',
+              transformOrigin: 'center',
+              willChange: 'left',
+            }}
+          />
+          {/* Third slash line - lower */}
+          <div 
+            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-500 delay-100 ${
+              transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
+            }`}
+            style={{ 
+              boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
+              transform: 'rotate(-45deg) translateY(10px)',
+              top: '50%',
+              transformOrigin: 'center',
+              willChange: 'left',
             }}
           />
         </div>
