@@ -618,8 +618,8 @@ const InitialLoadAnimation = ({ onComplete }) => {
       {/* Logo assembly in center - ALWAYS IN FRONT */}
       <div className={`relative z-20 transition-all duration-700 ${phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
         <div className="relative">
-          {/* LARGER claw image with slash reveal */}
-          <div className="w-80 h-80 relative mb-6 flex items-center justify-center">
+          {/* MASSIVE claw image - 500px for dramatic effect */}
+          <div className="w-[500px] h-[500px] relative mb-8 flex items-center justify-center">
             {/* Opaque background so slash doesn't show through */}
             <div className="absolute inset-0 bg-[#132038] z-0" />
             
@@ -631,7 +631,7 @@ const InitialLoadAnimation = ({ onComplete }) => {
                   phase === 'logo' || phase === 'complete' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
                 }`}
                 style={{ 
-                  filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 40px rgba(255, 90, 31, 0.9))',
+                  filter: 'brightness(1.5) contrast(1.3) drop-shadow(0 0 50px rgba(255, 90, 31, 1))',
                 }}
               />
             ) : (
@@ -642,16 +642,16 @@ const InitialLoadAnimation = ({ onComplete }) => {
             )}
             
             {/* Pulsing glow */}
-            <div className="absolute inset-0 bg-orange-500/30 blur-3xl animate-pulse z-5" />
+            <div className="absolute inset-0 bg-orange-500/40 blur-[100px] animate-pulse z-5" />
           </div>
           
           {/* Team name */}
           <div className="text-center">
-            <h1 className="text-6xl font-black text-white mb-2 tracking-tight" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
+            <h1 className="text-7xl font-black text-white mb-3 tracking-tight" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
               WOLVERINE
             </h1>
-            <p className="text-orange-500 font-black text-2xl tracking-widest">ROBOTICS</p>
-            <p className="text-[#A2A9B1] font-mono text-base mt-4 tracking-wider">TEAM 33791</p>
+            <p className="text-orange-500 font-black text-3xl tracking-widest">ROBOTICS</p>
+            <p className="text-[#A2A9B1] font-mono text-lg mt-6 tracking-wider">TEAM 33791</p>
           </div>
         </div>
       </div>
@@ -862,35 +862,32 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Page change effect - slide transition
+  // Page change effect - clean transition without double-trigger
   useEffect(() => {
     if (currentPage === displayPage) return; // No change needed
     if (currentPage === 'home' && isInitialLoad) return;
     
-    // Start slide transition
+    // Start transition
     setPageTransitioning(true);
     
-    // Wait for slide-out, then switch page
-    const switchTimer = setTimeout(() => {
-      setDisplayPage(currentPage);
-      window.scrollTo(0, 0); // Instant teleport to top
-      setIsVisible({}); // Reset visibility
-    }, 250); // Half of transition time
+    // Switch page immediately and teleport to top
+    setDisplayPage(currentPage);
+    window.scrollTo(0, 0); // INSTANT teleport to top
+    setIsVisible({}); // Reset all visibility
     
-    // End transition after both animations complete
+    // End transition after overlay fades
     const endTimer = setTimeout(() => {
       setPageTransitioning(false);
-    }, 500);
+    }, 400); // Transition duration
     
     return () => {
-      clearTimeout(switchTimer);
       clearTimeout(endTimer);
     };
-  }, [currentPage, displayPage, isInitialLoad]);
+  }, [currentPage, isInitialLoad]); // Remove displayPage from dependencies to prevent double-trigger
 
-  // Scroll-based intersection observer
+  // Scroll-based intersection observer - triggers animations on scroll
   useEffect(() => {
-    // Small delay to ensure DOM is ready
+    // Small delay to ensure DOM is ready after page change
     const setupTimer = setTimeout(() => {
       const observer = new IntersectionObserver(
         (entries) => {
@@ -913,10 +910,10 @@ const App = () => {
       return () => {
         observer.disconnect();
       };
-    }, 100);
+    }, 150); // Slightly longer delay to ensure page has switched
     
     return () => clearTimeout(setupTimer);
-  }, [displayPage, isInitialLoad]); // Re-run when display page changes
+  }, [displayPage]); // Only depend on displayPage, not isInitialLoad
 
   const navigation = [
     { name: 'HOME', id: 'home' },
@@ -960,7 +957,7 @@ const App = () => {
   // FIXED: Function to handle navigation to home and scroll to top
   const handleLogoClick = () => {
     setCurrentPage('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0); // INSTANT teleport, not smooth
   };
 
   const renderPage = () => {
@@ -2019,11 +2016,11 @@ const App = () => {
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-x-hidden relative">
       {/* Page Transition Overlay - simple fade that actually works */}
       <div 
-        className={`fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center transition-opacity duration-300 pointer-events-none ${
+        className={`fixed inset-0 z-[200] bg-[#132038] flex items-center justify-center pointer-events-none transition-opacity duration-400 ${
           pageTransitioning ? 'opacity-100 pointer-events-auto' : 'opacity-0'
         }`}
       >
-        <div className="w-24 h-24 relative flex items-center justify-center">
+        <div className="w-32 h-32 relative flex items-center justify-center">
           <img 
             src="/data/logo.svg" 
             alt="Loading" 
