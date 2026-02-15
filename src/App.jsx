@@ -1120,7 +1120,7 @@ const App = () => {
                   }`}
                   style={{transitionDelay: '200ms'}}
                 >
-                  17 students. 1 vision. Unlimited potential.
+                  13 students. 1 vision. Unlimited potential.
                 </p>
               </div>
               
