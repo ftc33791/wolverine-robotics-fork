@@ -958,7 +958,7 @@ const App = () => {
       { name: 'Jivansh Pandya', role: 'Outreach', image: '/data/team/Jivansh.jpg', initials: 'JP', rookie: true },
     ],
     mentors: [
-      { name: 'Abdullah Khalid', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false },
+      { name: 'Abdullah Khaled', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false },
     ],
     coaches: [
       { name: 'Mr. Ellis', role: 'Coach', image: '/data/team/ellis.jpg', initials: 'E', rookie: false },
