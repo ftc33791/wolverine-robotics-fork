@@ -105,18 +105,18 @@ const SponsorCard = ({ sponsor }) => {
       }}
     >
       {!imageLoaded ? (
-        <div className="w-full h-full bg-gradient-to-br from-blue-900 to-orange-900 flex items-center justify-center">
+        <div className="w-full h-full bg-gradient-to-br from-[#132038] to-[#FF5A1F] flex items-center justify-center">
           <div className="text-white text-6xl font-black animate-pulse">{initials}</div>
         </div>
       ) : imageError ? (
-        <div className="w-full h-full bg-gradient-to-br from-blue-900 to-orange-900 flex items-center justify-center">
+        <div className="w-full h-full bg-gradient-to-br from-[#132038] to-[#FF5A1F] flex items-center justify-center">
           <div className="text-white text-6xl font-black">{initials}</div>
         </div>
       ) : (
         <img 
           src={sponsor.image} 
           alt={sponsor.name} 
-          className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-500" 
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
         />
       )}
       
