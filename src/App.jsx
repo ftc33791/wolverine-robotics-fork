@@ -554,8 +554,8 @@ const InitialLoadAnimation = ({ onComplete }) => {
       '/data/team/sahejdeep.jpg',
       '/data/team/sripadh.jpg',
       '/data/team/manveer.jpg',
-      '/data/sponsors/wakeland-high-school.jpg',
-      '/data/sponsors/wakeland-nhs.jpg'
+      '/data/sponsors/whs.png',
+      '/data/sponsors/nhs.png'
     ];
     
     let loadedCount = 0;
