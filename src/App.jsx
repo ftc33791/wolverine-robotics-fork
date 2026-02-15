@@ -667,7 +667,6 @@ const App = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [pageTransitioning, setPageTransitioning] = useState(false);
   const [displayPage, setDisplayPage] = useState('home'); // The page actually being rendered
-  const [previousPage, setPreviousPage] = useState('home'); // For transition effect
   const [transitionPhase, setTransitionPhase] = useState('none'); // 'out' or 'in' or 'none'
 
   // Set favicon on mount
@@ -688,6 +687,26 @@ const App = () => {
     };
     
     setFavicon();
+  }, []);
+
+  // Update URL when page changes
+  useEffect(() => {
+    const path = currentPage === 'home' ? '/' : `/${currentPage}`;
+    window.history.pushState({}, '', path);
+  }, [currentPage]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      const page = path === '/' ? 'home' : path.substring(1);
+      if (['home', 'about', 'robots', 'sponsors', 'contact'].includes(page)) {
+        setCurrentPage(page);
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
@@ -869,7 +888,7 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Page change effect - claw slash transition
+  // Page change effect - claw slash transition WITHOUT the glowing lines
   useEffect(() => {
     if (currentPage === displayPage) return; // No change needed
     if (currentPage === 'home' && isInitialLoad) return;
@@ -966,12 +985,6 @@ const App = () => {
     ]
   };
 
-  const upcomingEvents = [
-    { name: 'Regional Championship', date: 'March 15, 2025', time: '9:00 AM', location: 'Frisco Event Center' },
-    { name: 'Team Practice', date: 'March 8, 2025', time: '4:00 PM', location: 'Wakeland High School' },
-    { name: 'Community Outreach', date: 'March 22, 2025', time: '10:00 AM', location: 'Local STEM Fair' },
-  ];
-
   // FIXED: Function to handle navigation to home and scroll to top
   const handleLogoClick = () => {
     setCurrentPage('home');
@@ -1054,7 +1067,7 @@ const App = () => {
               <div 
                 id="hero-buttons"
                 data-animate
-                className={`flex flex-wrap gap-6 justify-center mb-16 transition-all duration-700 ${
+                className={`flex flex-wrap gap-6 justify-center transition-all duration-700 ${
                   isVisible['hero-buttons'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
                 }`}
                 style={{animationDelay: '0.5s'}}
@@ -1066,258 +1079,11 @@ const App = () => {
                   MEET THE TEAM
                 </AngleButton>
               </div>
-
-              {/* Stats Bar - appears AFTER buttons */}
-              <div 
-                id="hero-stats"
-                data-animate
-                className={`grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-24 transition-all duration-700 ${
-                  isVisible['hero-stats'] ? 'animate-slide-down-fade' : 'opacity-0 translate-y-[-100%]'
-                }`}
-                style={{animationDelay: '0.7s'}}
-              >
-                {[
-                  { label: 'RECORD', value: '5-0-1' },
-                  { label: 'TEAM SIZE', value: '17' },
-                  { label: 'SEASON', value: '2025' }
-                ].map((stat, idx) => (
-                  <div key={idx} className="relative group">
-                    <div className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-6 border-2 border-[#A2A9B1] backdrop-blur-sm hover:border-orange-600 transition-all duration-500 group-hover:scale-[1.05]"
-                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
-                           style={{
-                             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
-                           }} />
-                      <div className="text-3xl md:text-4xl font-black text-white mb-1 relative z-10">{stat.value}</div>
-                      <div className="text-xs text-orange-500 font-bold tracking-widest relative z-10">{stat.label}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Robot Showcase - FIXED: Added top padding to prevent stats overlap */}
-          <div className="py-32 pt-16 bg-gradient-to-b from-[#132038] to-[#0a1628] relative overflow-hidden">
-            <ClawMarkImage opacity={0.08} className="top-1/4 left-0 w-[500px] h-[500px]" />
-            
-            <div className="max-w-7xl mx-auto px-4 relative z-10">
-              <div className="text-center mb-20">
-                <div 
-                  id="robot-section"
-                  data-animate
-                  className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['robot-section'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
-                  }`}
-                >
-                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
-                       style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
-                    <span className="text-orange-500 font-black text-sm tracking-widest">OUR MACHINE</span>
-                  </div>
-                </div>
-                
-                <h2 
-                  id="robot-title"
-                  data-animate
-                  className={`text-5xl md:text-7xl font-black text-white mb-4 transition-all duration-700 ${
-                    isVisible['robot-title'] ? 'animate-lock-in' : 'opacity-0 translate-x-[-40px]'
-                  }`}
-                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
-                >
-                  MEET MATCHSTICK
-                </h2>
-                <p 
-                  id="robot-subtitle"
-                  data-animate
-                  className={`text-xl text-gray-400 max-w-2xl mx-auto transition-all duration-700 ${
-                    isVisible['robot-subtitle'] ? 'animate-fade-in-up' : 'opacity-0 translate-y-[30px]'
-                  }`}
-                  style={{transitionDelay: '200ms'}}
-                >
-                  Precision-engineered for the 2025-26 DECODE season
-                </p>
-              </div>
-              
-              <div
-                id="robot-card"
-                data-animate
-                className={`relative transition-all duration-700 ${
-                  isVisible['robot-card'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
-                }`}
-                style={{transitionDelay: '300ms'}}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-blue-900/10 transform translate-x-4 translate-y-4"
-                     style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}} />
-                
-                <div className="relative bg-gradient-to-br from-[#1a2847] to-[#0f1629] p-8 md:p-12 border-2 border-[#A2A9B1] overflow-hidden group hover:border-orange-600 transition-all duration-500 hover:scale-[1.02]"
-                     style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}>
-                  {/* FIXED: Using claw.png instead of 3-lined pattern */}
-                  <ClawMarkImage className="top-0 right-0 w-48 h-48" opacity={0.08} />
-                  
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
-                       style={{
-                         boxShadow: 'inset 0 0 50px rgba(255, 90, 31, 0.4)',
-                       }} />
-                  
-                  <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
-                    <div className="space-y-6">
-                      <div 
-                        className="aspect-square bg-gradient-to-br from-orange-900 to-blue-900 flex items-center justify-center text-white font-black overflow-hidden relative hover:shadow-2xl hover:shadow-orange-600/50 transition-all duration-500 border-2 border-[#A2A9B1] hover:border-orange-600 group hover:scale-[1.03]"
-                        style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%)'}}
-                      >
-                        <RobotImage 
-                          src="/data/robots/matchstick-main.jpg" 
-                          alt="Matchstick Robot" 
-                          fallbackText="MS"
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        {[1, 2, 3, 4].map((i) => (
-                          <div
-                            key={i}
-                            className="aspect-square bg-gradient-to-br from-blue-800 to-orange-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden hover:scale-[1.05] transition-all duration-300 border-2 border-[#A2A9B1] hover:border-orange-600 group"
-                            style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}
-                          >
-                            <RobotImage 
-                              src={`/data/robots/matchstick-${i}.jpg`} 
-                              alt={`Matchstick detail ${i}`} 
-                              fallbackText={i.toString()}
-                            />
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                 style={{
-                                   boxShadow: 'inset 0 0 20px rgba(255, 90, 31, 0.5)',
-                                 }} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-8">
-                      <div>
-                        <h3 className="text-5xl font-black text-white mb-2" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>
-                          MATCHSTICK
-                        </h3>
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="h-1 w-16 bg-gradient-to-r from-orange-600 to-transparent" />
-                          <p className="text-orange-500 font-bold tracking-wider text-sm">SEASON 2025-26</p>
-                        </div>
-                        <p className="text-gray-300 text-lg leading-relaxed">
-                          Our inaugural machine. Engineered in record time with zero compromises on performance. Every component optimized for competitive excellence.
-                        </p>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        {[
-                          { label: 'WEIGHT', value: '28 LBS' },
-                          { label: 'HEIGHT', value: '18 IN' },
-                          { label: 'DRIVE', value: 'MECANUM' },
-                          { label: 'CODE', value: 'JAVA 17' }
-                        ].map((spec, idx) => (
-                          <div 
-                            key={idx}
-                            className="bg-gradient-to-br from-orange-600/20 to-blue-900/20 p-4 border-2 border-[#A2A9B1] hover:border-orange-600 hover:scale-[1.05] transition-all duration-300 group relative"
-                            style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}
-                          >
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
-                                 style={{
-                                   boxShadow: 'inset 0 0 25px rgba(255, 90, 31, 0.4)',
-                                 }} />
-                            <p className="text-orange-500/70 font-bold text-xs mb-1 tracking-wider relative z-10">{spec.label}</p>
-                            <p className="text-white text-xl font-black relative z-10">{spec.value}</p>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <AngleButton onClick={() => setCurrentPage('robots')} variant="primary" className="w-full">
-                        FULL SPECIFICATIONS <ChevronRight size={20} />
-                      </AngleButton>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Events Section */}
-          <div className="py-32 bg-[#0a1628] relative overflow-hidden">
-            <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[700px] h-[700px]" />
-            
-            <div className="max-w-7xl mx-auto px-4 relative z-10">
-              <div className="text-center mb-20">
-                <div 
-                  id="events-tag"
-                  data-animate
-                  className={`inline-block mb-6 transition-all duration-700 ${
-                    isVisible['events-tag'] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
-                  }`}
-                >
-                  <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600 hover:scale-105 transition-transform duration-300"
-                       style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'}}>
-                    <span className="text-orange-500 font-black text-sm tracking-widest">UPCOMING</span>
-                  </div>
-                </div>
-                
-                <h2 
-                  id="events-title"
-                  data-animate
-                  className={`text-5xl md:text-7xl font-black text-white transition-all duration-700 ${
-                    isVisible['events-title'] ? 'animate-lock-in' : 'opacity-0 translate-x-[-40px]'
-                  }`}
-                  style={{fontFamily: 'system-ui, -apple-system, sans-serif', transitionDelay: '100ms'}}
-                >
-                  EVENTS & SCHEDULE
-                </h2>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-6">
-                {upcomingEvents.map((event, idx) => (
-                  <div
-                    key={idx}
-                    id={`event-${idx}`}
-                    data-animate
-                    className={`relative group transition-all duration-700 ${
-                      isVisible[`event-${idx}`] ? 'animate-grow-in' : 'opacity-0 scale-[0.85]'
-                    }`}
-                    style={{ transitionDelay: `${idx * 100}ms` }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-blue-900/20 transform translate-x-2 translate-y-2"
-                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}} />
-                    
-                    <div className="relative bg-[#1a2847] p-8 border-2 border-[#A2A9B1] hover:border-orange-600 transition-all duration-500 overflow-hidden hover:scale-[1.03]"
-                         style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)'}}>
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-600/10 to-transparent transform translate-x-8 -translate-y-8 rotate-45" />
-                      
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-glow"
-                           style={{
-                             boxShadow: 'inset 0 0 30px rgba(255, 90, 31, 0.5)',
-                           }} />
-                      
-                      <Calendar className="text-orange-500 mb-6 relative z-10" size={36} />
-                      <h3 className="text-2xl font-black text-white mb-6 relative z-10">{event.name}</h3>
-                      <div className="space-y-3 text-gray-300 relative z-10">
-                        <div className="flex items-center gap-3">
-                          <div className="w-1 h-6 bg-orange-600" />
-                          <span className="text-sm">{event.date}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-1 h-6 bg-orange-600" />
-                          <span className="text-sm">{event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-1 h-6 bg-orange-600" />
-                          <span className="text-sm">{event.location}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 
           {/* Team Preview */}
-          <div className="py-32 bg-gradient-to-b from-[#0a1628] to-[#132038] relative overflow-hidden">
+          <div className="py-32 bg-gradient-to-b from-[#132038] to-[#0a1628] relative overflow-hidden">
             <GridScan sensitivity={0.3} scanOpacity={0.2} />
             <ClawMarkImage opacity={0.08} className="top-1/3 left-1/4 w-[550px] h-[550px]" />
             
@@ -1684,9 +1450,9 @@ const App = () => {
                       </div>
                       <ul className="space-y-3 relative z-10">
                         {[
-                          '5-0-1 COMPETITION RECORD',
-                          '#2 OPR & RANK - LEAGUE MEET 3',
-                          'TEAM 33791 INAUGURAL ROBOT'
+                          '2X CONTROL AWARD WINNER',
+                          'SEMI-FINALIST AT U-LEAGUE TOURNAMENT',
+                          'WINNER OF DALLAS SEMI-REGIONAL'
                         ].map((achievement, idx) => (
                           <li key={idx} className="flex items-center gap-3 text-gray-300">
                             <div className="w-2 h-2 bg-orange-600 transform rotate-45" />
@@ -1705,10 +1471,10 @@ const App = () => {
                       <h3 className="text-white font-black text-2xl mb-6 relative z-10">KEY FEATURES</h3>
                       <ul className="space-y-3 relative z-10">
                         {[
-                          '12 & 6 BALL AUTONOMOUS MODES',
-                          '1 SECOND CYCLE TIME',
-                          'AUTO-ADJUSTING AIMING SYSTEM',
-                          'REINFORCED ALUMINUM CHASSIS'
+                          '12 & 9 BALL AUTONOMOUS',
+                          '3 SECOND CYCLE TIME',
+                          'VARIABLE SHOOTING SEQUENCE',
+                          'MODULAR SUBSYSTEM DESIGN'
                         ].map((feature, idx) => (
                           <li key={idx} className="flex items-center gap-3 text-gray-300">
                             <div className="w-2 h-2 bg-orange-600 transform rotate-45" />
@@ -2032,52 +1798,7 @@ const App = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a1628] overflow-hidden relative">
-      {/* Claw Slash Overlay - triple slash effect with GPU acceleration */}
-      {pageTransitioning && (
-        <div className="fixed inset-0 z-[150] pointer-events-none overflow-hidden">
-          {/* Main slash line - brightest and thickest */}
-          <div 
-            className={`absolute h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent w-[200%] transition-all duration-600 ${
-              transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
-            }`}
-            style={{ 
-              boxShadow: '0 0 40px rgba(255, 90, 31, 1)',
-              transform: 'rotate(-45deg)',
-              top: '50%',
-              transformOrigin: 'center',
-              willChange: 'left',
-            }}
-          />
-          {/* Secondary slash line - upper */}
-          <div 
-            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-600 delay-75 ${
-              transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
-            }`}
-            style={{ 
-              boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
-              transform: 'rotate(-45deg) translateY(-10px)',
-              top: '50%',
-              transformOrigin: 'center',
-              willChange: 'left',
-            }}
-          />
-          {/* Third slash line - lower */}
-          <div 
-            className={`absolute h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent w-[200%] transition-all duration-600 delay-100 ${
-              transitionPhase === 'out' ? 'left-[-100%]' : 'left-full'
-            }`}
-            style={{ 
-              boxShadow: '0 0 30px rgba(255, 90, 31, 0.8)',
-              transform: 'rotate(-45deg) translateY(10px)',
-              top: '50%',
-              transformOrigin: 'center',
-              willChange: 'left',
-            }}
-          />
-        </div>
-      )}
-
-      {/* Main Content with claw slash animations - optimized */}
+      {/* Main Content with claw slash animations - optimized WITHOUT glowing lines */}
       <div 
         className={`min-h-[100dvh] ${
           transitionPhase === 'out' ? 'animate-claw-slash-out' : 
