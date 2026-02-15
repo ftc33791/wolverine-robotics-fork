@@ -1763,8 +1763,8 @@ const App = () => {
 
             <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto mb-20">
               {[
-                { name: 'Wakeland High School', image: '/data/sponsors/wakeland-high-school.jpg' },
-                { name: 'Wakeland High School NHS', image: '/data/sponsors/wakeland-nhs.jpg' }
+                { name: 'Wakeland High School', image: '/data/sponsors/whs.png' },
+                { name: 'Wakeland High School NHS', image: '/data/sponsors/nhs.png' }
               ].map((sponsor, idx) => (
                 <div
                   key={idx}
