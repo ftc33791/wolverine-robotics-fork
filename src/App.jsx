@@ -1876,7 +1876,7 @@ const App = () => {
                   {
                     icon: Mail,
                     title: 'EMAIL',
-                    content: 'wolverine.robotics.33791@gmail.com',
+                    content: 'ftc33791@gmail.com',
                     color: 'orange'
                   },
                   {
