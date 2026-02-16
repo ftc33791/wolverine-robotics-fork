@@ -1942,7 +1942,7 @@ const App = () => {
               © 2025 Wolverine Robotics. All rights reserved.
             </p>
             <p className="text-gray-600 text-xs mt-2">
-              Website developed by Sahejdeep Singh: sahej.robotics@outlook.com
+              Website developed by Sahejdeep Singh: sahej.robotics@outlook.com. Made with Guidance of Dev Gavande and Abdullah Khaled
             </p>
           </div>
         </div>
