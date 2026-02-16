@@ -962,19 +962,18 @@ const App = () => {
 
   const teamMembers = {
     students: [
-      { name: 'Dev Gavande', role: 'Team Captain, Founder, Driver, CAD Lead, Build Team Lead', image: '/data/team/dev.jpg', initials: 'DG', rookie: false },
-      { name: 'Sahejdeep Singh', role: 'Software, Drive Coach, Build Team', image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true },
-      { name: 'Sripaadh J Kuppusamy', role: 'Human Player and Build Team', image: '/data/team/sripadh.jpg', initials: 'SK', rookie: true },
-      { name: 'Manveer Singh Tib', role: 'Human Player and Build Team', image: '/data/team/manveer.jpg', initials: 'MT', rookie: true },
-      { name: 'Piousvir Singh', role: 'Build Team', image: '/data/team/pious.jpg', initials: 'PS', rookie: true },
-      { name: 'Kalvik Das', role: 'Outreach', image: '/data/team/Kalvik.jpg', initials: 'KD', rookie: true },
-      { name: 'Jacob Esparza', role: 'Outreach', image: '/data/team/Jacob.jpeg', initials: 'JE', rookie: true },
-      { name: 'Alexander Fiderfish', role: 'Outreach', image: '/data/team/member9.jpg', initials: 'AF', rookie: true },
+      { name: 'Dev Gavande', role: 'Team Captain, Founder, Driver, CAD Lead, Hardware Lead', image: '/data/team/dev.jpg', initials: 'DG', rookie: false },
+      { name: 'Sahejdeep Singh', role: 'Software, Hardware, Drive Coach', image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true },
+      { name: 'Sripaadh J Kuppusamy', role: 'Hardware, Human Player', image: '/data/team/sripadh.jpg', initials: 'SK', rookie: true },
+      { name: 'Manveer Singh Tib', role: 'Hardware, Human Player', image: '/data/team/manveer.jpg', initials: 'MT', rookie: true },
+      { name: 'Piousvir Singh', role: 'Outreach', image: '/data/team/pious.jpg', initials: 'PS', rookie: true },
+      { name: 'Kalvik Das', role: 'Hardware', image: '/data/team/Kalvik.jpg', initials: 'KD', rookie: true },
+      { name: 'Jacob Esparza', role: 'Hardware', image: '/data/team/Jacob.jpeg', initials: 'JE', rookie: true },
+      { name: 'Alexander Fiderfish', role: 'Hardware', image: '/data/team/member9.jpg', initials: 'AF', rookie: true },
       { name: 'Pratham Erramilli', role: 'Outreach', image: '/data/team/pratham.jpg', initials: 'PE', rookie: true },
-      { name: 'Abhi Ravulaparthy', role: 'Outreach', image: '/data/team/member11.jpg', initials: 'AR', rookie: true },
       { name: 'Kavin Murugan', role: 'Outreach', image: '/data/team/kavin.jpg', initials: 'KM', rookie: true },
-      { name: 'Kaiden Lee', role: 'Outreach', image: '/data/team/kaiden.jpg', initials: 'KL', rookie: true },
-      { name: 'Jivansh Pandya', role: 'Outreach', image: '/data/team/Jivansh.jpg', initials: 'JP', rookie: true },
+      { name: 'Kaiden Lee', role: 'Hardware', image: '/data/team/kaiden.jpg', initials: 'KL', rookie: true },
+      { name: 'Jivansh Pandya', role: 'Hardware', image: '/data/team/Jivansh.jpg', initials: 'JP', rookie: true },
     ],
     mentors: [
       { name: 'Abdullah Khaled', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false },
@@ -1120,7 +1119,7 @@ const App = () => {
                   }`}
                   style={{transitionDelay: '200ms'}}
                 >
-                  13 students. 1 vision. Unlimited potential.
+                  12 students. 1 vision. Unlimited potential.
                 </p>
               </div>
               
