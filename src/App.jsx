@@ -521,7 +521,7 @@ function ScoutingPage({ isVisible }) {
       const [teamInfoResults,quickResults,eventsResults] = await Promise.all([
         batchFetch(teamNumbers, n=>fetchJSON(`${FTCSCOUT_API}/teams/${n}`).catch(()=>null), 5),
         batchFetch(teamNumbers, n=>fetchJSON(`${FTCSCOUT_API}/teams/${n}/quick-stats?season=${season}`).catch(()=>null), 5),
-        batchFetch(teamNumbers, n=>fetchJSON(`${FTCSCOUT_API}/teams/${n}/events?season=${season}`).catch(()=>null), 5),
+        batchFetch(teamNumbers, n=>fetchJSON(`${FTCSCOUT_API}/teams/${n}/events/${season}`).catch(()=>null), 5),
       ]);
 
       // Console debug — open DevTools to see exact API shape, remove once confirmed
