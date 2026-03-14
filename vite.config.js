@@ -21,7 +21,14 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: true,
+    proxy: {
+      '/api/ignite': {
+        target: 'https://ftc.ignitepathways.org/api/public',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/ignite/, '')
+      }
+    }
   },
   preview: {
     port: 4173
