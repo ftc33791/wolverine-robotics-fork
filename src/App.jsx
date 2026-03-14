@@ -72,16 +72,20 @@ function analyzePlaystyle(data, currentSeason) {
 
 function buildTeam(teamNumber, igniteData, quickStats, awardsForTeam, season) {
     const ig = igniteData;
+    const qs = quickStats;
     const summary = ig?.seasonSummary;
     const name = ig?.name ?? '';
     const location = [ig?.city, ig?.state, ig?.country].filter(Boolean).join(', ');
-    const seasonOpr = summary?.opr ?? quickStats?.tot?.value ?? 0;
-    const autoOpr = summary?.autoOpr ?? 0;
-    const teleOpr = summary?.teleopOpr ?? 0;
-    const egOpr = summary?.endgameOpr ?? 0;
-    const dpr = summary?.dpr ?? 0;
-    const ccwm = summary?.ccwm ?? 0;
-    const seasonRank = quickStats?.tot?.rank ?? 99999;
+    
+    // Prioritize FTC Scout quick-stats for official averages
+    const seasonOpr = qs?.tot?.value ?? summary?.opr ?? 0;
+    const autoOpr   = qs?.auto?.value ?? summary?.autoOpr ?? 0;
+    const teleOpr   = qs?.tele?.value ?? summary?.teleopOpr ?? 0;
+    const egOpr     = qs?.end?.value ?? summary?.endgameOpr ?? 0;
+    const dpr       = qs?.dpr?.value ?? summary?.dpr ?? 0;
+    const ccwm      = qs?.ccwm?.value ?? summary?.ccwm ?? 0;
+    
+    const seasonRank = qs?.tot?.rank ?? 99999;
     const totalWins = summary?.totalWins ?? 0;
     const totalLosses = summary?.totalLosses ?? 0;
     const totalTies = summary?.totalTies ?? 0;
