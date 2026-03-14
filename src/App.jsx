@@ -1,487 +1,502 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, ChevronRight, Award, Users, Mail, MapPin, Github, Linkedin, Instagram, Zap, Search, BarChart2 } from 'lucide-react';
 import * as THREE from 'three';
+import './Scouting.css';
 
 const FTCSCOUT_API = 'https://api.ftcscout.org/rest/v1';
-const SCOUT_SEASONS = [
-  { value: '2025', label: '2025-26 DECODE' },
-  { value: '2024', label: '2024-25 INTO THE DEEP' },
-  { value: '2023', label: '2023-24 CENTERSTAGE' },
-  { value: '2022', label: '2022-23 POWERPLAY' },
-  { value: '2021', label: '2021-22 FREIGHT FRENZY' },
-  { value: '2020', label: '2020-21 ULTIMATE GOAL' },
-  { value: '2019', label: '2019-20 SKYSTONE' },
+const IGNITE_API = '/api/ignite';
+
+function escHtml(str) { return str; } // React sanitizes automatically
+
+// Format getters & columns logic ported from vanilla JS
+const getColumns = (season) => [
+  { key: 'team', label: 'Team #', getter: t => t.teamNumber, tooltip: 'Team number' },
+  { key: 'name', label: 'Team Name', getter: t => t.name, tooltip: 'Team name' },
+  { key: 'seasonRank', label: 'Rank', getter: t => t.seasonRank ?? 99999, tooltip: 'Global OPR ranking' },
+  { key: 'bestOpr', label: 'Best OPR', getter: t => t.bestOpr ?? 0, tooltip: 'Highest OPR', hasVisual: true, barColor: 'blue' },
+  { key: 'autoOpr', label: 'Auto OPR', getter: t => t.autoOpr ?? 0, tooltip: 'Season Auto OPR', hasVisual: true, barColor: 'yellow' },
+  { key: 'teleOpr', label: 'TeleOp OPR', getter: t => t.teleOpr ?? 0, tooltip: 'Season TeleOp OPR', hasVisual: true, barColor: 'blue' },
+  { key: 'egOpr', label: 'Endg OPR', getter: t => t.egOpr ?? 0, tooltip: 'Season Endgame OPR', hasVisual: true, barColor: 'red' },
+  { key: 'dpr', label: 'Def PR', getter: t => t.dpr ?? 0, tooltip: 'Defensive Power Rating', hasVisual: true, barColor: 'red' },
+  { key: 'ccwm', label: 'CCWM', getter: t => t.ccwm ?? 0, tooltip: 'Contribution to Margin', hasVisual: true, barColor: 'green' },
+  { key: 'winRate', label: 'Season Win%', getter: t => t.winRate ?? 0, tooltip: 'Season-wide win rate', hasVisual: true, barColor: 'green', isWinPct: true },
+  { key: 'lastWinRate', label: 'Last Win%', getter: t => t.lastWinRate ?? 0, tooltip: 'Win rate at recent event', hasVisual: true, barColor: 'green', isWinPct: true },
+  { key: 'record', label: 'W-L-T', getter: t => t.totalWins ?? 0, tooltip: 'Season record' },
+  { key: 'maxScore', label: 'Max NP', getter: t => t.maxScoreNp ?? 0, tooltip: 'Best score', hasVisual: true, barColor: 'blue' },
+  { key: 'avgScore', label: 'Avg NP', getter: t => t.avgScoreNp ?? 0, tooltip: 'Average score', hasVisual: true, barColor: 'blue' },
+  { key: 'events', label: 'Events', getter: t => t.eventCount ?? 0, tooltip: 'Events played' },
+  { key: 'lastRank', label: 'Last Rank', getter: t => t.lastRank ?? 999, tooltip: 'Ranking at recent event' },
+  { key: 'lastEvent', label: 'Last Event', getter: t => t.lastEventCode ?? '', tooltip: 'Most recent event' },
+  { key: 'comments', label: 'Comments', getter: t => t.teamNumber, tooltip: 'Local notes', noSort: true },
+  { key: 'awards', label: 'Awards', getter: t => t.awardCount ?? 0, tooltip: 'Season awards' },
+  { key: 'location', label: 'Location', getter: t => t.location ?? '', tooltip: 'Team location' }
 ];
 
-async function fetchJSON(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+function analyzePlaystyle(data, currentSeason) {
+    const { autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, winRate } = data;
+    const tags = [];
+    let score = 0;
+    const total = autoOpr + teleOpr + egOpr;
+
+    if (total > 0) {
+        if (autoOpr >= 30) { tags.push('Strong Auto'); score += 3; }
+        else if (autoOpr >= 15) { tags.push('Solid Auto'); score += 2; }
+        else if (autoOpr < 5) { tags.push('Weak Auto'); }
+    }
+    if (teleOpr >= 100) { tags.push('TeleOp Powerhouse'); score += 4; }
+    else if (teleOpr >= 60) { tags.push('Strong TeleOp'); score += 3; }
+    else if (teleOpr >= 30) { tags.push('Avg TeleOp'); score += 1; }
+    if (egOpr >= 15) { tags.push('Climber'); score += 2; }
+    else if (egOpr >= 5) { tags.push('Parks'); score += 1; }
+    if (dpr > 0 && seasonOpr > 0 && dpr > seasonOpr * 0.8) { tags.push('Defensive'); score += 1; }
+    if (ccwm >= 50) { tags.push('Carry Potential'); score += 3; }
+    else if (ccwm >= 20) { tags.push('Net Positive'); score += 2; }
+    else if (ccwm < 0) { tags.push('Needs Strong Partner'); }
+    if (winRate >= 80) { tags.push('Elite'); score += 3; }
+    else if (winRate >= 65) { tags.push('Consistent'); score += 2; }
+
+    if (currentSeason === '2024') {
+        const avgSpecimen = autoOpr * 0.4 + teleOpr * 0.3;
+        if (avgSpecimen > 40) tags.push('Specimen Specialist');
+        else if (teleOpr > 80) tags.push('High Basket Expert');
+    }
+
+    let tier = '';
+    if (seasonOpr >= 150) tier = '★★★';
+    else if (seasonOpr >= 100) tier = '★★';
+    else if (seasonOpr >= 50) tier = '★';
+
+    const text = (tier ? tier + ' ' : '') + (tags.length > 0 ? tags.slice(0, 3).join(' · ') : 'Balanced');
+    return { text, score };
+}
+
+function buildTeam(teamNumber, igniteData, quickStats, awardsForTeam, season) {
+    const ig = igniteData;
+    const summary = ig?.seasonSummary;
+    const name = ig?.name ?? '';
+    const location = [ig?.city, ig?.state, ig?.country].filter(Boolean).join(', ');
+    const seasonOpr = summary?.opr ?? quickStats?.tot?.value ?? 0;
+    const autoOpr = summary?.autoOpr ?? 0;
+    const teleOpr = summary?.teleopOpr ?? 0;
+    const egOpr = summary?.endgameOpr ?? 0;
+    const dpr = summary?.dpr ?? 0;
+    const ccwm = summary?.ccwm ?? 0;
+    const seasonRank = quickStats?.tot?.rank ?? 99999;
+    const totalWins = summary?.totalWins ?? 0;
+    const totalLosses = summary?.totalLosses ?? 0;
+    const totalTies = summary?.totalTies ?? 0;
+    const totalMatches = summary?.matchesPlayed ?? 0;
+    const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
+    const maxScoreNp = summary?.maxScore ?? 0;
+    const avgScoreNp = summary?.avgScore ?? 0;
+    const eventCount = summary?.eventsPlayed ?? 0;
+
+    let lastOpr = 0, lastRank = 999, lastWins = 0, lastLosses = 0, lastTies = 0, lastEventCode = '', lastWinRate = 0, bestOpr = 0;
+    let eventHistory = [];
+
+    if (ig?.events && ig?.eventStats) {
+        const validEvents = [...ig.events].filter(e => ig.eventStats[e.eventId] && ig.eventStats[e.eventId].wins !== null);
+        validEvents.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+        validEvents.forEach(e => {
+            const stats = ig.eventStats[e.eventId];
+            const eventOpr = stats.opr ?? stats.npOpr ?? 0;
+            if (eventOpr > bestOpr) bestOpr = eventOpr;
+            eventHistory.push({ eventName: e.name, eventCode: e.eventCode, date: e.startDate, opr: eventOpr });
+        });
+        if (eventHistory.length > 0) {
+            const latestEvent = validEvents[validEvents.length - 1];
+            const latestStats = ig.eventStats[latestEvent.eventId];
+            lastOpr = eventHistory[eventHistory.length - 1].opr;
+            lastRank = latestStats.rank ?? 999;
+            lastWins = latestStats.wins ?? 0;
+            lastLosses = latestStats.losses ?? 0;
+            lastTies = latestStats.ties ?? 0;
+            lastEventCode = latestEvent.eventCode ?? '';
+            const lastTotal = lastWins + lastLosses + lastTies;
+            lastWinRate = lastTotal > 0 ? (lastWins / lastTotal) * 100 : 0;
+        }
+    }
+
+    const seasonAwards = ig?.seasonAwards ?? [];
+    const allAwards = [...(awardsForTeam || []), ...seasonAwards];
+    const seen = new Set();
+    const uniqueAwards = allAwards.filter(a => {
+        const key = a.type || a.awardName || '';
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+
+    const playstyle = analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, totalWins, totalLosses, winRate }, season);
+
+    return {
+        teamNumber, name, location, bestOpr,
+        seasonOpr, seasonRank, autoOpr, teleOpr, egOpr, dpr, ccwm,
+        totalWins, totalLosses, totalTies, totalMatches, winRate,
+        maxScoreNp, avgScoreNp, eventCount,
+        lastOpr, lastRank, lastWins, lastLosses, lastTies, lastEventCode, lastWinRate,
+        awards: uniqueAwards, awardCount: uniqueAwards.length,
+        playstyle: playstyle.text, playstyleScore: playstyle.score, eventHistory
+    };
+}
+
+async function fetchEvent(season, code) {
+    const res = await fetch(`${FTCSCOUT_API}/events/${season}/${code}`);
+    if (!res.ok) throw new Error('Event not found. Check the event code and season.');
+    return res.json();
+}
+async function fetchEventTeams(season, code) {
+    const res = await fetch(`${FTCSCOUT_API}/events/${season}/${code}/teams`);
+    if (!res.ok) throw new Error('Could not fetch team list for this event.');
+    return res.json();
+}
+async function fetchEventAwards(season, code) {
+    try { const res = await fetch(`${FTCSCOUT_API}/events/${season}/${code}/awards`); return res.ok ? res.json() : []; } catch { return []; }
+}
+async function fetchTeamQuickStats(teamNumber, season) {
+    try { const res = await fetch(`${FTCSCOUT_API}/teams/${teamNumber}/quick-stats?season=${season}`); return res.ok ? res.json() : null; } catch { return null; }
+}
+async function fetchIgniteTeam(teamNumber, season) {
+    try { const res = await fetch(`${IGNITE_API}/teams/${teamNumber}?season=${season}`); return res.ok ? res.json() : null; } catch { return null; }
 }
 
 async function batchFetch(items, fn, batchSize = 5) {
-  const results = {};
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    const infos = await Promise.all(batch.map(fn));
-    batch.forEach((item, idx) => { results[item] = infos[idx]; });
-  }
-  return results;
-}
-
-function fmtDate(dateStr) {
-  if (!dateStr) return 'TBD';
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, winRate, season }) {
-  const tags = []; let score = 0;
-  const total = autoOpr + teleOpr + egOpr;
-  if (total > 0) {
-    if (autoOpr >= 30) { tags.push('Strong Auto'); score += 3; }
-    else if (autoOpr >= 15) { tags.push('Solid Auto'); score += 2; }
-    else if (autoOpr < 5) { tags.push('Weak Auto'); }
-  }
-  if (teleOpr >= 100) { tags.push('TeleOp Powerhouse'); score += 4; }
-  else if (teleOpr >= 60) { tags.push('Strong TeleOp'); score += 3; }
-  else if (teleOpr >= 30) { tags.push('Avg TeleOp'); score += 1; }
-  if (egOpr >= 15) { tags.push('Climber'); score += 2; }
-  else if (egOpr >= 5) { tags.push('Parks'); score += 1; }
-  if (dpr > 0 && seasonOpr > 0 && dpr > seasonOpr * 0.8) { tags.push('Defensive'); score += 1; }
-  if (ccwm >= 50) { tags.push('Carry Potential'); score += 3; }
-  else if (ccwm >= 20) { tags.push('Net Positive'); score += 2; }
-  else if (ccwm < 0) { tags.push('Needs Strong Partner'); }
-  if (winRate >= 80) { tags.push('Elite'); score += 3; }
-  else if (winRate >= 65) { tags.push('Consistent'); score += 2; }
-  if (season === '2024') {
-    if (autoOpr * 0.4 + teleOpr * 0.3 > 40) tags.push('Specimen Specialist');
-    else if (teleOpr > 80) tags.push('High Basket Expert');
-  }
-  let tier = '';
-  if (seasonOpr >= 150) tier = '★★★ ';
-  else if (seasonOpr >= 100) tier = '★★ ';
-  else if (seasonOpr >= 50) tier = '★ ';
-  return { text: tier + (tags.length > 0 ? tags.slice(0, 3).join(' · ') : 'Balanced'), score };
-}
-
-// Safely extract a number from either a plain number or {value:...} object
-function numVal(x) {
-  if (x === null || x === undefined) return 0;
-  if (typeof x === 'object') return Number(x.value ?? x.val ?? 0) || 0;
-  return Number(x) || 0;
-}
-
-// Extract OPR from stats sub-object — tries every field name FTCScout has used
-// Uses || (not ??) because numVal returns 0 for missing fields (falsy, not null)
-function extractOprFromStats(st) {
-  if (!st) return 0;
-  return numVal(st.tot) || numVal(st.totalPointsNp) || numVal(st.totalPoints) || numVal(st.opr) || numVal(st.npOpr) || 0;
-}
-
-// rankingEntry comes from GET /events/:season/:code/rankings
-// That endpoint returns an array of TeamEventParticipation scalars including:
-//   teamNumber, rank, wins, losses, ties, opr, autoOpr, teleOpr, endgameOpr,
-//   dpr, ccwm, eventCode  (field names confirmed from FTCScout GraphQL schema)
-function buildTeam(teamNumber, teamInfo, quickStats, rankingEntry, awardsForTeam, season, eventCode) {
-  const name     = teamInfo?.name ?? teamInfo?.teamName ?? '';
-  const location = [teamInfo?.city, teamInfo?.state, teamInfo?.country].filter(Boolean).join(', ');
-
-  // Season-wide OPR from quick-stats (global ranking across whole season)
-  const seasonOpr  = numVal(quickStats?.tot);
-  const autoOpr    = numVal(quickStats?.auto);
-  const teleOpr    = numVal(quickStats?.tele);
-  const egOpr      = numVal(quickStats?.end);
-  const dpr        = numVal(quickStats?.dpr);
-  const ccwm       = numVal(quickStats?.ccwm);
-  const seasonRank = quickStats?.tot?.rank ?? 99999;
-
-  // Event-specific data from the rankings entry for this event
-  const lastWins      = rankingEntry?.wins      ?? 0;
-  const lastLosses    = rankingEntry?.losses     ?? 0;
-  const lastTies      = rankingEntry?.ties       ?? 0;
-  const lastRank      = rankingEntry?.rank       ?? 999;
-  const lastEventCode = eventCode || rankingEntry?.eventCode || '';
-
-  // Event OPR — try the specific field names FTCScout uses in rankings
-  const lastOpr = numVal(rankingEntry?.opr)
-    || numVal(rankingEntry?.npOpr)
-    || numVal(rankingEntry?.totalPointsNp)
-    || numVal(rankingEntry?.tot)
-    || 0;
-
-  const lastTotal   = lastWins + lastLosses + lastTies;
-  const lastWinRate = lastTotal > 0 ? (lastWins / lastTotal) * 100 : 0;
-
-  // Season record: we only have this event's data — use it directly
-  const totalWins    = lastWins;
-  const totalLosses  = lastLosses;
-  const totalTies    = lastTies;
-  const totalMatches = lastTotal;
-  const winRate      = lastWinRate;
-  const eventCount   = totalMatches > 0 ? 1 : 0;
-  const bestOpr      = lastOpr;
-  const maxScoreNp   = lastOpr;
-  const avgScoreNp   = lastOpr;
-
-  const eventHistory = lastOpr > 0 || lastTotal > 0
-    ? [{ eventName: lastEventCode, eventCode: lastEventCode, date: '',
-         opr: lastOpr, rank: lastRank,
-         wins: lastWins, losses: lastLosses, ties: lastTies }]
-    : [];
-
-  const seen = new Set();
-  const awards = (awardsForTeam || []).filter(a => {
-    const key = a.type || a.awardName || '';
-    if (seen.has(key)) return false; seen.add(key); return true;
-  });
-
-  const playstyle = analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, winRate, season });
-  return {
-    teamNumber, name, location, bestOpr,
-    seasonOpr, seasonRank, autoOpr, teleOpr, egOpr, dpr, ccwm,
-    totalWins, totalLosses, totalTies, totalMatches, winRate,
-    maxScoreNp, avgScoreNp, eventCount,
-    lastOpr, lastRank, lastWins, lastLosses, lastTies, lastEventCode, lastWinRate,
-    awards, awardCount: awards.length,
-    playstyle: playstyle.text, playstyleScore: playstyle.score,
-    eventHistory,
-  };
-}
-
-const SCOUT_COLUMNS = [
-  { key: 'team',        label: 'Team #',      getter: t => t.teamNumber,          noSort: false, defaultAsc: true  },
-  { key: 'name',        label: 'Team Name',   getter: t => t.name ?? '',          noSort: false, isString: true    },
-  { key: 'seasonRank',  label: 'Rank',        getter: t => t.seasonRank ?? 99999, noSort: false, defaultAsc: true  },
-  { key: 'bestOpr',     label: 'Best OPR',    getter: t => t.bestOpr    ?? 0,     hasBar: true,  barColor: 'blue'  },
-  { key: 'autoOpr',     label: 'Auto OPR',    getter: t => t.autoOpr    ?? 0,     hasBar: true,  barColor: 'yellow'},
-  { key: 'teleOpr',     label: 'TeleOp OPR',  getter: t => t.teleOpr    ?? 0,     hasBar: true,  barColor: 'blue'  },
-  { key: 'egOpr',       label: 'Endg OPR',    getter: t => t.egOpr      ?? 0,     hasBar: true,  barColor: 'red'   },
-  { key: 'dpr',         label: 'Def PR',      getter: t => t.dpr        ?? 0,     hasBar: true,  barColor: 'red'   },
-  { key: 'ccwm',        label: 'CCWM',        getter: t => t.ccwm       ?? 0,     hasBar: true,  barColor: 'green' },
-  { key: 'winRate',     label: 'Season Win%', getter: t => t.winRate    ?? 0,     hasBar: true,  barColor: 'green' },
-  { key: 'lastWinRate', label: 'Last Win%',   getter: t => t.lastWinRate ?? 0,    hasBar: true,  barColor: 'green' },
-  { key: 'record',      label: 'W-L-T',       getter: t => t.totalWins  ?? 0,     noSort: true                     },
-  { key: 'maxScore',    label: 'Max NP',      getter: t => t.maxScoreNp ?? 0,     hasBar: true,  barColor: 'blue'  },
-  { key: 'avgScore',    label: 'Avg NP',      getter: t => t.avgScoreNp ?? 0,     hasBar: true,  barColor: 'blue'  },
-  { key: 'events',      label: 'Events',      getter: t => t.eventCount ?? 0                                       },
-  { key: 'lastRank',    label: 'Last Rank',   getter: t => t.lastRank   ?? 999,   defaultAsc: true                 },
-  { key: 'lastEvent',   label: 'Last Event',  getter: t => t.lastEventCode ?? '', isString: true                   },
-  { key: 'comments',    label: 'Comments',    getter: t => t.teamNumber,          noSort: true                     },
-  { key: 'awards',      label: 'Awards',      getter: t => t.awardCount ?? 0                                       },
-  { key: 'location',    label: 'Location',    getter: t => t.location   ?? '',    isString: true                   },
-];
-function WinRateBadge({ pct }) {
-  const n = Number(pct);
-  let color = 'text-red-400 bg-red-500/10 border-red-500/20';
-  if (n >= 60) color = 'text-green-400 bg-green-500/10 border-green-500/20';
-  else if (n >= 40) color = 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
-  return <span className={`inline-block px-2 py-0.5 text-xs font-bold font-mono border ${color}`}>{n.toFixed(0)}%</span>;
-}
-
-function AwardBadge({ name }) {
-  const lower = (name || '').toLowerCase();
-  let color = 'text-[#A2A9B1] border-[#A2A9B1]/20 bg-[#A2A9B1]/5';
-  if (lower.includes('winning') || lower.includes('winner')) color = 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10';
-  else if (lower.includes('finalist')) color = 'text-[#A2A9B1] border-[#A2A9B1]/30 bg-[#A2A9B1]/10';
-  else if (lower.includes('inspire'))  color = 'text-blue-400 border-blue-400/30 bg-blue-400/10';
-  else if (lower.includes('control'))  color = 'text-orange-400 border-orange-400/30 bg-orange-400/10';
-  else if (lower.includes('connect'))  color = 'text-green-400 border-green-400/30 bg-green-400/10';
-  else if (lower.includes('innovate')) color = 'text-purple-400 border-purple-400/30 bg-purple-400/10';
-  const display = name
-    .replace('Winning Alliance - Captain','WAC').replace('Winning Alliance - 1st Team Selected','WA-1st')
-    .replace('Winning Alliance - 2nd Team Selected','WA-2nd').replace('Finalist Alliance - Captain','FAC')
-    .replace('Finalist Alliance','Finalist').replace(' Award','');
-  return <span className={`inline-block px-1.5 py-0.5 text-[0.65rem] font-bold border mr-1 ${color}`}>{display}</span>;
-}
-
-function ScoutRankBadge({ rank }) {
-  const r = Number(rank);
-  if (r >= 99999) return <span className="text-[#A2A9B1]/40 font-mono text-sm">—</span>;
-  if (r === 1) return <span className="px-2 py-0.5 text-xs font-bold font-mono text-yellow-400 bg-yellow-400/10 border border-yellow-400/30">1</span>;
-  if (r === 2) return <span className="px-2 py-0.5 text-xs font-bold font-mono text-[#A2A9B1] bg-[#A2A9B1]/10 border border-[#A2A9B1]/25">2</span>;
-  if (r === 3) return <span className="px-2 py-0.5 text-xs font-bold font-mono text-orange-400 bg-orange-400/10 border border-orange-400/25">3</span>;
-  return <span className="text-[#A2A9B1] font-mono text-sm">#{r}</span>;
-}
-
-function LastRankBadge({ rank }) {
-  const r = Number(rank);
-  if (r >= 999) return <span className="text-[#A2A9B1]/40 font-mono text-sm">—</span>;
-  if (r <= 3) return <ScoutRankBadge rank={r} />;
-  return <span className="text-[#A2A9B1] font-mono text-sm">{r}</span>;
-}
-
-function PhaseBar({ auto, tele, eg }) {
-  const total = (auto + tele + eg) || 1;
-  return (
-    <div className="flex h-1.5 w-full gap-px">
-      <div className="bg-yellow-400/70" style={{ width: `${(auto / total) * 100}%` }} />
-      <div className="bg-blue-400/70"   style={{ width: `${(tele / total) * 100}%` }} />
-      <div className="bg-red-400/70"    style={{ width: `${(eg   / total) * 100}%` }} />
-    </div>
-  );
-}
-
-function ScoutSparkline({ data, width = 200, height = 50 }) {
-  if (!data || data.length < 2) return null;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = max - min || 1;
-  const pts = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * width;
-    const y = height - ((v - min) / range) * (height - 6) - 3;
-    return `${x},${y}`;
-  }).join(' ');
-  const last = pts.split(' ').at(-1).split(',');
-  return (
-    <svg width={width} height={height} className="block overflow-visible shrink-0">
-      <polyline points={pts} fill="none" stroke="#FF5A1F" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={last[0]} cy={last[1]} r="3" fill="#FF5A1F" />
-    </svg>
-  );
-}
-
-function useChart(canvasRef, buildConfig, deps) {
-  useEffect(() => {
-    const Chart = window.Chart;
-    if (!Chart || !canvasRef.current) return;
-    const instance = new Chart(canvasRef.current, buildConfig());
-    return () => instance.destroy();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-}
-
-function TeamModal({ team, season, allTeams, onClose }) {
-  const [notes, setNotes] = useState(() => localStorage.getItem(`notes_${team.teamNumber}`) || '');
-  const [savedMsg, setSavedMsg] = useState('');
-  const oprCanvasRef = useRef(null); const phaseCanvasRef = useRef(null); const radarCanvasRef = useRef(null);
-
-  useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = ''; }; }, []);
-  useEffect(() => {
-    const fn = e => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', fn); return () => window.removeEventListener('keydown', fn);
-  }, [onClose]);
-
-  function saveNotes() {
-    localStorage.setItem(`notes_${team.teamNumber}`, notes);
-    setSavedMsg('✓ Saved'); setTimeout(() => setSavedMsg(''), 2000);
-  }
-
-  const n = allTeams.length || 1;
-  const avgAuto = allTeams.reduce((s, t) => s + (t.autoOpr || 0), 0) / n;
-  const avgTele = allTeams.reduce((s, t) => s + (t.teleOpr || 0), 0) / n;
-  const avgEg   = allTeams.reduce((s, t) => s + (t.egOpr   || 0), 0) / n;
-  const avgDpr  = allTeams.reduce((s, t) => s + (t.dpr     || 0), 0) / n;
-  const avgCcwm = allTeams.reduce((s, t) => s + (t.ccwm    || 0), 0) / n;
-  const oprHistData = team.eventHistory?.map(e => e.opr) || [];
-  const oprLabels   = team.eventHistory?.map(e => e.eventCode) || [];
-  const aOpr = Math.max(0, team.autoOpr), tOpr = Math.max(0, team.teleOpr), eOpr = Math.max(0, team.egOpr);
-
-  useChart(oprCanvasRef, () => ({
-    type: 'line',
-    data: { labels: oprLabels, datasets: [{ label: 'Event OPR', data: oprHistData, borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.1)', borderWidth: 2, pointBackgroundColor: '#3b82f6', pointRadius: 4, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'OPR TREND OVER SEASON', color: '#8b8b9a', font: { size: 10, weight: 'bold' } } }, scales: { y: { grid: { color: '#1e2030' }, ticks: { color: '#8b8b9a' }, beginAtZero: true }, x: { grid: { display: false }, ticks: { color: '#8b8b9a', font: { size: 10 } } } } },
-  }), [team.teamNumber]);
-
-  useChart(phaseCanvasRef, () => ({
-    type: 'doughnut',
-    data: { labels: ['Auto OPR', 'TeleOp OPR', 'Endgame OPR'], datasets: [{ data: [aOpr, tOpr, eOpr], backgroundColor: ['#eab308', '#3b82f6', '#ef4444'], borderWidth: 0, hoverOffset: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#e8e8ed', font: { size: 11 }, padding: 15 } }, title: { display: true, text: 'SCORING PROFILE', color: '#8b8b9a', font: { size: 10, weight: 'bold' }, padding: { bottom: 10 } } } },
-  }), [team.teamNumber]);
-
-  useChart(radarCanvasRef, () => ({
-    type: 'radar',
-    data: { labels: ['Auto OPR', 'TeleOp OPR', 'Endg OPR', 'CCWM', 'Def PR'],
-      datasets: [
-        { label: `Team ${team.teamNumber}`, data: [team.autoOpr||0, team.teleOpr||0, team.egOpr||0, team.ccwm||0, team.dpr||0], backgroundColor: 'rgba(56,189,248,0.4)', borderColor: '#38bdf8', pointBackgroundColor: '#0ea5e9', borderWidth: 2 },
-        { label: 'Event Average', data: [avgAuto, avgTele, avgEg, avgCcwm, avgDpr], backgroundColor: 'rgba(139,139,154,0.2)', borderColor: '#8b8b9a', pointBackgroundColor: '#5a5a6e', borderWidth: 1, borderDash: [5, 5] },
-      ] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#e8e8ed', font: { size: 10 }, boxWidth: 12 } }, title: { display: true, text: 'TEAM VS AVERAGE', color: '#8b8b9a', font: { size: 10, weight: 'bold' } } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#8b8b9a', font: { size: 9 } }, ticks: { display: false } } } },
-  }), [team.teamNumber]);
-
-  const clipSm = { clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)' };
-  const clipMd = { clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' };
-  const clipLg = { clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)' };
-  const StatBox = ({ label, value, sub }) => (
-    <div className="flex flex-col gap-1">
-      <span className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase">{label}</span>
-      <span className={`font-mono font-bold ${sub ? 'text-xl text-[#A2A9B1]' : 'text-2xl text-white'}`}>{value}</span>
-    </div>
-  );
-
-  return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4"
-         style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(10px)' }}
-         onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="relative bg-gradient-to-br from-[#132038] to-[#0a1628] border-2 border-[#A2A9B1] w-full max-w-2xl max-h-[90vh] overflow-y-auto" style={clipLg}>
-        <div className="absolute top-0 right-0 w-5 h-5 bg-orange-600" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }} />
-        <div className="p-8">
-          <button onClick={onClose} className="absolute top-3 right-3 text-[#A2A9B1]/60 hover:text-orange-500 transition-colors p-2 z-10"><X size={18} /></button>
-          <div className="mb-6 pb-5 border-b border-[#A2A9B1]/20">
-            <div className="flex items-baseline gap-3 mb-1 flex-wrap">
-              <span className="text-orange-500 font-black font-mono text-2xl">#{team.teamNumber}</span>
-              <h2 className="text-white font-black text-xl" style={{ fontFamily: 'system-ui,-apple-system,sans-serif' }}>{team.name || 'Unknown Team'}</h2>
-            </div>
-            {team.location && <p className="text-[#A2A9B1]/60 text-sm">{team.location}</p>}
-          </div>
-          <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">Season Performance</p>
-          <div className="grid grid-cols-3 gap-4 mb-4 p-5 bg-[#1a2847]/50 border border-[#A2A9B1]/15" style={clipMd}>
-            <StatBox label="OPR"      value={team.seasonOpr.toFixed(1)} />
-            <StatBox label="Rank"     value={team.seasonRank >= 99999 ? '—' : `#${team.seasonRank}`} />
-            <StatBox label="Win Rate" value={`${team.winRate.toFixed(0)}%`} />
-          </div>
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {[['Auto OPR','border-yellow-400/20',team.autoOpr],['TeleOp OPR','border-blue-400/20',team.teleOpr],['Endgame OPR','border-red-400/20',team.egOpr]].map(([lbl,border,val]) => (
-              <div key={lbl} className={`p-4 bg-[#1a2847]/40 border ${border}`} style={clipSm}><StatBox label={lbl} value={val.toFixed(1)} sub /></div>
-            ))}
-          </div>
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {[['Def PR','border-red-400/10',team.dpr],['CCWM','border-green-400/10',team.ccwm],['Events','border-[#A2A9B1]/15',team.eventCount]].map(([lbl,border,val]) => (
-              <div key={lbl} className={`p-4 bg-[#1a2847]/30 border ${border}`} style={clipSm}><StatBox label={lbl} value={typeof val === 'number' && !Number.isInteger(val) ? val.toFixed(1) : val} sub /></div>
-            ))}
-          </div>
-          <div className="mb-6">
-            <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-2">Scoring Breakdown</p>
-            <PhaseBar auto={team.autoOpr} tele={team.teleOpr} eg={team.egOpr} />
-            <div className="flex gap-4 mt-2">
-              {[['bg-yellow-400/70','text-yellow-400/70','Auto'],['bg-blue-400/70','text-blue-400/70','TeleOp'],['bg-red-400/70','text-red-400/70','Endgame']].map(([bg,tc,lbl]) => (
-                <span key={lbl} className={`text-[0.65rem] ${tc} flex items-center gap-1`}><span className={`w-2 h-2 inline-block ${bg}`} />{lbl}</span>
-              ))}
-            </div>
-          </div>
-          {team.lastEventCode && (
-            <div className="mb-6 p-5 bg-[#1a2847]/30 border border-[#A2A9B1]/15" style={clipMd}>
-              <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">Latest Event: <span className="text-orange-500">{team.lastEventCode}</span></p>
-              <div className="grid grid-cols-3 gap-4">
-                <StatBox label="Event OPR" value={team.lastOpr > 0 ? team.lastOpr.toFixed(1) : '—'} sub />
-                <StatBox label="Rank"      value={team.lastRank >= 999 ? '—' : `#${team.lastRank}`} sub />
-                <StatBox label="Record"    value={`${team.lastWins}-${team.lastLosses}-${team.lastTies}`} sub />
-              </div>
-            </div>
-          )}
-          {oprHistData.length >= 2 && (
-            <div className="mb-6">
-              <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">OPR Trend</p>
-              <div className="flex items-end gap-6 flex-wrap">
-                <ScoutSparkline data={oprHistData} />
-                <div className="flex gap-4 flex-wrap">
-                  {team.eventHistory.map((e, i) => (
-                    <span key={i} className="flex flex-col items-center gap-0.5">
-                      <span className="font-mono text-xs text-orange-500/80">{e.opr.toFixed(1)}</span>
-                      <span className="text-[0.6rem] text-[#A2A9B1]/50">{e.eventCode}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          <div className="mb-6">
-            <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">Visual Analytics</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-[#1a2847]/30 border border-[#A2A9B1]/15" style={clipSm}><div style={{ height: 160 }}>{oprHistData.length >= 2 ? <canvas ref={oprCanvasRef} /> : <div className="h-full flex items-center justify-center text-[#A2A9B1]/30 text-xs text-center">Not enough events</div>}</div></div>
-              <div className="p-4 bg-[#1a2847]/30 border border-[#A2A9B1]/15" style={clipSm}><div style={{ height: 160 }}>{(aOpr+tOpr+eOpr)>0 ? <canvas ref={phaseCanvasRef} /> : <div className="h-full flex items-center justify-center text-[#A2A9B1]/30 text-xs">No OPR data</div>}</div></div>
-              <div className="p-4 bg-[#1a2847]/30 border border-[#A2A9B1]/15" style={clipSm}><div style={{ height: 160 }}><canvas ref={radarCanvasRef} /></div></div>
-            </div>
-          </div>
-          {allTeams.length > 1 && (
-            <div className="mb-6">
-              <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">vs Event Average</p>
-              <div className="space-y-2">
-                {[{label:'Auto',tv:team.autoOpr,avg:avgAuto,color:'bg-yellow-400'},{label:'TeleOp',tv:team.teleOpr,avg:avgTele,color:'bg-blue-400'},{label:'Endgame',tv:team.egOpr,avg:avgEg,color:'bg-red-400'}].map(({label,tv,avg,color}) => {
-                  const maxVal = Math.max(tv,avg,1);
-                  return (
-                    <div key={label} className="flex items-center gap-3">
-                      <span className="text-xs text-[#A2A9B1]/60 w-16 text-right shrink-0">{label}</span>
-                      <div className="flex-1 flex gap-2 items-center"><div className="flex-1 bg-[#1a2847] h-2 relative overflow-hidden"><div className={`absolute top-0 left-0 h-full ${color} opacity-80`} style={{width:`${(tv/maxVal)*100}%`}} /></div><span className="font-mono text-xs text-white w-10 shrink-0">{tv.toFixed(1)}</span></div>
-                      <div className="flex-1 flex gap-2 items-center"><div className="flex-1 bg-[#1a2847] h-2 relative overflow-hidden"><div className="absolute top-0 left-0 h-full bg-[#A2A9B1] opacity-40" style={{width:`${(avg/maxVal)*100}%`}} /></div><span className="font-mono text-xs text-[#A2A9B1]/60 w-10 shrink-0">{avg.toFixed(1)}</span></div>
-                    </div>
-                  );
-                })}
-                <div className="flex gap-4 mt-1">
-                  <span className="text-[0.65rem] text-orange-400/70 flex items-center gap-1"><span className="w-2 h-2 bg-orange-400/70 inline-block" />This Team</span>
-                  <span className="text-[0.65rem] text-[#A2A9B1]/50 flex items-center gap-1"><span className="w-2 h-2 bg-[#A2A9B1]/40 inline-block" />Event Avg</span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div className="mb-6 p-4 bg-orange-600/5 border border-orange-600/20" style={clipSm}>
-            <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-1">Robot Profile</p>
-            <p className="text-orange-400 font-semibold text-sm">{team.playstyle}</p>
-          </div>
-          {team.awards?.length > 0 && (
-            <div className="mb-6">
-              <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-2">Awards</p>
-              <div className="flex flex-wrap gap-1">{team.awards.map((a,i) => <AwardBadge key={i} name={a.type||a.awardName||''} />)}</div>
-            </div>
-          )}
-          <div className="p-5 bg-[#0a1628]/60 border border-[#A2A9B1]/15" style={clipMd}>
-            <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">Scouting Notes</p>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Observations, strengths, weaknesses..." rows={4}
-              className="w-full bg-[#132038] border border-[#A2A9B1]/20 text-white text-sm p-3 focus:outline-none focus:border-orange-600 resize-none transition-colors placeholder-[#A2A9B1]/30" style={clipSm} />
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-[#A2A9B1]/40 italic">{savedMsg || 'Saved locally in your browser'}</span>
-              <button onClick={saveNotes} className="px-5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white text-xs font-black tracking-widest transition-colors" style={clipSm}>SAVE</button>
-            </div>
-          </div>
-          <div className="flex gap-5 mt-5 pt-4 border-t border-[#A2A9B1]/15">
-            <a href={`https://ftcscout.org/teams/${team.teamNumber}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#A2A9B1]/50 hover:text-orange-500 transition-colors">FTCScout ↗</a>
-            <a href={`https://theorangealliance.org/teams/${team.teamNumber}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#A2A9B1]/50 hover:text-orange-500 transition-colors">Orange Alliance ↗</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-function AwardsPanel({ teams }) {
-  const allAwards = [];
-  for (const t of teams) for (const a of (t.awards||[])) allAwards.push({...a,teamNumber:t.teamNumber,teamName:t.name});
-  if (allAwards.length === 0) return null;
-  const ORDER = {winning:0,winner:0,finalist:1,inspire:2,think:3,connect:4,innovate:5,control:6,motivate:7,design:8};
-  allAwards.sort((a,b) => {
-    const ak=Object.keys(ORDER).find(k=>(a.type||a.awardName||'').toLowerCase().includes(k))?? 'z';
-    const bk=Object.keys(ORDER).find(k=>(b.type||b.awardName||'').toLowerCase().includes(k))?? 'z';
-    return (ORDER[ak]??99)-(ORDER[bk]??99);
-  });
-  const seen = new Set();
-  const unique = allAwards.filter(a => { const key=`${a.teamNumber}-${a.type||a.awardName}`; if(seen.has(key))return false; seen.add(key); return true; });
-  const ICONS   = {winning:'🏆',winner:'🏆',finalist:'🥈',inspire:'⭐',think:'🧠',connect:'🤝',innovate:'💡',control:'🎮',motivate:'🔥',design:'📐'};
-  const BORDERS = {winning:'border-l-yellow-400/70',winner:'border-l-yellow-400/70',finalist:'border-l-[#A2A9B1]/40',inspire:'border-l-blue-400/60',control:'border-l-orange-500/60',connect:'border-l-green-400/60',innovate:'border-l-purple-400/60'};
-  return (
-    <div className="mb-10">
-      <div className="flex items-center gap-4 mb-4 pb-3 border-b-2 border-[#A2A9B1]/20">
-        <h3 className="text-sm font-black tracking-widest text-[#A2A9B1]">AWARDS</h3>
-        <div className="flex-1 h-px bg-gradient-to-r from-orange-600/40 to-transparent" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-        {unique.map((award, i) => {
-          const lower=(award.type||award.awardName||'').toLowerCase();
-          const iconKey=Object.keys(ICONS).find(k=>lower.includes(k));
-          const borderKey=Object.keys(BORDERS).find(k=>lower.includes(k));
-          return (
-            <div key={i} className={`flex items-center gap-3 p-3 bg-[#1a2847]/40 border border-[#A2A9B1]/15 border-l-4 ${BORDERS[borderKey]||'border-l-yellow-400/60'}`}>
-              <span className="text-lg shrink-0">{ICONS[iconKey]||'🏆'}</span>
-              <div className="min-w-0">
-                <div className="text-white text-xs font-bold uppercase tracking-wide truncate">{award.type||award.awardName||''}</div>
-                <div className="text-[#A2A9B1]/60 text-xs"><a href={`https://ftcscout.org/teams/${award.teamNumber}`} target="_blank" rel="noopener noreferrer" className="text-orange-500/80 hover:text-orange-400">#{award.teamNumber}</a>{award.teamName?` — ${award.teamName}`:''}</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+    const results = {};
+    for (let i = 0; i < items.length; i += batchSize) {
+        const batch = items.slice(i, i + batchSize);
+        const infos = await Promise.all(batch.map(fn));
+        batch.forEach((item, idx) => results[item] = infos[idx]);
+    }
+    return results;
 }
 
 function ScoutingPage({ isVisible }) {
-  // We embed the vanilla HTML/JS version of the scouting app here.
-  // It is served from the public/scout-app directory.
-  return (
-    <div className="w-full" style={{ height: 'calc(100vh - 80px)' }}>
-      <iframe 
-        src="/scout-app/index.html" 
-        className="w-full h-full border-none"
-        title="FTC Auto Scout"
-      />
-    </div>
-  );
+    const [season, setSeason] = useState('2024');
+    const [eventCode, setEventCode] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+    
+    // Data State
+    const [eventInfo, setEventInfo] = useState(null);
+    const [renderedTeams, setRenderedTeams] = useState([]);
+    const [allTeams, setAllTeams] = useState([]);
+    const [sortKey, setSortKey] = useState('seasonOpr');
+    const [sortAsc, setSortAsc] = useState(false);
+    const [filterQuery, setFilterQuery] = useState('');
+    const [showVisuals, setShowVisuals] = useState(false);
+    
+    // Modal State
+    const [modalTeam, setModalTeam] = useState(null);
+    const [notes, setNotes] = useState('');
+    const [saveStatus, setSaveStatus] = useState('');
+
+    const oprRef = useRef(null);
+    const phaseRef = useRef(null);
+    const radarRef = useRef(null);
+    const chartInstances = useRef({});
+
+    const handleScout = async (e) => {
+        e.preventDefault();
+        const code = eventCode.trim().toUpperCase();
+        if (!code) { setErrorMsg('Enter an event code.'); return; }
+        
+        setErrorMsg('');
+        setLoading(true);
+        setEventInfo(null);
+        setAllTeams([]);
+
+        try {
+            const [event, eventTeams, eventAwards] = await Promise.all([
+                fetchEvent(season, code),
+                fetchEventTeams(season, code),
+                fetchEventAwards(season, code),
+            ]);
+
+            if (!eventTeams || eventTeams.length === 0) throw new Error('No teams found. The event may not have published its team list yet.');
+            const teamNumbers = eventTeams.map(t => t.teamNumber);
+            const awardsMap = {};
+            if (eventAwards) eventAwards.forEach(a => {
+                if (!awardsMap[a.teamNumber]) awardsMap[a.teamNumber] = [];
+                awardsMap[a.teamNumber].push(a);
+            });
+
+            const [igniteResults, quickResults] = await Promise.all([
+                batchFetch(teamNumbers, n => fetchIgniteTeam(n, season), 5),
+                batchFetch(teamNumbers, n => fetchTeamQuickStats(n, season), 5),
+            ]);
+
+            const assembled = teamNumbers.map(num => buildTeam(num, igniteResults[num], quickResults[num], awardsMap[num] || [], season));
+            assembled.sort((a, b) => b.seasonOpr - a.seasonOpr);
+
+            setEventInfo({ ...event, teamCount: assembled.length });
+            setAllTeams(assembled);
+            setRenderedTeams(assembled);
+            setSortKey('seasonOpr'); setSortAsc(false); setFilterQuery('');
+        } catch (err) {
+            setErrorMsg(err.message || 'An unexpected error occurred.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSort = (key) => {
+        const isAsc = sortKey === key ? !sortAsc : (key === 'seasonRank' || key === 'lastRank');
+        setSortKey(key); setSortAsc(isAsc);
+        
+        const col = getColumns(season).find(c => c.key === key);
+        if (!col || col.noSort) return;
+        
+        const sorted = [...renderedTeams].sort((a, b) => {
+            let va = col.getter(a), vb = col.getter(b);
+            if (typeof va === 'string') return isAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            return isAsc ? va - vb : vb - va;
+        });
+        setRenderedTeams(sorted);
+    };
+
+    const handleFilter = (e) => {
+        const query = e.target.value.toLowerCase();
+        setFilterQuery(query);
+        let filtered = allTeams.filter(t => String(t.teamNumber).includes(query) || (t.name || '').toLowerCase().includes(query));
+        
+        const col = getColumns(season).find(c => c.key === sortKey);
+        if (col && !col.noSort) {
+            filtered.sort((a, b) => {
+                let va = col.getter(a), vb = col.getter(b);
+                if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+                return sortAsc ? va - vb : vb - va;
+            });
+        }
+        setRenderedTeams(filtered);
+    };
+
+    const openModal = (team) => {
+        setModalTeam(team);
+        setNotes(localStorage.getItem(`notes_${team.teamNumber}`) || '');
+        setSaveStatus(localStorage.getItem(`notes_${team.teamNumber}`) ? 'Last saved locally' : 'No notes yet');
+    };
+
+    const closeTeamModal = () => {
+        if (chartInstances.current.opr) chartInstances.current.opr.destroy();
+        if (chartInstances.current.phase) chartInstances.current.phase.destroy();
+        if (chartInstances.current.radar) chartInstances.current.radar.destroy();
+        setModalTeam(null);
+    };
+
+    const saveNotes = () => {
+        if (!modalTeam) return;
+        localStorage.setItem(`notes_${modalTeam.teamNumber}`, notes.trim());
+        setSaveStatus('Saved to local storage');
+    };
+
+    // Chart.js Drawing
+    useEffect(() => {
+        if (!modalTeam || !window.Chart) return;
+
+        if (chartInstances.current.opr) chartInstances.current.opr.destroy();
+        if (chartInstances.current.phase) chartInstances.current.phase.destroy();
+        if (chartInstances.current.radar) chartInstances.current.radar.destroy();
+
+        const labels = modalTeam.eventHistory ? modalTeam.eventHistory.map(e => e.eventCode) : [];
+        const oprData = modalTeam.eventHistory ? modalTeam.eventHistory.map(e => e.opr) : [];
+        
+        chartInstances.current.opr = new window.Chart(oprRef.current, {
+            type: 'line',
+            data: { labels, datasets: [{ label: 'Event OPR', data: oprData, borderColor: '#60a5fa', backgroundColor: 'rgba(96, 165, 250, 0.1)', borderWidth: 2, pointBackgroundColor: '#3b82f6', fill: true, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'OPR TREND OVER SEASON', color: '#8b8b9a' } }, scales: { y: { grid: { color: '#23232e' }, ticks: { color: '#8b8b9a' } }, x: { grid: { display: false }, ticks: { color: '#8b8b9a' } } } }
+        });
+
+        const aOpr = Math.max(0, modalTeam.autoOpr);
+        const tOpr = Math.max(0, modalTeam.teleOpr);
+        const eOpr = Math.max(0, modalTeam.egOpr);
+
+        chartInstances.current.phase = new window.Chart(phaseRef.current, {
+            type: 'doughnut',
+            data: { labels: ['Auto', 'TeleOp', 'Endgame'], datasets: [{ data: [aOpr, tOpr, eOpr], backgroundColor: ['#eab308', '#3b82f6', '#ef4444'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#e8e8ed' } }, title: { display: true, text: 'SCORING PROFILE', color: '#8b8b9a' } } }
+        });
+
+        const avgStats = { auto: 0, tele: 0, eg: 0, dpr: 0, ccwm: 0 };
+        if (allTeams.length > 0) {
+            allTeams.forEach(t => { avgStats.auto += t.autoOpr||0; avgStats.tele += t.teleOpr||0; avgStats.eg += t.egOpr||0; avgStats.dpr += t.dpr||0; avgStats.ccwm += t.ccwm||0; });
+            avgStats.auto /= allTeams.length; avgStats.tele /= allTeams.length; avgStats.eg /= allTeams.length; avgStats.dpr /= allTeams.length; avgStats.ccwm /= allTeams.length;
+        }
+
+        chartInstances.current.radar = new window.Chart(radarRef.current, {
+            type: 'radar',
+            data: {
+                labels: ['Auto OPR', 'TeleOp OPR', 'Endg OPR', 'CCWM', 'Def PR'],
+                datasets: [
+                    { label: `Team ${modalTeam.teamNumber}`, data: [modalTeam.autoOpr||0, modalTeam.teleOpr||0, modalTeam.egOpr||0, modalTeam.ccwm||0, modalTeam.dpr||0], borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.4)' },
+                    { label: 'Event Average', data: [avgStats.auto, avgStats.tele, avgStats.eg, avgStats.ccwm, avgStats.dpr], borderColor: '#8b8b9a', backgroundColor: 'rgba(139, 139, 154, 0.2)', borderDash: [5, 5] }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#e8e8ed' } }, title: { display: true, text: 'TEAM VS AVERAGE', color: '#8b8b9a' } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#8b8b9a' }, ticks: { display: false } } } }
+        });
+    }, [modalTeam]);
+
+    const maxVals = {};
+    const cols = getColumns(season);
+    cols.forEach(c => {
+        if (c.hasVisual) {
+            let max = 0;
+            allTeams.forEach(t => { const v = c.getter(t) || 0; if (v > max) max = v; });
+            maxVals[c.key] = max;
+        }
+    });
+
+    return (
+        <div className="scouting-app-scoped">
+            <div className="app-container" style={{paddingTop: '32px'}}>
+                <header className="header">
+                    <div className="logo-section">
+                        <div className="logo-icon">
+                            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="1" y="1" width="26" height="26" stroke="#3b82f6" strokeWidth="2" fill="none" /><rect x="7" y="7" width="14" height="14" fill="#3b82f6" /></svg>
+                        </div>
+                        <div><h1 className="logo-text">FTC AUTO SCOUT</h1><p className="logo-subtitle">SCOUTING DATABASE</p></div>
+                    </div>
+                </header>
+                
+                <section className="search-section">
+                    <div className="search-card">
+                        <h2 className="search-title">LOOK UP EVENT</h2>
+                        <p className="search-desc">Enter an FTC event code to pull stats, awards, and team data.</p>
+                        <form onSubmit={handleScout} className="search-form">
+                            <div className="input-group">
+                                <div className="input-wrapper">
+                                    <label className="input-label">SEASON</label>
+                                    <select value={season} onChange={e=>setSeason(e.target.value)} className="input-field" disabled={loading}>
+                                        <option value="2025">2025-26 DECODE</option>
+                                        <option value="2024">2024-25 INTO THE DEEP</option>
+                                        <option value="2023">2023-24 CENTERSTAGE</option>
+                                    </select>
+                                </div>
+                                <div className="input-wrapper input-wrapper-grow">
+                                    <label className="input-label">EVENT CODE</label>
+                                    <input type="text" value={eventCode} onChange={e=>setEventCode(e.target.value.toUpperCase())} className="input-field" placeholder="e.g. USTXCCOS2" disabled={loading} />
+                                </div>
+                                <button type="submit" className="scout-btn" disabled={loading}>
+                                    {!loading ? <span className="btn-text">SCOUT EVENT</span> : <span className="spinner"></span>}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                {errorMsg && (
+                    <div className="error-display"><div className="error-card"><span className="error-icon">✕</span> <span>{errorMsg}</span></div></div>
+                )}
+                {loading && <div className="loading-bar"><div className="loading-bar-inner"></div></div>}
+
+                {eventInfo && (
+                    <section className="event-info">
+                        <div className="event-card">
+                            <div className="event-header">
+                                <div className="event-details">
+                                    <div className="event-label">EVENT</div>
+                                    <h2 className="event-name">{eventInfo.name}</h2>
+                                    <div className="event-meta">
+                                        <span className="event-meta-item"><span className="meta-label">VENUE</span><span className="meta-value">{eventInfo.venue}</span></span>
+                                        <span className="event-meta-item"><span className="meta-label">TEAMS</span><span className="meta-value">{eventInfo.teamCount}</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                {allTeams.length > 0 && (
+                    <section className="table-section">
+                        <div className="section-header">
+                            <h3 className="section-title">TEAM STATISTICS</h3>
+                            <div className="table-controls">
+                                <div className="visuals-toggle">
+                                    <label className="switch">
+                                        <input type="checkbox" checked={showVisuals} onChange={e=>setShowVisuals(e.target.checked)} />
+                                        <span className="slider round"></span>
+                                    </label>
+                                    <span className="toggle-label">Show Visuals</span>
+                                </div>
+                                <div className="table-search">
+                                    <input type="text" value={filterQuery} onChange={handleFilter} className="table-filter" placeholder="Filter teams..." />
+                                </div>
+                                <span className="team-count-label">{renderedTeams.length}/{allTeams.length}</span>
+                            </div>
+                        </div>
+                        <div className="table-wrapper">
+                            <table className={`scout-table ${showVisuals ? 'show-visuals' : ''}`}>
+                                <thead>
+                                    <tr>
+                                        {cols.map(c => (
+                                            <th key={c.key} onClick={() => handleSort(c.key)} className={sortKey===c.key?'sort-active':''}>
+                                                {c.label}{!c.noSort && <span className="sort-arrow">{sortKey===c.key?(sortAsc?'▲':'▼'):'↕'}</span>}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {renderedTeams.map(t => (
+                                        <tr key={t.teamNumber} onClick={() => openModal(t)} className="cursor-pointer hover:bg-[#1e1e28]">
+                                            {cols.map(c => {
+                                                const val = c.getter(t);
+                                                let pct = c.hasVisual ? (c.isWinPct ? val : Math.min(100, (Math.max(0, val)/(maxVals[c.key]||1))*100)) : 0;
+                                                return (
+                                                    <td key={c.key} className={c.hasVisual ? `bar-cell bar-${c.barColor}` : ''} style={c.hasVisual ? {'--val-pct': `${pct}%`} : {}}>
+                                                        {c.key === 'team' ? <span className="cell-number" style={{fontWeight:'bold', color: '#60a5fa'}}>#{val}</span> :
+                                                         c.key === 'name' ? <span className="cell-team-name">{val}</span> :
+                                                         c.key === 'winRate' || c.key === 'lastWinRate' ? <span className={`winrate-tag ${val>=60?'wr-high':val>=40?'wr-mid':'wr-low'}`}>{val.toFixed(0)}%</span> :
+                                                         c.key === 'record' ? <span className="cell-record">{t.totalWins}-{t.totalLosses}-{t.totalTies}</span> :
+                                                         c.key === 'lastEvent' ? <span className="cell-location">{val}</span> :
+                                                         c.key === 'comments' ? <span className="cell-comments text-gray-400 italic text-xs">{localStorage.getItem(`notes_${t.teamNumber}`) ? '"' + localStorage.getItem(`notes_${t.teamNumber}`).substring(0,20) + '..."' : 'No comments'}</span> :
+                                                         c.key === 'awards' ? <div className="flex gap-1">{(t.awards||[]).slice(0,2).map((a,i)=><span key={i} className="award-badge text-xs bg-yellow-500/20 text-yellow-300 px-1 py-0.5 rounded leading-none border border-yellow-500/50">{a.awardName?a.awardName.split(' ')[0]:'Awd'}</span>)}{t.awards?.length>2&&<span className="text-gray-500 text-xs">+{t.awards.length-2}</span>}</div> :
+                                                         <span className={typeof val === 'number' ? `cell-number ${val>0?'val-positive':val<0?'val-negative':'val-neutral'}` : ''}>{typeof val === 'number' ? (Number.isInteger(val)?val:val.toFixed(1)) : val}</span>}
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                )}
+            </div>
+
+            {modalTeam && (
+                <div className="modal-overlay" onClick={e => { if(e.target===e.currentTarget) closeTeamModal(); }}>
+                    <div className="modal-card max-h-[90vh] overflow-y-auto">
+                        <button className="modal-close-btn" onClick={closeTeamModal}>✕</button>
+                        <div className="modal-header">
+                            <div className="modal-team-info">
+                                <span className="modal-team-number">#{modalTeam.teamNumber}</span>
+                                <h2 className="modal-team-name">{modalTeam.name || 'Unknown Team'}</h2>
+                            </div>
+                        </div>
+                        <div className="modal-grid">
+                            <div className="modal-section modal-section-wide">
+                                <h3 className="modal-section-title">VISUAL ANALYTICS</h3>
+                                <div className="charts-container h-[250px] flex gap-4">
+                                    <div className="chart-wrapper flex-1 bg-[#1c1c24] p-2 rounded"><canvas ref={oprRef}></canvas></div>
+                                    <div className="chart-wrapper flex-1 bg-[#1c1c24] p-2 rounded"><canvas ref={phaseRef}></canvas></div>
+                                    <div className="chart-wrapper flex-1 bg-[#1c1c24] p-2 rounded"><canvas ref={radarRef}></canvas></div>
+                                </div>
+                            </div>
+                            <div className="modal-section modal-section-wide modal-section-primary">
+                                <h3 className="modal-section-title">SCOUTING NOTES</h3>
+                                <div className="notes-container">
+                                    <textarea className="notes-textarea w-full p-3 bg-gray-900 text-gray-200" rows="3" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Observations..."></textarea>
+                                    <div className="notes-footer flex justify-between mt-2">
+                                        <span className="text-gray-500 text-sm">{saveStatus}</span>
+                                        <button onClick={saveNotes} className="bg-blue-600 text-white px-4 py-1 text-sm font-bold tracking-wider">SAVE</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 // ─────────────────────────────────────────────────────────────────────────────
 // SITE COMPONENTS
