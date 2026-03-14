@@ -11,6 +11,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/ignite/(.*)",
+      "destination": "https://ftc.ignitepathways.org/api/public/$1"
+    },
+    {
       "source": "/scout-app/(.*)",
       "destination": "/scout-app/$1"
     },
