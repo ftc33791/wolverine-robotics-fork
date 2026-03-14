@@ -78,73 +78,73 @@ function extractOprFromStats(st) {
   return numVal(st.tot) || numVal(st.totalPointsNp) || numVal(st.totalPoints) || numVal(st.opr) || numVal(st.npOpr) || 0;
 }
 
-function buildTeam(teamNumber, teamInfo, quickStats, teamEvents, awardsForTeam, season) {
-  const name = teamInfo?.name ?? teamInfo?.teamName ?? '';
+// rankingEntry comes from GET /events/:season/:code/rankings
+// That endpoint returns an array of TeamEventParticipation scalars including:
+//   teamNumber, rank, wins, losses, ties, opr, autoOpr, teleOpr, endgameOpr,
+//   dpr, ccwm, eventCode  (field names confirmed from FTCScout GraphQL schema)
+function buildTeam(teamNumber, teamInfo, quickStats, rankingEntry, awardsForTeam, season, eventCode) {
+  const name     = teamInfo?.name ?? teamInfo?.teamName ?? '';
   const location = [teamInfo?.city, teamInfo?.state, teamInfo?.country].filter(Boolean).join(', ');
 
-  // quick-stats: tot/auto/tele/end are {value,rank}; dpr/ccwm may be flat numbers or {value}
-  const seasonOpr = numVal(quickStats?.tot);
-  const autoOpr   = numVal(quickStats?.auto);
-  const teleOpr   = numVal(quickStats?.tele);
-  const egOpr     = numVal(quickStats?.end);
-  const dpr       = numVal(quickStats?.dpr);
-  const ccwm      = numVal(quickStats?.ccwm);
+  // Season-wide OPR from quick-stats (global ranking across whole season)
+  const seasonOpr  = numVal(quickStats?.tot);
+  const autoOpr    = numVal(quickStats?.auto);
+  const teleOpr    = numVal(quickStats?.tele);
+  const egOpr      = numVal(quickStats?.end);
+  const dpr        = numVal(quickStats?.dpr);
+  const ccwm       = numVal(quickStats?.ccwm);
   const seasonRank = quickStats?.tot?.rank ?? 99999;
 
-  let lastOpr = 0, lastRank = 999, lastWins = 0, lastLosses = 0, lastTies = 0;
-  let lastEventCode = '', lastWinRate = 0, bestOpr = 0;
-  let totalWins = 0, totalLosses = 0, totalTies = 0;
-  let maxScoreNp = 0, avgScoreNp = 0, eventCount = 0;
-  let eventHistory = [];
+  // Event-specific data from the rankings entry for this event
+  const lastWins      = rankingEntry?.wins      ?? 0;
+  const lastLosses    = rankingEntry?.losses     ?? 0;
+  const lastTies      = rankingEntry?.ties       ?? 0;
+  const lastRank      = rankingEntry?.rank       ?? 999;
+  const lastEventCode = eventCode || rankingEntry?.eventCode || '';
 
-  if (Array.isArray(teamEvents) && teamEvents.length > 0) {
-    const played = teamEvents.filter(e => e.wins !== null && e.wins !== undefined);
-    played.sort((a, b) => {
-      const da = new Date(a.event?.start ?? a.event?.startDate ?? a.start ?? a.startDate ?? 0);
-      const db = new Date(b.event?.start ?? b.event?.startDate ?? b.start ?? b.startDate ?? 0);
-      return da - db;
-    });
-    played.forEach(e => {
-      // OPR: try nested stats first (most common), then top-level flat fields
-      const eOpr = extractOprFromStats(e.stats) || numVal(e.opr) || numVal(e.npOpr) || 0;
-      if (eOpr > bestOpr) bestOpr = eOpr;
-      totalWins   += e.wins   ?? 0;
-      totalLosses += e.losses ?? 0;
-      totalTies   += e.ties   ?? 0;
-      const evtCode = e.event?.eventCode ?? e.event?.code ?? e.eventCode ?? e.code ?? '';
-      const evtName = e.event?.name ?? e.eventName ?? evtCode;
-      const evtDate = e.event?.start ?? e.event?.startDate ?? e.start ?? e.startDate ?? '';
-      eventHistory.push({
-        eventName: evtName, eventCode: evtCode, date: evtDate, opr: eOpr,
-        rank: e.rank ?? 999, wins: e.wins ?? 0, losses: e.losses ?? 0, ties: e.ties ?? 0,
-      });
-    });
-    eventCount = played.length;
-    if (eventHistory.length > 0) {
-      const latest = eventHistory[eventHistory.length - 1];
-      lastOpr = latest.opr; lastRank = latest.rank; lastWins = latest.wins;
-      lastLosses = latest.losses; lastTies = latest.ties; lastEventCode = latest.eventCode;
-      const lastTotal = lastWins + lastLosses + lastTies;
-      lastWinRate = lastTotal > 0 ? (lastWins / lastTotal) * 100 : 0;
-    }
-    const oprVals = eventHistory.map(e => e.opr).filter(v => v > 0);
-    avgScoreNp = oprVals.length > 0 ? oprVals.reduce((s, v) => s + v, 0) / oprVals.length : 0;
-    maxScoreNp = bestOpr;
-  }
+  // Event OPR — try the specific field names FTCScout uses in rankings
+  const lastOpr = numVal(rankingEntry?.opr)
+    || numVal(rankingEntry?.npOpr)
+    || numVal(rankingEntry?.totalPointsNp)
+    || numVal(rankingEntry?.tot)
+    || 0;
 
-  const totalMatches = totalWins + totalLosses + totalTies;
-  const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
+  const lastTotal   = lastWins + lastLosses + lastTies;
+  const lastWinRate = lastTotal > 0 ? (lastWins / lastTotal) * 100 : 0;
+
+  // Season record: we only have this event's data — use it directly
+  const totalWins    = lastWins;
+  const totalLosses  = lastLosses;
+  const totalTies    = lastTies;
+  const totalMatches = lastTotal;
+  const winRate      = lastWinRate;
+  const eventCount   = totalMatches > 0 ? 1 : 0;
+  const bestOpr      = lastOpr;
+  const maxScoreNp   = lastOpr;
+  const avgScoreNp   = lastOpr;
+
+  const eventHistory = lastOpr > 0 || lastTotal > 0
+    ? [{ eventName: lastEventCode, eventCode: lastEventCode, date: '',
+         opr: lastOpr, rank: lastRank,
+         wins: lastWins, losses: lastLosses, ties: lastTies }]
+    : [];
+
   const seen = new Set();
   const awards = (awardsForTeam || []).filter(a => {
     const key = a.type || a.awardName || '';
     if (seen.has(key)) return false; seen.add(key); return true;
   });
+
   const playstyle = analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, winRate, season });
   return {
-    teamNumber, name, location, bestOpr, seasonOpr, seasonRank, autoOpr, teleOpr, egOpr, dpr, ccwm,
-    totalWins, totalLosses, totalTies, totalMatches, winRate, maxScoreNp, avgScoreNp, eventCount,
+    teamNumber, name, location, bestOpr,
+    seasonOpr, seasonRank, autoOpr, teleOpr, egOpr, dpr, ccwm,
+    totalWins, totalLosses, totalTies, totalMatches, winRate,
+    maxScoreNp, avgScoreNp, eventCount,
     lastOpr, lastRank, lastWins, lastLosses, lastTies, lastEventCode, lastWinRate,
-    awards, awardCount: awards.length, playstyle: playstyle.text, playstyleScore: playstyle.score, eventHistory,
+    awards, awardCount: awards.length,
+    playstyle: playstyle.text, playstyleScore: playstyle.score,
+    eventHistory,
   };
 }
 
@@ -518,25 +518,34 @@ function ScoutingPage({ isVisible }) {
       const awardsMap = {};
       (eventAwards||[]).forEach(a=>{ if(!awardsMap[a.teamNumber])awardsMap[a.teamNumber]=[]; awardsMap[a.teamNumber].push(a); });
 
-      const [teamInfoResults,quickResults,eventsResults] = await Promise.all([
-        batchFetch(teamNumbers, n=>fetchJSON(`${FTCSCOUT_API}/teams/${n}`).catch(()=>null), 5),
-        batchFetch(teamNumbers, n=>fetchJSON(`${FTCSCOUT_API}/teams/${n}/quick-stats?season=${season}`).catch(()=>null), 5),
-        batchFetch(teamNumbers, n=>fetchJSON(`${FTCSCOUT_API}/teams/${n}/events/${season}`).catch(()=>null), 5),
+      // Phase 2: fetch event rankings (W/L/T, rank, event OPR for every team in ONE call)
+      // + team info and quick-stats in parallel batches
+      const [rankingsRaw, teamInfoResults, quickResults] = await Promise.all([
+        fetchJSON(`${FTCSCOUT_API}/events/${season}/${code}/rankings`).catch(() => []),
+        batchFetch(teamNumbers, n => fetchJSON(`${FTCSCOUT_API}/teams/${n}`).catch(() => null), 5),
+        batchFetch(teamNumbers, n => fetchJSON(`${FTCSCOUT_API}/teams/${n}/quick-stats?season=${season}`).catch(() => null), 5),
       ]);
 
-      // Console debug — open DevTools to see exact API shape, remove once confirmed
+      // Build a map from teamNumber → ranking entry for O(1) lookup
+      const rankingsMap = {};
+      (rankingsRaw || []).forEach(r => {
+        if (r.teamNumber != null) rankingsMap[r.teamNumber] = r;
+      });
+
+      // Debug: log first team's raw data in console so you can verify field names
       if (teamNumbers.length > 0) {
         const n0 = teamNumbers[0];
         console.group('%c[FTCScout Debug] Team ' + n0, 'color:#FF5A1F;font-weight:bold');
         console.log('teamInfo:', teamInfoResults[n0]);
         console.log('quickStats:', quickResults[n0]);
-        console.log('events[0]:', eventsResults[n0]?.[0]);
-        console.log('events[0].stats:', eventsResults[n0]?.[0]?.stats);
-        console.log('events[0].event:', eventsResults[n0]?.[0]?.event);
+        console.log('rankingsMap entry:', rankingsMap[n0]);
+        console.log('Full rankings[0]:', rankingsRaw?.[0]);
         console.groupEnd();
       }
 
-      const assembled = teamNumbers.map(num=>buildTeam(num,teamInfoResults[num],quickResults[num],eventsResults[num],awardsMap[num]||[],season));
+      const assembled = teamNumbers.map(num =>
+        buildTeam(num, teamInfoResults[num], quickResults[num], rankingsMap[num], awardsMap[num] || [], season, code)
+      );
       assembled.sort((a,b)=>b.seasonOpr-a.seasonOpr);
       let status='Upcoming';
       if(event.finished) status='Completed'; else if(event.ongoing) status='In Progress'; else if(event.started) status='Started';
