@@ -5,10 +5,22 @@ import * as THREE from 'three';
 // ─────────────────────────────────────────────────────────────────────────────
 // SCOUTING — API, helpers, sub-components
 // All at module level so React never recreates them between renders
+//
+// FIX: Removed /api/ignite proxy dependency entirely.
+// All data now sourced from FTCScout public REST API (no CORS issues):
+//   • Team name/location  → GET /teams/${n}
+//   • OPR breakdown       → GET /teams/${n}/quick-stats  (.auto/.tele/.end value+rank)
+//   • DPR, CCWM           → quick-stats .dpr / .ccwm
+//   • Per-event W/L/T     → GET /teams/${n}/events?season=
+//   • Event OPR history   → built from per-event data above
+//
+// ADDED: Chart.js charts in the team modal (OPR trend, scoring doughnut,
+//        radar vs event average) — matching the original standalone app.
+// NOTE: Add this to your index.html <head> for charts to work:
+//   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 // ─────────────────────────────────────────────────────────────────────────────
 
 const FTCSCOUT_API = 'https://api.ftcscout.org/rest/v1';
-const IGNITE_API   = '/api/ignite'; // Vercel serverless proxy → api/ignite.js
 
 const SCOUT_SEASONS = [
   { value: '2025', label: '2025-26 DECODE' },
@@ -41,7 +53,7 @@ function fmtDate(dateStr) {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// Identical logic to the original app.js analyzePlaystyle
+// ── analyzePlaystyle — identical logic to original app.js ─────────────────
 function analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, winRate, season }) {
   const tags = [];
   let score = 0;
@@ -73,79 +85,99 @@ function analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, winRa
   return { text: tier + (tags.length > 0 ? tags.slice(0, 3).join(' · ') : 'Balanced'), score };
 }
 
-// Identical logic to the original app.js buildTeam — uses both Ignite + FTCScout
-function buildTeam(teamNumber, igniteData, quickStats, awardsForTeam, season) {
-  const ig      = igniteData;
-  const summary = ig?.seasonSummary;
+// ── buildTeam — FTCScout-only, no Ignite proxy needed ────────────────────
+//
+// teamInfo    → GET /teams/${n}              (name, city, state, country)
+// quickStats  → GET /teams/${n}/quick-stats  (tot/auto/tele/end .value+.rank, dpr, ccwm)
+// teamEvents  → GET /teams/${n}/events?season (per-event opr, rank, wins/losses/ties)
+// awardsForTeam → from event awards endpoint (fetched separately, passed in)
+function buildTeam(teamNumber, teamInfo, quickStats, teamEvents, awardsForTeam, season) {
+  // ── Name & location ──────────────────────────────────────────────────────
+  const name     = teamInfo?.name ?? teamInfo?.teamName ?? '';
+  const location = [teamInfo?.city, teamInfo?.state, teamInfo?.country].filter(Boolean).join(', ');
 
-  // Names + location come from Ignite
-  const name     = ig?.name ?? '';
-  const location = [ig?.city, ig?.state, ig?.country].filter(Boolean).join(', ');
+  // ── OPR breakdown from quick-stats ──────────────────────────────────────
+  // Shape: { tot: {value, rank}, auto: {value, rank}, tele: {value, rank},
+  //          end: {value, rank}, dpr: {value} or number, ccwm: {value} or number }
+  const seasonOpr  = quickStats?.tot?.value  ?? 0;
+  const autoOpr    = quickStats?.auto?.value ?? 0;
+  const teleOpr    = quickStats?.tele?.value ?? 0;
+  const egOpr      = quickStats?.end?.value  ?? 0;
+  const dpr        = quickStats?.dpr?.value  ?? (typeof quickStats?.dpr  === 'number' ? quickStats.dpr  : 0);
+  const ccwm       = quickStats?.ccwm?.value ?? (typeof quickStats?.ccwm === 'number' ? quickStats.ccwm : 0);
+  const seasonRank = quickStats?.tot?.rank   ?? 99999;
 
-  // Season-wide stats: prefer Ignite summary, fall back to FTCScout quick-stats
-  const seasonOpr = summary?.opr       ?? quickStats?.tot?.value ?? 0;
-  const autoOpr   = summary?.autoOpr   ?? 0;
-  const teleOpr   = summary?.teleopOpr ?? 0;
-  const egOpr     = summary?.endgameOpr ?? 0;
-  const dpr       = summary?.dpr  ?? 0;
-  const ccwm      = summary?.ccwm ?? 0;
-
-  // Global rank from FTCScout
-  const seasonRank = quickStats?.tot?.rank ?? 99999;
-
-  // Season record from Ignite
-  const totalWins    = summary?.totalWins    ?? 0;
-  const totalLosses  = summary?.totalLosses  ?? 0;
-  const totalTies    = summary?.totalTies    ?? 0;
-  const totalMatches = summary?.matchesPlayed ?? 0;
-  const winRate      = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
-
-  // Season scores from Ignite
-  const maxScoreNp = summary?.maxScore    ?? 0;
-  const avgScoreNp = summary?.avgScore    ?? 0;
-  const eventCount = summary?.eventsPlayed ?? 0;
-
-  // Event history + best OPR + last event stats — all from Ignite
+  // ── Per-event data ───────────────────────────────────────────────────────
+  // GET /teams/${n}/events?season= returns array of event participation objects.
+  // Field names vary slightly by season so we check multiple variants.
   let lastOpr = 0, lastRank = 999, lastWins = 0, lastLosses = 0, lastTies = 0;
   let lastEventCode = '', lastWinRate = 0, bestOpr = 0;
+  let totalWins = 0, totalLosses = 0, totalTies = 0;
+  let maxScoreNp = 0, avgScoreNp = 0, eventCount = 0;
   let eventHistory = [];
 
-  if (ig?.events && ig?.eventStats) {
-    const validEvents = [...ig.events].filter(
-      e => ig.eventStats[e.eventId] && ig.eventStats[e.eventId].wins !== null
-    );
-    validEvents.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-    validEvents.forEach(e => {
-      const stats    = ig.eventStats[e.eventId];
-      const eventOpr = stats.opr ?? stats.npOpr ?? 0;
-      if (eventOpr > bestOpr) bestOpr = eventOpr;
-      eventHistory.push({ eventName: e.name, eventCode: e.eventCode, date: e.startDate, opr: eventOpr });
+  if (teamEvents && Array.isArray(teamEvents) && teamEvents.length > 0) {
+    // Only events that have actual match results
+    const played = teamEvents.filter(e => e.wins !== null && e.wins !== undefined);
+
+    // Sort ascending by start date for trend chart
+    played.sort((a, b) => new Date(a.start ?? a.startDate ?? 0) - new Date(b.start ?? b.startDate ?? 0));
+
+    played.forEach(e => {
+      const eOpr = e.opr ?? e.npOpr ?? e.tot?.value ?? 0;
+      if (eOpr > bestOpr) bestOpr = eOpr;
+
+      totalWins   += e.wins   ?? 0;
+      totalLosses += e.losses ?? 0;
+      totalTies   += e.ties   ?? 0;
+
+      const high = e.highScore ?? e.maxScore ?? 0;
+      if (high > maxScoreNp) maxScoreNp = high;
+
+      eventHistory.push({
+        eventName: e.eventName ?? e.name ?? '',
+        eventCode: e.eventCode ?? e.code ?? '',
+        date:      e.start     ?? e.startDate ?? '',
+        opr:       eOpr,
+        rank:      e.rank   ?? 999,
+        wins:      e.wins   ?? 0,
+        losses:    e.losses ?? 0,
+        ties:      e.ties   ?? 0,
+      });
     });
+
+    eventCount = played.length;
+
     if (eventHistory.length > 0) {
-      const latest      = validEvents[validEvents.length - 1];
-      const latestStats = ig.eventStats[latest.eventId];
-      lastOpr       = eventHistory[eventHistory.length - 1].opr;
-      lastRank      = latestStats.rank   ?? 999;
-      lastWins      = latestStats.wins   ?? 0;
-      lastLosses    = latestStats.losses ?? 0;
-      lastTies      = latestStats.ties   ?? 0;
-      lastEventCode = latest.eventCode   ?? '';
+      const latest  = eventHistory[eventHistory.length - 1];
+      lastOpr       = latest.opr;
+      lastRank      = latest.rank;
+      lastWins      = latest.wins;
+      lastLosses    = latest.losses;
+      lastTies      = latest.ties;
+      lastEventCode = latest.eventCode;
       const lastTotal = lastWins + lastLosses + lastTies;
       lastWinRate   = lastTotal > 0 ? (lastWins / lastTotal) * 100 : 0;
     }
+
+    const oprVals = eventHistory.map(e => e.opr).filter(v => v > 0);
+    avgScoreNp = oprVals.length > 0
+      ? oprVals.reduce((s, v) => s + v, 0) / oprVals.length
+      : 0;
   }
 
-  // Combine event awards + season awards from Ignite, deduplicate
-  const seasonAwards = ig?.seasonAwards ?? [];
-  const allAwards    = [...(awardsForTeam || []), ...seasonAwards];
-  const seen         = new Set();
-  const awards       = allAwards.filter(a => {
+  const totalMatches = totalWins + totalLosses + totalTies;
+  const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
+
+  // ── Awards ───────────────────────────────────────────────────────────────
+  const seen = new Set();
+  const awards = (awardsForTeam || []).filter(a => {
     const key = a.type || a.awardName || '';
     if (seen.has(key)) return false;
     seen.add(key); return true;
   });
 
-  const playstyle = analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, totalWins, totalLosses, winRate, season });
+  const playstyle = analyzePlaystyle({ autoOpr, teleOpr, egOpr, dpr, ccwm, seasonOpr, winRate, season });
 
   return {
     teamNumber, name, location, bestOpr,
@@ -159,31 +191,31 @@ function buildTeam(teamNumber, igniteData, quickStats, awardsForTeam, season) {
   };
 }
 
-// Full column set matching the original app.js
+// ── Column definitions — full set matching original app.js ────────────────
 const SCOUT_COLUMNS = [
-  { key: 'team',        label: 'Team #',      getter: t => t.teamNumber,       noSort: false, defaultAsc: true  },
-  { key: 'name',        label: 'Team Name',   getter: t => t.name ?? '',       noSort: false, isString: true    },
-  { key: 'seasonRank',  label: 'Rank',        getter: t => t.seasonRank ?? 99999, noSort: false, defaultAsc: true },
-  { key: 'bestOpr',     label: 'Best OPR',    getter: t => t.bestOpr   ?? 0,   hasBar: true,  barColor: 'blue'  },
-  { key: 'autoOpr',     label: 'Auto OPR',    getter: t => t.autoOpr   ?? 0,   hasBar: true,  barColor: 'yellow'},
-  { key: 'teleOpr',     label: 'TeleOp OPR',  getter: t => t.teleOpr   ?? 0,   hasBar: true,  barColor: 'blue'  },
-  { key: 'egOpr',       label: 'Endg OPR',    getter: t => t.egOpr     ?? 0,   hasBar: true,  barColor: 'red'   },
-  { key: 'dpr',         label: 'Def PR',      getter: t => t.dpr       ?? 0,   hasBar: true,  barColor: 'red'   },
-  { key: 'ccwm',        label: 'CCWM',        getter: t => t.ccwm      ?? 0,   hasBar: true,  barColor: 'green' },
-  { key: 'winRate',     label: 'Season Win%', getter: t => t.winRate   ?? 0,   hasBar: true,  barColor: 'green' },
-  { key: 'lastWinRate', label: 'Last Win%',   getter: t => t.lastWinRate ?? 0, hasBar: true,  barColor: 'green' },
-  { key: 'record',      label: 'W-L-T',       getter: t => t.totalWins ?? 0,   noSort: true                     },
-  { key: 'maxScore',    label: 'Max NP',      getter: t => t.maxScoreNp ?? 0,  hasBar: true,  barColor: 'blue'  },
-  { key: 'avgScore',    label: 'Avg NP',      getter: t => t.avgScoreNp ?? 0,  hasBar: true,  barColor: 'blue'  },
-  { key: 'events',      label: 'Events',      getter: t => t.eventCount ?? 0                                    },
-  { key: 'lastRank',    label: 'Last Rank',   getter: t => t.lastRank  ?? 999, defaultAsc: true                 },
-  { key: 'lastEvent',   label: 'Last Event',  getter: t => t.lastEventCode ?? '', isString: true                },
-  { key: 'comments',    label: 'Comments',    getter: t => t.teamNumber,       noSort: true                     },
-  { key: 'awards',      label: 'Awards',      getter: t => t.awardCount ?? 0                                    },
-  { key: 'location',    label: 'Location',    getter: t => t.location  ?? '',  isString: true                   },
+  { key: 'team',        label: 'Team #',      getter: t => t.teamNumber,          noSort: false, defaultAsc: true  },
+  { key: 'name',        label: 'Team Name',   getter: t => t.name ?? '',          noSort: false, isString: true    },
+  { key: 'seasonRank',  label: 'Rank',        getter: t => t.seasonRank ?? 99999, noSort: false, defaultAsc: true  },
+  { key: 'bestOpr',     label: 'Best OPR',    getter: t => t.bestOpr    ?? 0,     hasBar: true,  barColor: 'blue'  },
+  { key: 'autoOpr',     label: 'Auto OPR',    getter: t => t.autoOpr    ?? 0,     hasBar: true,  barColor: 'yellow'},
+  { key: 'teleOpr',     label: 'TeleOp OPR',  getter: t => t.teleOpr    ?? 0,     hasBar: true,  barColor: 'blue'  },
+  { key: 'egOpr',       label: 'Endg OPR',    getter: t => t.egOpr      ?? 0,     hasBar: true,  barColor: 'red'   },
+  { key: 'dpr',         label: 'Def PR',      getter: t => t.dpr        ?? 0,     hasBar: true,  barColor: 'red'   },
+  { key: 'ccwm',        label: 'CCWM',        getter: t => t.ccwm       ?? 0,     hasBar: true,  barColor: 'green' },
+  { key: 'winRate',     label: 'Season Win%', getter: t => t.winRate    ?? 0,     hasBar: true,  barColor: 'green' },
+  { key: 'lastWinRate', label: 'Last Win%',   getter: t => t.lastWinRate ?? 0,    hasBar: true,  barColor: 'green' },
+  { key: 'record',      label: 'W-L-T',       getter: t => t.totalWins  ?? 0,     noSort: true                     },
+  { key: 'maxScore',    label: 'Max NP',      getter: t => t.maxScoreNp ?? 0,     hasBar: true,  barColor: 'blue'  },
+  { key: 'avgScore',    label: 'Avg NP',      getter: t => t.avgScoreNp ?? 0,     hasBar: true,  barColor: 'blue'  },
+  { key: 'events',      label: 'Events',      getter: t => t.eventCount ?? 0                                       },
+  { key: 'lastRank',    label: 'Last Rank',   getter: t => t.lastRank   ?? 999,   defaultAsc: true                 },
+  { key: 'lastEvent',   label: 'Last Event',  getter: t => t.lastEventCode ?? '', isString: true                   },
+  { key: 'comments',    label: 'Comments',    getter: t => t.teamNumber,          noSort: true                     },
+  { key: 'awards',      label: 'Awards',      getter: t => t.awardCount ?? 0                                       },
+  { key: 'location',    label: 'Location',    getter: t => t.location   ?? '',    isString: true                   },
 ];
 
-// ── Scout sub-components ──────────────────────────────────────
+// ── Scout sub-components ──────────────────────────────────────────────────
 
 function WinRateBadge({ pct }) {
   const n = Number(pct);
@@ -203,11 +235,11 @@ function AwardBadge({ name }) {
   else if (lower.includes('connect'))   color = 'text-green-400 border-green-400/30 bg-green-400/10';
   else if (lower.includes('innovate'))  color = 'text-purple-400 border-purple-400/30 bg-purple-400/10';
   const display = name
-    .replace('Winning Alliance - Captain',          'WAC')
-    .replace('Winning Alliance - 1st Team Selected','WA-1st')
-    .replace('Winning Alliance - 2nd Team Selected','WA-2nd')
-    .replace('Finalist Alliance - Captain',         'FAC')
-    .replace('Finalist Alliance',                   'Finalist')
+    .replace('Winning Alliance - Captain',           'WAC')
+    .replace('Winning Alliance - 1st Team Selected', 'WA-1st')
+    .replace('Winning Alliance - 2nd Team Selected', 'WA-2nd')
+    .replace('Finalist Alliance - Captain',          'FAC')
+    .replace('Finalist Alliance',                    'Finalist')
     .replace(' Award', '');
   return <span className={`inline-block px-1.5 py-0.5 text-[0.65rem] font-bold border mr-1 ${color}`}>{display}</span>;
 }
@@ -239,11 +271,43 @@ function PhaseBar({ auto, tele, eg }) {
   );
 }
 
-// ── Team Detail Modal ─────────────────────────────────────────
+function ScoutSparkline({ data, width = 200, height = 50 }) {
+  if (!data || data.length < 2) return null;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((v - min) / range) * (height - 6) - 3;
+    return `${x},${y}`;
+  }).join(' ');
+  const last = pts.split(' ').at(-1).split(',');
+  return (
+    <svg width={width} height={height} className="block overflow-visible shrink-0">
+      <polyline points={pts} fill="none" stroke="#FF5A1F" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={last[0]} cy={last[1]} r="3" fill="#FF5A1F" />
+    </svg>
+  );
+}
 
+// ── Chart.js hook — creates/destroys a chart on mount/update ─────────────
+function useChart(canvasRef, buildConfig, deps) {
+  useEffect(() => {
+    const Chart = window.Chart;
+    if (!Chart || !canvasRef.current) return;
+    const instance = new Chart(canvasRef.current, buildConfig());
+    return () => instance.destroy();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+}
+
+// ── Team Detail Modal ─────────────────────────────────────────────────────
 function TeamModal({ team, season, allTeams, onClose }) {
-  const [notes, setNotes]     = useState(() => localStorage.getItem(`notes_${team.teamNumber}`) || '');
+  const [notes, setNotes]       = useState(() => localStorage.getItem(`notes_${team.teamNumber}`) || '');
   const [savedMsg, setSavedMsg] = useState('');
+
+  const oprCanvasRef   = useRef(null);
+  const phaseCanvasRef = useRef(null);
+  const radarCanvasRef = useRef(null);
 
   useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = ''; }; }, []);
   useEffect(() => {
@@ -258,10 +322,114 @@ function TeamModal({ team, season, allTeams, onClose }) {
     setTimeout(() => setSavedMsg(''), 2000);
   }
 
-  const avgAuto = allTeams.reduce((s, t) => s + (t.autoOpr || 0), 0) / (allTeams.length || 1);
-  const avgTele = allTeams.reduce((s, t) => s + (t.teleOpr || 0), 0) / (allTeams.length || 1);
-  const avgEg   = allTeams.reduce((s, t) => s + (t.egOpr   || 0), 0) / (allTeams.length || 1);
-  const oprData = team.eventHistory?.map(e => e.opr) || [];
+  // Averages for comparison charts
+  const n       = allTeams.length || 1;
+  const avgAuto = allTeams.reduce((s, t) => s + (t.autoOpr || 0), 0) / n;
+  const avgTele = allTeams.reduce((s, t) => s + (t.teleOpr || 0), 0) / n;
+  const avgEg   = allTeams.reduce((s, t) => s + (t.egOpr   || 0), 0) / n;
+  const avgDpr  = allTeams.reduce((s, t) => s + (t.dpr     || 0), 0) / n;
+  const avgCcwm = allTeams.reduce((s, t) => s + (t.ccwm    || 0), 0) / n;
+
+  const oprHistData = team.eventHistory?.map(e => e.opr) || [];
+  const oprLabels   = team.eventHistory?.map(e => e.eventCode) || [];
+  const aOpr = Math.max(0, team.autoOpr);
+  const tOpr = Math.max(0, team.teleOpr);
+  const eOpr = Math.max(0, team.egOpr);
+
+  // OPR Trend line chart
+  useChart(oprCanvasRef, () => ({
+    type: 'line',
+    data: {
+      labels: oprLabels,
+      datasets: [{
+        label: 'Event OPR',
+        data: oprHistData,
+        borderColor: '#60a5fa',
+        backgroundColor: 'rgba(96,165,250,0.1)',
+        borderWidth: 2,
+        pointBackgroundColor: '#3b82f6',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.3,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        title: { display: true, text: 'OPR TREND OVER SEASON', color: '#8b8b9a', font: { size: 10, weight: 'bold' } },
+      },
+      scales: {
+        y: { grid: { color: '#1e2030' }, ticks: { color: '#8b8b9a' }, beginAtZero: true },
+        x: { grid: { display: false }, ticks: { color: '#8b8b9a', font: { size: 10 } } },
+      },
+    },
+  }), [team.teamNumber]);
+
+  // Scoring phase doughnut
+  useChart(phaseCanvasRef, () => ({
+    type: 'doughnut',
+    data: {
+      labels: ['Auto OPR', 'TeleOp OPR', 'Endgame OPR'],
+      datasets: [{
+        data: [aOpr, tOpr, eOpr],
+        backgroundColor: ['#eab308', '#3b82f6', '#ef4444'],
+        borderWidth: 0,
+        hoverOffset: 4,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#e8e8ed', font: { size: 11 }, padding: 15 } },
+        title: { display: true, text: 'SCORING PROFILE', color: '#8b8b9a', font: { size: 10, weight: 'bold' }, padding: { bottom: 10 } },
+      },
+    },
+  }), [team.teamNumber]);
+
+  // Radar: team vs event average
+  useChart(radarCanvasRef, () => ({
+    type: 'radar',
+    data: {
+      labels: ['Auto OPR', 'TeleOp OPR', 'Endg OPR', 'CCWM', 'Def PR'],
+      datasets: [
+        {
+          label: `Team ${team.teamNumber}`,
+          data: [team.autoOpr||0, team.teleOpr||0, team.egOpr||0, team.ccwm||0, team.dpr||0],
+          backgroundColor: 'rgba(56,189,248,0.4)',
+          borderColor: '#38bdf8',
+          pointBackgroundColor: '#0ea5e9',
+          borderWidth: 2,
+        },
+        {
+          label: 'Event Average',
+          data: [avgAuto, avgTele, avgEg, avgCcwm, avgDpr],
+          backgroundColor: 'rgba(139,139,154,0.2)',
+          borderColor: '#8b8b9a',
+          pointBackgroundColor: '#5a5a6e',
+          borderWidth: 1,
+          borderDash: [5, 5],
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#e8e8ed', font: { size: 10 }, boxWidth: 12 } },
+        title: { display: true, text: 'TEAM VS AVERAGE', color: '#8b8b9a', font: { size: 10, weight: 'bold' } },
+      },
+      scales: {
+        r: {
+          angleLines: { color: 'rgba(255,255,255,0.1)' },
+          grid:        { color: 'rgba(255,255,255,0.1)' },
+          pointLabels: { color: '#8b8b9a', font: { size: 9 } },
+          ticks:       { display: false },
+        },
+      },
+    },
+  }), [team.teamNumber]);
 
   const clipSm = { clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)' };
   const clipMd = { clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' };
@@ -348,12 +516,12 @@ function TeamModal({ team, season, allTeams, onClose }) {
             </div>
           )}
 
-          {/* OPR trend sparkline */}
-          {oprData.length >= 2 && (
+          {/* OPR trend sparkline (native SVG, no Chart.js needed) */}
+          {oprHistData.length >= 2 && (
             <div className="mb-6">
               <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">OPR Trend</p>
               <div className="flex items-end gap-6 flex-wrap">
-                <ScoutSparkline data={oprData} />
+                <ScoutSparkline data={oprHistData} />
                 <div className="flex gap-4 flex-wrap">
                   {team.eventHistory.map((e, i) => (
                     <span key={i} className="flex flex-col items-center gap-0.5">
@@ -366,7 +534,33 @@ function TeamModal({ team, season, allTeams, onClose }) {
             </div>
           )}
 
-          {/* vs Event average */}
+          {/* Chart.js Visual Analytics */}
+          <div className="mb-6">
+            <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">Visual Analytics</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-[#1a2847]/30 border border-[#A2A9B1]/15" style={clipSm}>
+                <div style={{ height: 160 }}>
+                  {oprHistData.length >= 2
+                    ? <canvas ref={oprCanvasRef} />
+                    : <div className="h-full flex items-center justify-center text-[#A2A9B1]/30 text-xs text-center">Not enough events for trend</div>}
+                </div>
+              </div>
+              <div className="p-4 bg-[#1a2847]/30 border border-[#A2A9B1]/15" style={clipSm}>
+                <div style={{ height: 160 }}>
+                  {(aOpr + tOpr + eOpr) > 0
+                    ? <canvas ref={phaseCanvasRef} />
+                    : <div className="h-full flex items-center justify-center text-[#A2A9B1]/30 text-xs">No OPR data yet</div>}
+                </div>
+              </div>
+              <div className="p-4 bg-[#1a2847]/30 border border-[#A2A9B1]/15" style={clipSm}>
+                <div style={{ height: 160 }}>
+                  <canvas ref={radarCanvasRef} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* vs Event average (bar comparison) */}
           {allTeams.length > 1 && (
             <div className="mb-6">
               <p className="text-[0.6rem] font-bold tracking-widest text-[#A2A9B1]/60 uppercase mb-3">vs Event Average</p>
@@ -452,26 +646,7 @@ function TeamModal({ team, season, allTeams, onClose }) {
   );
 }
 
-function ScoutSparkline({ data, width = 200, height = 50 }) {
-  if (!data || data.length < 2) return null;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = max - min || 1;
-  const pts = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * width;
-    const y = height - ((v - min) / range) * (height - 6) - 3;
-    return `${x},${y}`;
-  }).join(' ');
-  const last = pts.split(' ').at(-1).split(',');
-  return (
-    <svg width={width} height={height} className="block overflow-visible shrink-0">
-      <polyline points={pts} fill="none" stroke="#FF5A1F" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={last[0]} cy={last[1]} r="3" fill="#FF5A1F" />
-    </svg>
-  );
-}
-
-// ── Awards Panel ──────────────────────────────────────────────
-
+// ── Awards Panel ──────────────────────────────────────────────────────────
 function AwardsPanel({ teams }) {
   const allAwards = [];
   for (const t of teams) {
@@ -524,18 +699,17 @@ function AwardsPanel({ teams }) {
   );
 }
 
-// ── SCOUTING PAGE — stable module-level component ─────────────
-
+// ── ScoutingPage ──────────────────────────────────────────────────────────
 function ScoutingPage({ isVisible }) {
-  const [season, setSeason]             = useState('2024');
-  const [eventCode, setEventCode]       = useState('');
-  const [loading, setLoading]           = useState(false);
-  const [error, setError]               = useState('');
-  const [eventInfo, setEventInfo]       = useState(null);
-  const [teams, setTeams]               = useState([]);
-  const [filter, setFilter]             = useState('');
-  const [sort, setSort]                 = useState({ key: 'seasonOpr', asc: false });
-  const [showVisuals, setShowVisuals]   = useState(false);
+  const [season,       setSeason]       = useState('2024');
+  const [eventCode,    setEventCode]    = useState('');
+  const [loading,      setLoading]      = useState(false);
+  const [error,        setError]        = useState('');
+  const [eventInfo,    setEventInfo]    = useState(null);
+  const [teams,        setTeams]        = useState([]);
+  const [filter,       setFilter]       = useState('');
+  const [sort,         setSort]         = useState({ key: 'seasonOpr', asc: false });
+  const [showVisuals,  setShowVisuals]  = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   const displayTeams = React.useMemo(() => {
@@ -548,7 +722,7 @@ function ScoutingPage({ isVisible }) {
     if (col && !col.noSort) {
       list.sort((a, b) => {
         const va = col.getter(a), vb = col.getter(b);
-        let cmp = col.isString ? String(va).localeCompare(String(vb)) : (Number(va) - Number(vb));
+        const cmp = col.isString ? String(va).localeCompare(String(vb)) : (Number(va) - Number(vb));
         return sort.asc ? cmp : -cmp;
       });
     }
@@ -577,7 +751,7 @@ function ScoutingPage({ isVisible }) {
     setError(''); setLoading(true); setEventInfo(null); setTeams([]); setFilter('');
 
     try {
-      // Phase 1 — event info, team list, awards (FTCScout, no CORS issue)
+      // ── Phase 1: event info + team list + awards (FTCScout, no CORS) ──
       const [event, eventTeams, eventAwards] = await Promise.all([
         fetchJSON(`${FTCSCOUT_API}/events/${season}/${code}`),
         fetchJSON(`${FTCSCOUT_API}/events/${season}/${code}/teams`),
@@ -587,28 +761,31 @@ function ScoutingPage({ isVisible }) {
       if (!eventTeams?.length) throw new Error('No teams found. The event may not have published its team list yet.');
 
       const teamNumbers = eventTeams.map(t => t.teamNumber);
-      const awardsMap   = {};
+      const awardsMap = {};
       (eventAwards || []).forEach(a => {
         if (!awardsMap[a.teamNumber]) awardsMap[a.teamNumber] = [];
         awardsMap[a.teamNumber].push(a);
       });
 
-      // Phase 2 — Ignite (names, location, breakdown stats) + FTCScout quick-stats (global rank)
-      // Both fetched in parallel, batched to avoid rate limits
-      const [igniteResults, quickResults] = await Promise.all([
-        batchFetch(teamNumbers, n => fetchJSON(`${IGNITE_API}/teams/${n}?season=${season}`).catch(() => null), 5),
+      // ── Phase 2: per-team FTCScout data (3 endpoints, all CORS-safe) ─
+      //   /teams/${n}                   → name, city, state, country
+      //   /teams/${n}/quick-stats       → OPR breakdown, DPR, CCWM, global rank
+      //   /teams/${n}/events?season=    → per-event W/L/T, rank, OPR history
+      const [teamInfoResults, quickResults, eventsResults] = await Promise.all([
+        batchFetch(teamNumbers, n => fetchJSON(`${FTCSCOUT_API}/teams/${n}`).catch(() => null), 5),
         batchFetch(teamNumbers, n => fetchJSON(`${FTCSCOUT_API}/teams/${n}/quick-stats?season=${season}`).catch(() => null), 5),
+        batchFetch(teamNumbers, n => fetchJSON(`${FTCSCOUT_API}/teams/${n}/events?season=${season}`).catch(() => null), 5),
       ]);
 
       const assembled = teamNumbers.map(num =>
-        buildTeam(num, igniteResults[num], quickResults[num], awardsMap[num] || [], season)
+        buildTeam(num, teamInfoResults[num], quickResults[num], eventsResults[num], awardsMap[num] || [], season)
       );
       assembled.sort((a, b) => b.seasonOpr - a.seasonOpr);
 
       let status = 'Upcoming';
-      if (event.finished)  status = 'Completed';
-      else if (event.ongoing) status = 'In Progress';
-      else if (event.started) status = 'Started';
+      if (event.finished)      status = 'Completed';
+      else if (event.ongoing)  status = 'In Progress';
+      else if (event.started)  status = 'Started';
 
       setEventInfo({ ...event, status, teamCount: assembled.length });
       setTeams(assembled);
@@ -620,7 +797,7 @@ function ScoutingPage({ isVisible }) {
     }
   }
 
-  function renderCell(col, team, currentSeason) {
+  function renderCell(col, team) {
     const v = col.getter(team);
     switch (col.key) {
       case 'team':
@@ -691,7 +868,7 @@ function ScoutingPage({ isVisible }) {
              className={`text-lg text-[#A2A9B1] max-w-2xl mx-auto transition-all duration-700 ${isVisible['scout-desc'] ? 'animate-fade-in-up' : 'opacity-0 translate-y-[30px]'}`}
              style={{ transitionDelay: '200ms' }}>
             Enter an FTC event code to load full team stats, OPR breakdowns, awards and more.
-            Powered by <a href="https://ftcscout.org" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">FTCScout</a> &amp; <a href="https://ignitepathways.org" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">Ignite</a>.
+            Powered by <a href="https://ftcscout.org" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">FTCScout</a>.
           </p>
         </div>
 
@@ -822,7 +999,6 @@ function ScoutingPage({ isVisible }) {
                     {SCOUT_COLUMNS.map(col => (
                       <th key={col.key}
                           onClick={() => !col.noSort && toggleSort(col.key)}
-                          title={col.tooltip}
                           className={`px-3 py-3 text-left text-[0.6rem] font-black tracking-widest uppercase whitespace-nowrap bg-[#1a2847]/60 transition-colors
                             ${col.noSort ? 'cursor-default text-[#A2A9B1]/40' : 'cursor-pointer hover:text-orange-500'}
                             ${sort.key === col.key ? 'text-orange-500' : 'text-[#A2A9B1]/60'}`}>
@@ -875,7 +1051,7 @@ function ScoutingPage({ isVisible }) {
 
         <div className="text-center pt-8 border-t border-[#A2A9B1]/10">
           <p className="text-xs text-[#A2A9B1]/30">
-            Data from <a href="https://ftcscout.org" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500/60">FTCScout</a> &amp; <a href="https://ignitepathways.org" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500/60">Ignite Pathways</a> · Original source FIRST · Click any row for full detail
+            Data from <a href="https://ftcscout.org" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500/60">FTCScout</a> · Original source FIRST · Click any row for full detail
           </p>
         </div>
       </div>
