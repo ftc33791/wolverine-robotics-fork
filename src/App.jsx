@@ -13,10 +13,10 @@ const getColumns = (season) => [
   { key: 'team', label: 'Team #', getter: t => t.teamNumber, tooltip: 'Team number' },
   { key: 'name', label: 'Team Name', getter: t => t.name, tooltip: 'Team name' },
   { key: 'seasonRank', label: 'Rank', getter: t => t.seasonRank ?? 99999, tooltip: 'Global OPR ranking' },
-  { key: 'bestOpr', label: 'Best OPR', getter: t => t.bestOpr ?? 0, tooltip: 'Highest OPR', hasVisual: true, barColor: 'blue' },
-  { key: 'autoOpr', label: 'Auto OPR', getter: t => t.autoOpr ?? 0, tooltip: 'Season Auto OPR', hasVisual: true, barColor: 'yellow' },
-  { key: 'teleOpr', label: 'TeleOp OPR', getter: t => t.teleOpr ?? 0, tooltip: 'Season TeleOp OPR', hasVisual: true, barColor: 'blue' },
-  { key: 'egOpr', label: 'Endg OPR', getter: t => t.egOpr ?? 0, tooltip: 'Season Endgame OPR', hasVisual: true, barColor: 'red' },
+  { key: 'seasonOpr', label: 'Total NP', getter: t => t.seasonOpr ?? 0, tooltip: 'Season average Non-Penalty score', hasVisual: true, barColor: 'blue' },
+  { key: 'autoOpr', label: 'Auto', getter: t => t.autoOpr ?? 0, tooltip: 'Season Auto average', hasVisual: true, barColor: 'yellow' },
+  { key: 'teleOpr', label: 'Teleop', getter: t => t.teleOpr ?? 0, tooltip: 'Season TeleOp average', hasVisual: true, barColor: 'blue' },
+  { key: 'egOpr', label: 'Endgame', getter: t => t.egOpr ?? 0, tooltip: 'Season Endgame average', hasVisual: true, barColor: 'red' },
   { key: 'dpr', label: 'Def PR', getter: t => t.dpr ?? 0, tooltip: 'Defensive Power Rating', hasVisual: true, barColor: 'red' },
   { key: 'ccwm', label: 'CCWM', getter: t => t.ccwm ?? 0, tooltip: 'Contribution to Margin', hasVisual: true, barColor: 'green' },
   { key: 'winRate', label: 'Season Win%', getter: t => t.winRate ?? 0, tooltip: 'Season-wide win rate', hasVisual: true, barColor: 'green', isWinPct: true },
@@ -77,12 +77,12 @@ function buildTeam(teamNumber, igniteData, quickStats, awardsForTeam, season) {
     const name = ig?.name ?? '';
     const location = [ig?.city, ig?.state, ig?.country].filter(Boolean).join(', ');
     
-    // Prioritize FTC Scout quick-stats for official averages
+    // Prioritize FTC Scout quick-stats for official averages (mapping to correct API fields)
     const seasonOpr = qs?.tot?.value ?? summary?.opr ?? 0;
     const autoOpr   = qs?.auto?.value ?? summary?.autoOpr ?? 0;
-    const teleOpr   = qs?.tele?.value ?? summary?.teleopOpr ?? 0;
-    const egOpr     = qs?.end?.value ?? summary?.endgameOpr ?? 0;
-    const dpr       = qs?.dpr?.value ?? summary?.dpr ?? 0;
+    const teleOpr   = qs?.dc?.value   ?? summary?.teleopOpr ?? 0;
+    const egOpr     = qs?.eg?.value   ?? summary?.endgameOpr ?? 0;
+    const dpr       = qs?.dpr?.value  ?? summary?.dpr ?? 0;
     const ccwm      = qs?.ccwm?.value ?? summary?.ccwm ?? 0;
     
     const seasonRank = qs?.tot?.rank ?? 99999;
