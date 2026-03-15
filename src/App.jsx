@@ -188,6 +188,13 @@ function ScoutingPage({ isVisible }) {
     const [sortAsc, setSortAsc] = useState(false);
     const [filterQuery, setFilterQuery] = useState('');
     const [showVisuals, setShowVisuals] = useState(false);
+    const [activeTab, setActiveTab] = useState('event'); // 'event' or 'compare'
+    
+    // Comparison State
+    const [compareTeam1, setCompareTeam1] = useState('');
+    const [compareTeam2, setCompareTeam2] = useState('');
+    const [compareData, setCompareData] = useState({ t1: null, t2: null });
+    const [compareLoading, setCompareLoading] = useState(false);
     
     // Modal State
     const [modalTeam, setModalTeam] = useState(null);
@@ -240,6 +247,34 @@ function ScoutingPage({ isVisible }) {
             setErrorMsg(err.message || 'An unexpected error occurred.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCompare = async (e) => {
+        e.preventDefault();
+        const t1 = compareTeam1.trim();
+        const t2 = compareTeam2.trim();
+        if (!t1 || !t2) { setErrorMsg('Enter both team numbers.'); return; }
+        
+        setErrorMsg('');
+        setCompareLoading(true);
+        setCompareData({ t1: null, t2: null });
+
+        try {
+            const nums = [parseInt(t1), parseInt(t2)];
+            const [igniteResults, quickResults] = await Promise.all([
+                batchFetch(nums, n => fetchIgniteTeam(n, season), 2),
+                batchFetch(nums, n => fetchTeamQuickStats(n, season), 2),
+            ]);
+
+            const data1 = buildTeam(nums[0], igniteResults[nums[0]], quickResults[nums[0]], [], season);
+            const data2 = buildTeam(nums[1], igniteResults[nums[1]], quickResults[nums[1]], [], season);
+
+            setCompareData({ t1: data1, t2: data2 });
+        } catch (err) {
+            setErrorMsg('Error fetching comparison data.');
+        } finally {
+            setCompareLoading(false);
         }
     };
 
@@ -361,38 +396,67 @@ function ScoutingPage({ isVisible }) {
                     </div>
                 </header>
                 
-                <section className="search-section">
-                    <div className="search-card">
-                        <h2 className="search-title">LOOK UP EVENT</h2>
-                        <p className="search-desc">Enter an FTC event code to pull stats, awards, and team data.</p>
-                        <form onSubmit={handleScout} className="search-form">
-                            <div className="input-group">
-                                <div className="input-wrapper">
-                                    <label className="input-label">SEASON</label>
-                                    <select value={season} onChange={e=>setSeason(e.target.value)} className="input-field" disabled={loading}>
-                                        <option value="2025">2025-26 DECODE</option>
-                                        <option value="2024">2024-25 INTO THE DEEP</option>
-                                        <option value="2023">2023-24 CENTERSTAGE</option>
-                                    </select>
-                                </div>
-                                <div className="input-wrapper input-wrapper-grow">
-                                    <label className="input-label">EVENT CODE</label>
-                                    <input type="text" value={eventCode} onChange={e=>setEventCode(e.target.value.toUpperCase())} className="input-field" placeholder="e.g. USTXCCOS2" disabled={loading} />
-                                </div>
-                                <button type="submit" className="scout-btn" disabled={loading}>
-                                    {!loading ? <span className="btn-text">SCOUT EVENT</span> : <span className="spinner"></span>}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                <section className="scout-tabs">
+                    <button className={`tab-btn ${activeTab === 'event' ? 'active' : ''}`} onClick={() => setActiveTab('event')}>EVENT SCOUT</button>
+                    <button className={`tab-btn ${activeTab === 'compare' ? 'active' : ''}`} onClick={() => setActiveTab('compare')}>COMPARE TEAMS</button>
                 </section>
+
+                {activeTab === 'event' ? (
+                    <section className="search-section">
+                        <div className="search-card">
+                            <h2 className="search-title">LOOK UP EVENT</h2>
+                            <p className="search-desc">Enter an FTC event code to pull stats, awards, and team data.</p>
+                            <form onSubmit={handleScout} className="search-form">
+                                <div className="input-group">
+                                    <div className="input-wrapper">
+                                        <label className="input-label">SEASON</label>
+                                        <select value={season} onChange={e=>setSeason(e.target.value)} className="input-field" disabled={loading}>
+                                            <option value="2025">2025-26 DECODE</option>
+                                            <option value="2024">2024-25 INTO THE DEEP</option>
+                                            <option value="2023">2023-24 CENTERSTAGE</option>
+                                        </select>
+                                    </div>
+                                    <div className="input-wrapper input-wrapper-grow">
+                                        <label className="input-label">EVENT CODE</label>
+                                        <input type="text" value={eventCode} onChange={e=>setEventCode(e.target.value.toUpperCase())} className="input-field" placeholder="e.g. USTXCCOS2" disabled={loading} />
+                                    </div>
+                                    <button type="submit" className="scout-btn" disabled={loading}>
+                                        {!loading ? <span className="btn-text">SCOUT EVENT</span> : <span className="spinner"></span>}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                ) : (
+                    <section className="search-section">
+                        <div className="search-card">
+                            <h2 className="search-title">COMPARE TEAMS</h2>
+                            <p className="search-desc">Enter two team numbers to see their 2025 stats side-by-side.</p>
+                            <form onSubmit={handleCompare} className="search-form">
+                                <div className="input-group">
+                                    <div className="input-wrapper">
+                                        <label className="input-label">TEAM #1</label>
+                                        <input type="number" value={compareTeam1} onChange={e=>setCompareTeam1(e.target.value)} className="input-field" placeholder="e.g. 33791" disabled={compareLoading} />
+                                    </div>
+                                    <div className="input-wrapper">
+                                        <label className="input-label">TEAM #2</label>
+                                        <input type="number" value={compareTeam2} onChange={e=>setCompareTeam2(e.target.value)} className="input-field" placeholder="e.g. 12820" disabled={compareLoading} />
+                                    </div>
+                                    <button type="submit" className="scout-btn" disabled={compareLoading}>
+                                        {!compareLoading ? <span className="btn-text">COMPARE TEAMS</span> : <span className="spinner"></span>}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                )}
 
                 {errorMsg && (
                     <div className="error-display"><div className="error-card"><span className="error-icon">✕</span> <span>{errorMsg}</span></div></div>
                 )}
-                {loading && <div className="loading-bar"><div className="loading-bar-inner"></div></div>}
+                {(loading || compareLoading) && <div className="loading-bar"><div className="loading-bar-inner"></div></div>}
 
-                {eventInfo && (
+                {activeTab === 'event' && eventInfo && (
                     <section className="event-info">
                         <div className="event-card">
                             <div className="event-header">
@@ -409,7 +473,7 @@ function ScoutingPage({ isVisible }) {
                     </section>
                 )}
 
-                {allTeams.length > 0 && (
+                {activeTab === 'event' && allTeams.length > 0 && (
                     <section className="table-section">
                         <div className="section-header">
                             <h3 className="section-title">TEAM STATISTICS</h3>
@@ -461,6 +525,43 @@ function ScoutingPage({ isVisible }) {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </section>
+                )}
+
+                {activeTab === 'compare' && compareData.t1 && compareData.t2 && (
+                    <section className="compare-section">
+                        <div className="compare-grid">
+                            {[compareData.t1, compareData.t2].map((t, idx) => {
+                                const other = idx === 0 ? compareData.t2 : compareData.t1;
+                                return (
+                                    <div key={idx} className="compare-card">
+                                        <div className="compare-header">
+                                            <span className="compare-number">#{t.teamNumber}</span>
+                                            <h2 className="compare-name">{t.name || 'Unknown Team'}</h2>
+                                            <p className="compare-loc">{t.location}</p>
+                                        </div>
+                                        <div className="compare-stats">
+                                            <div className={`comp-stat ${t.seasonOpr > other.seasonOpr ? 'winner' : ''}`}>
+                                                <label>Total NP</label>
+                                                <span>{t.seasonOpr.toFixed(1)}</span>
+                                            </div>
+                                            <div className={`comp-stat ${t.autoOpr > other.autoOpr ? 'winner' : ''}`}>
+                                                <label>Auto</label>
+                                                <span>{t.autoOpr.toFixed(1)}</span>
+                                            </div>
+                                            <div className={`comp-stat ${t.teleOpr > other.teleOpr ? 'winner' : ''}`}>
+                                                <label>Teleop</label>
+                                                <span>{t.teleOpr.toFixed(1)}</span>
+                                            </div>
+                                            <div className={`comp-stat ${t.egOpr > other.egOpr ? 'winner' : ''}`}>
+                                                <label>Endgame</label>
+                                                <span>{t.egOpr.toFixed(1)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </section>
                 )}
