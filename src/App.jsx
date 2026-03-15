@@ -204,6 +204,7 @@ function ScoutingPage({ isVisible }) {
     const oprRef = useRef(null);
     const phaseRef = useRef(null);
     const radarRef = useRef(null);
+    const compareRadarRef = useRef(null);
     const chartInstances = useRef({});
 
     const handleScout = async (e) => {
@@ -374,6 +375,51 @@ function ScoutingPage({ isVisible }) {
         });
     }, [modalTeam]);
 
+    // Comparison Radar Chart
+    useEffect(() => {
+        if (!compareData.t1 || !compareData.t2 || !window.Chart) return;
+
+        if (chartInstances.current.compareRadar) {
+            chartInstances.current.compareRadar.destroy();
+        }
+
+        const metrics = [
+            { label: 'Total NP', key: 'seasonOpr' },
+            { label: 'Auto', key: 'autoOpr' },
+            { label: 'Teleop', key: 'teleOpr' },
+            { label: 'Endgame', key: 'egOpr' },
+            { label: 'CCWM', key: 'ccwm' },
+            { label: 'DPR', key: 'dpr' }
+        ];
+
+        const t1 = compareData.t1;
+        const t2 = compareData.t2;
+
+        chartInstances.current.compareRadar = new window.Chart(compareRadarRef.current, {
+            type: 'radar',
+            data: {
+                labels: metrics.map(m => m.label),
+                datasets: [
+                    { label: `Team ${t1.teamNumber}`, data: metrics.map(m => t1[m.key]||0), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.3)', pointBackgroundColor: '#3b82f6' },
+                    { label: `Team ${t2.teamNumber}`, data: metrics.map(m => t2[m.key]||0), borderColor: '#fb923c', backgroundColor: 'rgba(251, 146, 60, 0.3)', pointBackgroundColor: '#fb923c' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#e8e8ed', font: { weight: 'bold' } } } },
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255,255,255,0.1)' },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        pointLabels: { color: '#8b8b9a', font: { size: 10, weight: '700' } },
+                        ticks: { display: false }
+                    }
+                }
+            }
+        });
+    }, [compareData]);
+
     const maxVals = {};
     const cols = getColumns(season);
     cols.forEach(c => {
@@ -531,13 +577,18 @@ function ScoutingPage({ isVisible }) {
 
                 {activeTab === 'compare' && compareData.t1 && compareData.t2 && (
                     <section className="compare-section">
+                        <div className="compare-visual-section">
+                            <div className="compare-chart-container">
+                                <canvas ref={compareRadarRef}></canvas>
+                            </div>
+                        </div>
                         <div className="compare-grid">
                             {[compareData.t1, compareData.t2].map((t, idx) => {
                                 const other = idx === 0 ? compareData.t2 : compareData.t1;
                                 return (
-                                    <div key={idx} className="compare-card">
+                                    <div key={idx} className="compare-card" style={{borderColor: idx === 0 ? '#3b82f6' : '#fb923c'}}>
                                         <div className="compare-header">
-                                            <span className="compare-number">#{t.teamNumber}</span>
+                                            <span className="compare-number" style={{color: idx === 0 ? '#3b82f6' : '#fb923c'}}>#{t.teamNumber}</span>
                                             <h2 className="compare-name">{t.name || 'Unknown Team'}</h2>
                                             <p className="compare-loc">{t.location}</p>
                                         </div>
@@ -557,6 +608,18 @@ function ScoutingPage({ isVisible }) {
                                             <div className={`comp-stat ${t.egOpr > other.egOpr ? 'winner' : ''}`}>
                                                 <label>Endgame</label>
                                                 <span>{t.egOpr.toFixed(1)}</span>
+                                            </div>
+                                            <div className={`comp-stat ${t.ccwm > other.ccwm ? 'winner' : ''}`}>
+                                                <label>CCWM</label>
+                                                <span>{t.ccwm.toFixed(1)}</span>
+                                            </div>
+                                            <div className={`comp-stat ${t.dpr < other.dpr ? 'winner' : ''}`}>
+                                                <label>Def PR</label>
+                                                <span>{t.dpr.toFixed(1)}</span>
+                                            </div>
+                                            <div className={`comp-stat ${t.winRate > other.winRate ? 'winner' : ''}`}>
+                                                <label>Win Rate</label>
+                                                <span>{t.winRate.toFixed(0)}%</span>
                                             </div>
                                         </div>
                                     </div>
