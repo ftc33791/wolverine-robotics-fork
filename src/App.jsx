@@ -175,7 +175,7 @@ async function batchFetch(items, fn, batchSize = 5) {
 }
 
 function ScoutingPage({ isVisible }) {
-    const [season, setSeason] = useState('2024');
+    const [season, setSeason] = useState('2025');
     const [eventCode, setEventCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
