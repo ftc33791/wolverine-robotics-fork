@@ -963,7 +963,7 @@ const App = () => {
   const teamMembers = {
     students: [
       { name: 'Dev Gavande',          role: 'Team Captain, Founder, Driver, CAD Lead, Hardware Lead', image: '/data/team/Dev.png',      initials: 'DG', rookie: false, season: '2025–26 Decode', bio: 'Founding member and team captain leading Wolverine Robotics from day one.' },
-      { name: 'Sahejdeep Singh',       role: 'Software, Hardware, Drive Coach',                        image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Sahejdeep Singh',       role: 'Software Lead, Hardware, Drive Coach',                        image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true,  season: '2025–26 Decode' },
       { name: 'Sripaadh J Kuppusamy', role: 'Hardware, Human Player',                                  image: '/data/team/sripadh.jpg',  initials: 'SK', rookie: true,  season: '2025–26 Decode' },
       { name: 'Manveer Singh Tib',     role: 'Hardware, Human Player',                                  image: '/data/team/manveer.jpg',  initials: 'MT', rookie: true,  season: '2025–26 Decode' },
       { name: 'Jivansh Pandya',        role: 'Hardware',                                                image: '/data/team/Jivansh.jpg',  initials: 'JP', rookie: true,  season: '2025–26 Decode' },
@@ -976,7 +976,7 @@ const App = () => {
       { name: 'Kavin Murugan',         role: 'Outreach',                                                image: '/data/team/kavin.jpg',    initials: 'KM', rookie: true,  season: '2025–26 Decode' },
     ],
     mentors: [
-      { name: 'Abdullah Khaled', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false, season: '2025–26 Decode' },
+      { name: 'Abdullah Khaled', role: 'Youth Software Mentor, Co-Founder', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false, season: '2025–26 Decode', bio: "Wolverine Robotics Co-Founder" },
     ],
     coaches: [
       { name: 'Mr. Ellis',   role: 'Coach', image: '/data/team/ellis.jpg', initials: 'E', rookie: false, season: '2025–26 Decode' },
