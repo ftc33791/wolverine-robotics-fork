@@ -6,9 +6,8 @@ import './Scouting.css';
 const FTCSCOUT_API = 'https://api.ftcscout.org/rest/v1';
 const IGNITE_API = '/api/ignite';
 
-function escHtml(str) { return str; } // React sanitizes automatically
+function escHtml(str) { return str; }
 
-// Format getters & columns logic ported from vanilla JS
 const getColumns = (season) => [
   { key: 'team', label: 'Team #', getter: t => t.teamNumber, tooltip: 'Team number' },
   { key: 'name', label: 'Team Name', getter: t => t.name, tooltip: 'Team name' },
@@ -76,15 +75,14 @@ function buildTeam(teamNumber, igniteData, quickStats, awardsForTeam, season) {
     const summary = ig?.seasonSummary;
     const name = ig?.name ?? '';
     const location = [ig?.city, ig?.state, ig?.country].filter(Boolean).join(', ');
-    
-    // Prioritize FTC Scout quick-stats for official averages (mapping to correct API fields)
+
     const seasonOpr = qs?.tot?.value ?? summary?.opr ?? 0;
     const autoOpr   = qs?.auto?.value ?? summary?.autoOpr ?? 0;
     const teleOpr   = qs?.dc?.value   ?? summary?.teleopOpr ?? 0;
     const egOpr     = qs?.eg?.value   ?? summary?.endgameOpr ?? 0;
     const dpr       = qs?.dpr?.value  ?? summary?.dpr ?? 0;
     const ccwm      = qs?.ccwm?.value ?? summary?.ccwm ?? 0;
-    
+
     const seasonRank = qs?.tot?.rank ?? 99999;
     const totalWins = summary?.totalWins ?? 0;
     const totalLosses = summary?.totalLosses ?? 0;
@@ -179,8 +177,7 @@ function ScoutingPage({ isVisible }) {
     const [eventCode, setEventCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
-    
-    // Data State
+
     const [eventInfo, setEventInfo] = useState(null);
     const [renderedTeams, setRenderedTeams] = useState([]);
     const [allTeams, setAllTeams] = useState([]);
@@ -188,15 +185,13 @@ function ScoutingPage({ isVisible }) {
     const [sortAsc, setSortAsc] = useState(false);
     const [filterQuery, setFilterQuery] = useState('');
     const [showVisuals, setShowVisuals] = useState(false);
-    const [activeTab, setActiveTab] = useState('event'); // 'event' or 'compare'
-    
-    // Comparison State
+    const [activeTab, setActiveTab] = useState('event');
+
     const [compareTeam1, setCompareTeam1] = useState('');
     const [compareTeam2, setCompareTeam2] = useState('');
     const [compareData, setCompareData] = useState({ t1: null, t2: null });
     const [compareLoading, setCompareLoading] = useState(false);
-    
-    // Modal State
+
     const [modalTeam, setModalTeam] = useState(null);
     const [notes, setNotes] = useState('');
     const [saveStatus, setSaveStatus] = useState('');
@@ -211,7 +206,7 @@ function ScoutingPage({ isVisible }) {
         e.preventDefault();
         const code = eventCode.trim().toUpperCase();
         if (!code) { setErrorMsg('Enter an event code.'); return; }
-        
+
         setErrorMsg('');
         setLoading(true);
         setEventInfo(null);
@@ -256,7 +251,7 @@ function ScoutingPage({ isVisible }) {
         const t1 = compareTeam1.trim();
         const t2 = compareTeam2.trim();
         if (!t1 || !t2) { setErrorMsg('Enter both team numbers.'); return; }
-        
+
         setErrorMsg('');
         setCompareLoading(true);
         setCompareData({ t1: null, t2: null });
@@ -282,10 +277,10 @@ function ScoutingPage({ isVisible }) {
     const handleSort = (key) => {
         const isAsc = sortKey === key ? !sortAsc : (key === 'seasonRank' || key === 'lastRank');
         setSortKey(key); setSortAsc(isAsc);
-        
+
         const col = getColumns(season).find(c => c.key === key);
         if (!col || col.noSort) return;
-        
+
         const sorted = [...renderedTeams].sort((a, b) => {
             let va = col.getter(a), vb = col.getter(b);
             if (typeof va === 'string') return isAsc ? va.localeCompare(vb) : vb.localeCompare(va);
@@ -298,7 +293,7 @@ function ScoutingPage({ isVisible }) {
         const query = e.target.value.toLowerCase();
         setFilterQuery(query);
         let filtered = allTeams.filter(t => String(t.teamNumber).includes(query) || (t.name || '').toLowerCase().includes(query));
-        
+
         const col = getColumns(season).find(c => c.key === sortKey);
         if (col && !col.noSort) {
             filtered.sort((a, b) => {
@@ -329,7 +324,6 @@ function ScoutingPage({ isVisible }) {
         setSaveStatus('Saved to local storage');
     };
 
-    // Chart.js Drawing
     useEffect(() => {
         if (!modalTeam || !window.Chart) return;
 
@@ -339,7 +333,7 @@ function ScoutingPage({ isVisible }) {
 
         const labels = modalTeam.eventHistory ? modalTeam.eventHistory.map(e => e.eventCode) : [];
         const oprData = modalTeam.eventHistory ? modalTeam.eventHistory.map(e => e.opr) : [];
-        
+
         chartInstances.current.opr = new window.Chart(oprRef.current, {
             type: 'line',
             data: { labels, datasets: [{ label: 'Event OPR', data: oprData, borderColor: '#60a5fa', backgroundColor: 'rgba(96, 165, 250, 0.1)', borderWidth: 2, pointBackgroundColor: '#3b82f6', fill: true, tension: 0.3 }] },
@@ -375,7 +369,6 @@ function ScoutingPage({ isVisible }) {
         });
     }, [modalTeam]);
 
-    // Comparison Radar Chart
     useEffect(() => {
         if (!compareData.t1 || !compareData.t2 || !window.Chart) return;
 
@@ -441,7 +434,7 @@ function ScoutingPage({ isVisible }) {
                         <div><h1 className="logo-text">FTC AUTO SCOUT</h1><p className="logo-subtitle">SCOUTING DATABASE</p></div>
                     </div>
                 </header>
-                
+
                 <section className="scout-tabs">
                     <button className={`tab-btn ${activeTab === 'event' ? 'active' : ''}`} onClick={() => setActiveTab('event')}>EVENT SCOUT</button>
                     <button className={`tab-btn ${activeTab === 'compare' ? 'active' : ''}`} onClick={() => setActiveTab('compare')}>COMPARE TEAMS</button>
@@ -593,34 +586,13 @@ function ScoutingPage({ isVisible }) {
                                             <p className="compare-loc">{t.location}</p>
                                         </div>
                                         <div className="compare-stats">
-                                            <div className={`comp-stat ${t.seasonOpr > other.seasonOpr ? 'winner' : ''}`}>
-                                                <label>Total NP</label>
-                                                <span>{t.seasonOpr.toFixed(1)}</span>
-                                            </div>
-                                            <div className={`comp-stat ${t.autoOpr > other.autoOpr ? 'winner' : ''}`}>
-                                                <label>Auto</label>
-                                                <span>{t.autoOpr.toFixed(1)}</span>
-                                            </div>
-                                            <div className={`comp-stat ${t.teleOpr > other.teleOpr ? 'winner' : ''}`}>
-                                                <label>Teleop</label>
-                                                <span>{t.teleOpr.toFixed(1)}</span>
-                                            </div>
-                                            <div className={`comp-stat ${t.egOpr > other.egOpr ? 'winner' : ''}`}>
-                                                <label>Endgame</label>
-                                                <span>{t.egOpr.toFixed(1)}</span>
-                                            </div>
-                                            <div className={`comp-stat ${t.ccwm > other.ccwm ? 'winner' : ''}`}>
-                                                <label>CCWM</label>
-                                                <span>{t.ccwm.toFixed(1)}</span>
-                                            </div>
-                                            <div className={`comp-stat ${t.dpr < other.dpr ? 'winner' : ''}`}>
-                                                <label>Def PR</label>
-                                                <span>{t.dpr.toFixed(1)}</span>
-                                            </div>
-                                            <div className={`comp-stat ${t.winRate > other.winRate ? 'winner' : ''}`}>
-                                                <label>Win Rate</label>
-                                                <span>{t.winRate.toFixed(0)}%</span>
-                                            </div>
+                                            <div className={`comp-stat ${t.seasonOpr > other.seasonOpr ? 'winner' : ''}`}><label>Total NP</label><span>{t.seasonOpr.toFixed(1)}</span></div>
+                                            <div className={`comp-stat ${t.autoOpr > other.autoOpr ? 'winner' : ''}`}><label>Auto</label><span>{t.autoOpr.toFixed(1)}</span></div>
+                                            <div className={`comp-stat ${t.teleOpr > other.teleOpr ? 'winner' : ''}`}><label>Teleop</label><span>{t.teleOpr.toFixed(1)}</span></div>
+                                            <div className={`comp-stat ${t.egOpr > other.egOpr ? 'winner' : ''}`}><label>Endgame</label><span>{t.egOpr.toFixed(1)}</span></div>
+                                            <div className={`comp-stat ${t.ccwm > other.ccwm ? 'winner' : ''}`}><label>CCWM</label><span>{t.ccwm.toFixed(1)}</span></div>
+                                            <div className={`comp-stat ${t.dpr < other.dpr ? 'winner' : ''}`}><label>Def PR</label><span>{t.dpr.toFixed(1)}</span></div>
+                                            <div className={`comp-stat ${t.winRate > other.winRate ? 'winner' : ''}`}><label>Win Rate</label><span>{t.winRate.toFixed(0)}%</span></div>
                                         </div>
                                     </div>
                                 );
@@ -666,6 +638,7 @@ function ScoutingPage({ isVisible }) {
         </div>
     );
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // SITE COMPONENTS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -881,6 +854,7 @@ const InitialLoadAnimation = ({ onComplete }) => {
     </div>
   );
 };
+
 // ─────────────────────────────────────────────────────────────────────────────
 // APP
 // ─────────────────────────────────────────────────────────────────────────────
@@ -894,6 +868,10 @@ const App = () => {
   const [pageTransitioning, setPageTransitioning] = useState(false);
   const [displayPage,       setDisplayPage]       = useState('home');
   const [transitionPhase,   setTransitionPhase]   = useState('none');
+
+  // Member modal state
+  const [selectedMember,   setSelectedMember]   = useState(null);
+  const [showPastMembers,  setShowPastMembers]  = useState(false);
 
   useEffect(() => {
     const el = document.querySelector("link[rel*='icon']");
@@ -911,7 +889,7 @@ const App = () => {
     const handle = () => {
       const path = window.location.pathname;
       const page = path === '/' ? 'home' : path.substring(1);
-      if (['home','about','robots','sponsors','contact','scouting'].includes(page)) setCurrentPage(page);
+      if (['home','about','robots','sponsors','contact','scouting','team'].includes(page)) setCurrentPage(page);
     };
     window.addEventListener('popstate', handle);
     return () => window.removeEventListener('popstate', handle);
@@ -975,6 +953,7 @@ const App = () => {
   const navigation = [
     { name: 'HOME',     id: 'home'     },
     { name: 'ABOUT',    id: 'about'    },
+    { name: 'TEAM',     id: 'team'     },
     { name: 'ROBOTS',   id: 'robots'   },
     { name: 'SPONSORS', id: 'sponsors' },
     { name: 'CONTACT',  id: 'contact'  },
@@ -983,30 +962,44 @@ const App = () => {
 
   const teamMembers = {
     students: [
-      { name: 'Dev Gavande',          role: 'Team Captain, Founder, Driver, CAD Lead, Hardware Lead', image: '/data/team/Dev.png',      initials: 'DG', rookie: false },
-      { name: 'Sahejdeep Singh',       role: 'Software, Hardware, Drive Coach',                        image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true  },
-      { name: 'Sripaadh J Kuppusamy', role: 'Hardware, Human Player',                                  image: '/data/team/sripadh.jpg',  initials: 'SK', rookie: true  },
-      { name: 'Manveer Singh Tib',     role: 'Hardware, Human Player',                                  image: '/data/team/manveer.jpg',  initials: 'MT', rookie: true  },
-      { name: 'Jivansh Pandya',        role: 'Hardware',                                                image: '/data/team/Jivansh.jpg',  initials: 'JP', rookie: true  },
-      { name: 'Jacob Esparza',         role: 'Hardware',                                                image: '/data/team/Jacob.jpeg',   initials: 'JE', rookie: true  },
-      { name: 'Kaiden Lee',            role: 'Hardware',                                                image: '/data/team/kaiden.jpg',   initials: 'KL', rookie: true  },
-      { name: 'Kalvik Das',            role: 'Hardware',                                                image: '/data/team/Kalvik.jpg',   initials: 'KD', rookie: true  },
-      { name: 'Alexander Fiderfish',   role: 'Hardware',                                                image: '/data/team/member9.jpg',  initials: 'AF', rookie: true  },
-      { name: 'Piousvir Singh',        role: 'Outreach',                                                image: '/data/team/pious.jpg',    initials: 'PS', rookie: true  },
-      { name: 'Pratham Erramilli',     role: 'Outreach',                                                image: '/data/team/pratham.jpg',  initials: 'PE', rookie: true  },
-      { name: 'Kavin Murugan',         role: 'Outreach',                                                image: '/data/team/kavin.jpg',    initials: 'KM', rookie: true  },
+      { name: 'Dev Gavande',          role: 'Team Captain, Founder, Driver, CAD Lead, Hardware Lead', image: '/data/team/Dev.png',      initials: 'DG', rookie: false, season: '2025–26 Decode', bio: 'Founding member and team captain leading Wolverine Robotics from day one.' },
+      { name: 'Sahejdeep Singh',       role: 'Software, Hardware, Drive Coach',                        image: '/data/team/sahejdeep.jpg', initials: 'SS', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Sripaadh J Kuppusamy', role: 'Hardware, Human Player',                                  image: '/data/team/sripadh.jpg',  initials: 'SK', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Manveer Singh Tib',     role: 'Hardware, Human Player',                                  image: '/data/team/manveer.jpg',  initials: 'MT', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Jivansh Pandya',        role: 'Hardware',                                                image: '/data/team/Jivansh.jpg',  initials: 'JP', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Jacob Esparza',         role: 'Hardware',                                                image: '/data/team/Jacob.jpeg',   initials: 'JE', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Kaiden Lee',            role: 'Hardware',                                                image: '/data/team/kaiden.jpg',   initials: 'KL', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Kalvik Das',            role: 'Hardware',                                                image: '/data/team/Kalvik.jpg',   initials: 'KD', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Alexander Fiderfish',   role: 'Hardware',                                                image: '/data/team/member9.jpg',  initials: 'AF', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Piousvir Singh',        role: 'Outreach',                                                image: '/data/team/pious.jpg',    initials: 'PS', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Pratham Erramilli',     role: 'Outreach',                                                image: '/data/team/pratham.jpg',  initials: 'PE', rookie: true,  season: '2025–26 Decode' },
+      { name: 'Kavin Murugan',         role: 'Outreach',                                                image: '/data/team/kavin.jpg',    initials: 'KM', rookie: true,  season: '2025–26 Decode' },
     ],
-    mentors: [{ name: 'Abdullah Khaled', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false }],
+    mentors: [
+      { name: 'Abdullah Khaled', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false, season: '2025–26 Decode' },
+    ],
     coaches: [
-      { name: 'Mr. Ellis',   role: 'Coach', image: '/data/team/ellis.jpg', initials: 'E', rookie: false },
-      { name: 'Mr. Gavande', role: 'Coach', image: '/data/team/vijay.jpg', initials: 'V', rookie: false },
+      { name: 'Mr. Ellis',   role: 'Coach', image: '/data/team/ellis.jpg', initials: 'E', rookie: false, season: '2025–26 Decode' },
+      { name: 'Mr. Gavande', role: 'Coach', image: '/data/team/vijay.jpg', initials: 'V', rookie: false, season: '2025–26 Decode' },
     ],
   };
 
+  // Add past members here as the team grows across seasons.
+  // Each entry supports: name, role, image, initials, rookie, season, pastRoles, bio
+  const pastMembers = [];
+
   const handleLogoClick = () => { setCurrentPage('home'); window.scrollTo(0, 0); };
+
+  // Close member modal when changing pages
+  useEffect(() => {
+    setSelectedMember(null);
+    setShowPastMembers(false);
+  }, [displayPage]);
 
   const renderPage = () => {
     if (displayPage === 'scouting') return <ScoutingPage isVisible={isVisible} />;
+
+    // ── HOME ──────────────────────────────────────────────────────────────────
     if (displayPage === 'home') return (
       <div className="min-h-screen">
         <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-[#132038]">
@@ -1054,37 +1047,251 @@ const App = () => {
               ))}
             </div>
             <div id="team-cta" data-animate className={`text-center transition-all duration-700 ${isVisible['team-cta']?'animate-grow-in':'opacity-0 scale-[0.85]'}`} style={{transitionDelay:'0.4s'}}>
-              <AngleButton onClick={() => setCurrentPage('about')} variant="secondary">FULL ROSTER <ChevronRight size={20} /></AngleButton>
+              <AngleButton onClick={() => setCurrentPage('team')} variant="secondary">FULL ROSTER <ChevronRight size={20} /></AngleButton>
             </div>
           </div>
         </div>
       </div>
     );
+
+    // ── ABOUT ─────────────────────────────────────────────────────────────────
     if (displayPage === 'about') return (
       <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
         <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[800px] h-[800px]" />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center mb-20">
-            <div id="about-tag" data-animate className={`inline-block mb-6 transition-all duration-700 ${isVisible['about-tag']?'animate-grow-in':'opacity-0 scale-[0.85]'}`}><div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600" style={{clipPath:'polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)'}}><span className="text-orange-500 font-black text-sm tracking-widest">TEAM 33791</span></div></div>
-            <h1 id="about-title" data-animate className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${isVisible['about-title']?'animate-lock-in':'opacity-0 translate-x-[-40px]'}`} style={{fontFamily:'system-ui,-apple-system,sans-serif',transitionDelay:'100ms'}}>THE PACK</h1>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay:'200ms'}}>A first-year team built on precision engineering, relentless innovation, and the drive to prove that rookies can compete at the highest level.</p>
-          </div>
-          {[{id:'students-section',label:'STUDENTS',sub:'THE ENGINEERS',members:teamMembers.students,rookie:true,delay:'300ms'},{id:'mentors-section',label:'MENTORS',sub:'THE GUIDES',members:teamMembers.mentors,rookie:false,delay:'400ms'},{id:'coaches-section',label:'COACHES',sub:'THE LEADERS',members:teamMembers.coaches,rookie:false,delay:'500ms'}].filter(g=>g.members.length>0).map(group=>(
-            <div key={group.id} id={group.id} data-animate className={`mb-24 transition-all duration-700 ${isVisible[group.id]?'animate-fade-in':'opacity-0'}`} style={{transitionDelay:group.delay}}>
-              <div className="mb-12"><div className="flex items-center gap-4 mb-2"><h2 className="text-4xl font-black text-white" style={{fontFamily:'system-ui,-apple-system,sans-serif'}}>{group.label}</h2><div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" /></div><p className="text-orange-500 font-bold tracking-wider text-sm">{group.sub}</p></div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {group.members.map((member,i)=>(
-                  <div key={i} className="text-center" style={{animation:'growIn 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards',animationDelay:`${i*40}ms`,opacity:0}}>
-                    <TeamMemberCard member={member} size="large" showRookie={group.rookie} />
-                    <div className="mt-4"><h3 className="text-white font-bold text-base mb-1 hover:text-orange-500 transition-colors duration-300">{member.name}</h3><p className="text-orange-500 text-xs font-bold tracking-wider leading-relaxed">{member.role}</p></div>
-                  </div>
-                ))}
+            <div id="about-tag" data-animate className={`inline-block mb-6 transition-all duration-700 ${isVisible['about-tag']?'animate-grow-in':'opacity-0 scale-[0.85]'}`}>
+              <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600" style={{clipPath:'polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)'}}>
+                <span className="text-orange-500 font-black text-sm tracking-widest">TEAM 33791</span>
               </div>
             </div>
-          ))}
+            <h1 id="about-title" data-animate className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${isVisible['about-title']?'animate-lock-in':'opacity-0 translate-x-[-40px]'}`} style={{fontFamily:'system-ui,-apple-system,sans-serif',transitionDelay:'100ms'}}>ABOUT US</h1>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay:'200ms'}}>
+              A first-year team built on precision engineering, relentless innovation, and the drive to prove that rookies can compete at the highest level.
+            </p>
+          </div>
+          {/* Content placeholder — add sections here as needed */}
+          <div id="about-content" data-animate className={`text-center transition-all duration-700 ${isVisible['about-content']?'animate-fade-in-up':'opacity-0 translate-y-[30px]'}`} style={{transitionDelay:'300ms'}}>
+            <p className="text-gray-500 text-lg tracking-wider">More content coming soon.</p>
+            <div className="mt-12">
+              <AngleButton onClick={() => setCurrentPage('team')} variant="secondary">MEET THE TEAM <ChevronRight size={20} /></AngleButton>
+            </div>
+          </div>
         </div>
       </div>
     );
+
+    // ── TEAM ──────────────────────────────────────────────────────────────────
+    if (displayPage === 'team') return (
+      <>
+        {/* Member detail modal */}
+        {selectedMember && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
+            onClick={e => { if (e.target === e.currentTarget) setSelectedMember(null); }}
+          >
+            <div
+              className="relative bg-[#1a2847] border-2 border-orange-600 w-full max-w-md p-8 overflow-y-auto max-h-[90vh]"
+              style={{ clipPath: 'polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%)' }}
+            >
+              <button
+                onClick={() => setSelectedMember(null)}
+                className="absolute top-4 right-6 text-gray-400 hover:text-white text-2xl font-black transition-colors duration-200"
+              >✕</button>
+
+              {/* Avatar + name */}
+              <div className="flex items-center gap-5 mb-8">
+                <div className="w-20 h-20 flex-shrink-0 overflow-hidden border-2 border-orange-600"
+                     style={{ clipPath: 'polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)' }}>
+                  <TeamMemberCard member={selectedMember} size="small" showRookie={false} />
+                </div>
+                <div>
+                  <h2 className="text-white font-black text-2xl leading-tight" style={{ fontFamily: 'system-ui,-apple-system,sans-serif' }}>
+                    {selectedMember.name}
+                  </h2>
+                  <span
+                    className="inline-block mt-2 text-xs font-black tracking-wider px-3 py-1"
+                    style={{
+                      background: selectedMember.isPast ? 'rgba(161,161,170,0.2)' : 'rgba(255,90,31,0.2)',
+                      color: selectedMember.isPast ? '#a1a1aa' : '#FF5A1F',
+                      clipPath: 'polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%)'
+                    }}
+                  >
+                    {selectedMember.isPast ? 'PAST MEMBER' : 'CURRENT MEMBER'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-5 border-t-2 border-orange-600/30 pt-6">
+                <div>
+                  <p className="text-orange-500 text-xs font-black tracking-widest mb-2">
+                    {selectedMember.isPast ? 'ROLES HELD' : 'CURRENT ROLES'}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMember.role.split(',').map((r, i) => (
+                      <span
+                        key={i}
+                        className="text-gray-200 text-sm bg-[#0f1629] border border-orange-600/40 px-3 py-1"
+                        style={{ clipPath: 'polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%)' }}
+                      >
+                        {r.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {selectedMember.pastRoles && (
+                  <div>
+                    <p className="text-orange-500 text-xs font-black tracking-widest mb-2">PAST ROLES</p>
+                    <p className="text-gray-400 text-sm leading-relaxed">{selectedMember.pastRoles}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-orange-500 text-xs font-black tracking-widest mb-2">SEASON</p>
+                  <p className="text-gray-300 text-sm">{selectedMember.season || '2025–26 Decode'}</p>
+                </div>
+
+                {selectedMember.rookie && !selectedMember.isPast && (
+                  <div
+                    className="flex items-center gap-2 bg-orange-600/10 border border-orange-600/40 px-4 py-3"
+                    style={{ clipPath: 'polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)' }}
+                  >
+                    <div className="w-2 h-2 bg-orange-600 rotate-45 flex-shrink-0" />
+                    <p className="text-orange-400 text-sm font-bold">Rookie season — first year competing</p>
+                  </div>
+                )}
+
+                {selectedMember.bio && (
+                  <div>
+                    <p className="text-orange-500 text-xs font-black tracking-widest mb-2">ABOUT</p>
+                    <p className="text-gray-300 text-sm leading-relaxed">{selectedMember.bio}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Page content */}
+        <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
+          <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[800px] h-[800px]" />
+          <div className="max-w-7xl mx-auto px-4 relative z-10">
+
+            {/* Page header */}
+            <div className="text-center mb-20">
+              <div id="team-page-tag" data-animate className={`inline-block mb-6 transition-all duration-700 ${isVisible['team-page-tag']?'animate-grow-in':'opacity-0 scale-[0.85]'}`}>
+                <div className="px-6 py-2 bg-orange-600/20 border-2 border-orange-600" style={{clipPath:'polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)'}}>
+                  <span className="text-orange-500 font-black text-sm tracking-widest">TEAM 33791</span>
+                </div>
+              </div>
+              <h1 id="team-page-title" data-animate className={`text-6xl md:text-8xl font-black text-white mb-6 transition-all duration-700 ${isVisible['team-page-title']?'animate-lock-in':'opacity-0 translate-x-[-40px]'}`} style={{fontFamily:'system-ui,-apple-system,sans-serif',transitionDelay:'100ms'}}>THE PACK</h1>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay:'200ms'}}>
+                12 students. 1 vision. Unlimited potential. Click any member to learn more.
+              </p>
+            </div>
+
+            {/* Member groups */}
+            {[
+              { id: 'students-section', label: 'STUDENTS',  sub: 'THE ENGINEERS', members: teamMembers.students, rookie: true,  delay: '300ms' },
+              { id: 'mentors-section',  label: 'MENTORS',   sub: 'THE GUIDES',    members: teamMembers.mentors,  rookie: false, delay: '400ms' },
+              { id: 'coaches-section',  label: 'COACHES',   sub: 'THE LEADERS',   members: teamMembers.coaches,  rookie: false, delay: '500ms' },
+            ].filter(g => g.members.length > 0).map(group => (
+              <div key={group.id} id={group.id} data-animate className={`mb-24 transition-all duration-700 ${isVisible[group.id]?'animate-fade-in':'opacity-0'}`} style={{transitionDelay:group.delay}}>
+                <div className="mb-12">
+                  <div className="flex items-center gap-4 mb-2">
+                    <h2 className="text-4xl font-black text-white" style={{fontFamily:'system-ui,-apple-system,sans-serif'}}>{group.label}</h2>
+                    <div className="flex-1 h-1 bg-gradient-to-r from-orange-600 to-transparent" />
+                  </div>
+                  <p className="text-orange-500 font-bold tracking-wider text-sm">{group.sub}</p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {group.members.map((member, i) => (
+                    <div
+                      key={i}
+                      className="text-center cursor-pointer group"
+                      style={{animation:'growIn 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards', animationDelay:`${i*40}ms`, opacity:0}}
+                      onClick={() => setSelectedMember(member)}
+                    >
+                      <TeamMemberCard member={member} size="large" showRookie={group.rookie} />
+                      <div className="mt-4">
+                        <h3 className="text-white font-bold text-base mb-1 group-hover:text-orange-500 transition-colors duration-300">{member.name}</h3>
+                        <p className="text-orange-500 text-xs font-bold tracking-wider leading-relaxed">{member.role.split(',')[0]}</p>
+                        <p className="text-gray-600 text-xs mt-1 group-hover:text-gray-400 transition-colors duration-300">click for details</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Past Members */}
+            <div className="mt-8 border-t-2 border-orange-600/20 pt-16">
+              <div className="text-center mb-10">
+                <button
+                  onClick={() => setShowPastMembers(prev => !prev)}
+                  className="relative px-10 py-4 font-black text-white border-2 border-gray-600 hover:border-orange-600 transition-all duration-300 hover:scale-105 group"
+                  style={{ clipPath: 'polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)', background: 'transparent' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                  <span className="relative z-10 flex items-center gap-3 tracking-wider text-sm">
+                    <span>{showPastMembers ? '▲' : '▼'}</span>
+                    PAST MEMBERS
+                    {pastMembers.length > 0 && (
+                      <span className="bg-orange-600/30 text-orange-400 text-xs px-2 py-0.5 border border-orange-600/50">
+                        {pastMembers.length}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              </div>
+
+              {showPastMembers && (
+                <div className="animate-fade-in-up">
+                  {pastMembers.length === 0 ? (
+                    <div className="text-center py-16">
+                      <p className="text-gray-600 text-sm tracking-wider">NO PAST MEMBERS YET — CHECK BACK NEXT SEASON</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-12">
+                        <div className="flex items-center gap-4 mb-2">
+                          <h2 className="text-4xl font-black text-gray-500" style={{fontFamily:'system-ui,-apple-system,sans-serif'}}>ALUMNI</h2>
+                          <div className="flex-1 h-1 bg-gradient-to-r from-gray-600 to-transparent" />
+                        </div>
+                        <p className="text-gray-600 font-bold tracking-wider text-sm">FORMER MEMBERS</p>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {pastMembers.map((member, i) => (
+                          <div
+                            key={i}
+                            className="text-center cursor-pointer group opacity-80 hover:opacity-100 transition-opacity duration-300"
+                            style={{animation:'growIn 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards', animationDelay:`${i*40}ms`}}
+                            onClick={() => setSelectedMember({ ...member, isPast: true })}
+                          >
+                            <TeamMemberCard member={member} size="large" showRookie={false} />
+                            <div className="mt-4">
+                              <h3 className="text-gray-400 font-bold text-base mb-1 group-hover:text-white transition-colors duration-300">{member.name}</h3>
+                              <p className="text-gray-600 text-xs font-bold tracking-wider leading-relaxed">{member.role.split(',')[0]}</p>
+                              <p className="text-gray-700 text-xs mt-1 group-hover:text-gray-500 transition-colors duration-300">click for details</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </>
+    );
+
+    // ── ROBOTS ────────────────────────────────────────────────────────────────
     if (displayPage === 'robots') return (
       <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
         <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[900px] h-[900px]" />
@@ -1144,6 +1351,8 @@ const App = () => {
         </div>
       </div>
     );
+
+    // ── SPONSORS ──────────────────────────────────────────────────────────────
     if (displayPage === 'sponsors') return (
       <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
         <ClawMarkImage opacity={0.1} className="bottom-0 right-0 w-[750px] h-[750px]" />
@@ -1178,6 +1387,8 @@ const App = () => {
         </div>
       </div>
     );
+
+    // ── CONTACT ───────────────────────────────────────────────────────────────
     if (displayPage === 'contact') return (
       <div className="min-h-screen bg-gradient-to-b from-[#132038] to-[#0a1628] py-32 relative overflow-hidden">
         <ClawMarkImage opacity={0.12} className="bottom-0 right-0 w-[850px] h-[850px]" />
@@ -1236,6 +1447,7 @@ const App = () => {
         </div>
       </div>
     );
+
     return null;
   };
 
