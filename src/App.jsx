@@ -976,11 +976,10 @@ const App = () => {
       { name: 'Kavin Murugan',         role: 'Outreach',                                                image: '/data/team/kavin.jpg',    initials: 'KM', rookie: true,  season: '2025–26 Decode' },
     ],
     mentors: [
-      { name: 'Abdullah Khaled', role: 'Youth Software Mentor, Co-Founder', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false, season: '2025–26 Decode', bio: "Wolverine Robotics Co-Founder" },
+      { name: 'Abdullah Khaled', role: 'Youth Software Mentor', image: '/data/team/abdullah.jpg', initials: 'AK', rookie: false, season: '2025–26 Decode', bio: "Wolverine Robotics Youth Software Mentor" },
     ],
     coaches: [
       { name: 'Mr. Ellis',   role: 'Coach', image: '/data/team/ellis.jpg', initials: 'E', rookie: false, season: '2025–26 Decode' },
-      { name: 'Mr. Gavande', role: 'Coach', image: '/data/team/vijay.jpg', initials: 'V', rookie: false, season: '2025–26 Decode' },
     ],
   };
 
