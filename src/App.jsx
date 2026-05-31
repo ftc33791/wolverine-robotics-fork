@@ -1197,8 +1197,8 @@ const App = () => {
             {/* Member groups */}
             {[
               { id: 'students-section', label: 'STUDENTS',  sub: 'THE ENGINEERS', members: teamMembers.students, rookie: true,  delay: '300ms' },
-              { id: 'mentors-section',  label: 'MENTORS',   sub: 'THE GUIDES',    members: teamMembers.mentors,  rookie: false, delay: '400ms' },
-              { id: 'coaches-section',  label: 'COACHES',   sub: 'THE LEADERS',   members: teamMembers.coaches,  rookie: false, delay: '500ms' },
+              { id: 'coaches-section',  label: 'COACHES',   sub: 'THE LEADERS',   members: teamMembers.coaches,  rookie: false, delay: '400ms' },  
+              { id: 'mentors-section',  label: 'MENTORS',   sub: 'THE GUIDES',    members: teamMembers.mentors,  rookie: false, delay: '500ms'},
             ].filter(g => g.members.length > 0).map(group => (
               <div key={group.id} id={group.id} data-animate className={`mb-24 transition-all duration-700 ${isVisible[group.id]?'animate-fade-in':'opacity-0'}`} style={{transitionDelay:group.delay}}>
                 <div className="mb-12">
