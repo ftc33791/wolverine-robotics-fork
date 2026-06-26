@@ -1,9 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+    http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- ── Core pages ───────────────────────────────────────────────
+       This site is a React SPA — all routes resolve to index.html.
+       Pages are listed as hash fragments for crawlers that follow
+       them, plus the bare root URL as the canonical entry point.
+  ──────────────────────────────────────────────────────────────── -->
+
+  <!-- Home — highest priority, changes most often -->
   <url>
     <loc>https://wolverine-robotics.vercel.app/</loc>
-    <lastmod>2025-01-28</lastmod>
+    <lastmod>2025-06-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- About -->
+  <url>
+    <loc>https://wolverine-robotics.vercel.app/#about</loc>
+    <lastmod>2025-06-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Team — updated each season when roster changes -->
+  <url>
+    <loc>https://wolverine-robotics.vercel.app/#team</loc>
+    <lastmod>2025-06-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Robots — updated each season with new robot data -->
+  <url>
+    <loc>https://wolverine-robotics.vercel.app/#robots</loc>
+    <lastmod>2025-06-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Sponsors — updated when new sponsors join -->
+  <url>
+    <loc>https://wolverine-robotics.vercel.app/#sponsors</loc>
+    <lastmod>2025-06-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Contact -->
+  <url>
+    <loc>https://wolverine-robotics.vercel.app/#contact</loc>
+    <lastmod>2025-06-26</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Scouting — tool page, not indexed for content -->
+  <url>
+    <loc>https://wolverine-robotics.vercel.app/#scouting</loc>
+    <lastmod>2025-06-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
 </urlset>
