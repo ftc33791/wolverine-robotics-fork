@@ -1,4 +1,28 @@
+# robots.txt — Wolverine Robotics (FTC Team 33791)
+# https://wolverine-robotics.com/
+
 User-agent: *
 Allow: /
 
-Sitemap: https://wolverine-robotics.vercel.app/sitemap.xml
+# Block build artifacts and source maps
+Disallow: /assets/*.map
+Disallow: /.vite/
+
+# Allow all major crawlers explicitly
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# Sitemap location
+Sitemap: https://wolverine-robotics.com/sitemap.xml
+
+# Host directive (for Yandex)
+Host: wolverine-robotics.com
