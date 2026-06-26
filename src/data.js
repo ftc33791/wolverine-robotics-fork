@@ -53,6 +53,7 @@ export const TEAM = {
       initials: 'SS',
       rookie: true,
       season: '2025–26 Decode',
+      bio: 'Led Software Team for Wolverine Robotics in the DECOCDE Season'
     },
     {
       name: 'Sripaadh J Kuppusamy',
