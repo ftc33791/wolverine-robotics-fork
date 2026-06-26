@@ -19,7 +19,7 @@
       "destination": "/scout-app/$1"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!data/|assets/|.*\\..*).*)",
       "destination": "/index.html"
     }
   ]
