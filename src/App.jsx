@@ -620,9 +620,20 @@ function InitialLoad({ onComplete }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ROOT APP
 // ─────────────────────────────────────────────────────────────────────────────
+// Valid page ids <-> URL paths (e.g. 'about' <-> '/about', 'home' <-> '/')
+const VALID_PAGES = ['home', 'about', 'team', 'robots', 'sponsors', 'contact', 'scouting'];
+
+const pageFromPath = (pathname) => {
+  const slug = pathname.replace(/^\/+/, '').replace(/\/+$/, '').toLowerCase();
+  return VALID_PAGES.includes(slug) ? slug : 'home';
+};
+
+const pathFromPage = (id) => (id === 'home' ? '/' : `/${id}`);
+
 const App = () => {
-  const [currentPage,  setCurrentPage]  = useState('home');
-  const [displayPage,  setDisplayPage]  = useState('home');
+  const initialPage = typeof window !== 'undefined' ? pageFromPath(window.location.pathname) : 'home';
+  const [currentPage,  setCurrentPage]  = useState(initialPage);
+  const [displayPage,  setDisplayPage]  = useState(initialPage);
   const [transitioning, setTransitioning] = useState(false);
   const [transPhase,   setTransPhase]   = useState('none'); // 'none'|'out'|'in'
   const [initialLoad,  setInitialLoad]  = useState(true);
@@ -639,7 +650,21 @@ const App = () => {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [currentPage]);
 
-  const navigate = (id) => setCurrentPage(id);
+  // Keep the URL in sync with the active page, and support browser back/forward
+  useEffect(() => {
+    const onPopState = () => setCurrentPage(pageFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const navigate = (id) => {
+    if (!VALID_PAGES.includes(id)) id = 'home';
+    const path = pathFromPage(id);
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, '', path);
+    }
+    setCurrentPage(id);
+  };
 
   const renderPage = () => {
     switch (displayPage) {
