@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Award, Zap } from 'lucide-react';
 import RobotViewer from '../components/RobotViewer';
+import OnshapeViewer from '../components/OnshapeViewer';
 import AngleButton from '../components/ui/AngleButton';
 import GridScan from '../components/ui/GridScan';
 
@@ -262,13 +263,21 @@ const RobotsPage = ({ robots }) => {
                     </span>
                   </div>
 
-                  <RobotViewer
-                    mode={viewMode}
-                    interactive={true}
-                    autoRotate={viewMode === 'detail'}
-                    showAnnotations={true}
-                    height="100%"
-                  />
+                  {robot.embedUrl ? (
+                    <OnshapeViewer
+                      embedUrl={viewMode === 'exploded' && robot.embedUrlExploded ? robot.embedUrlExploded : robot.embedUrl}
+                      title={`${robot.name} CAD${viewMode === 'exploded' ? ' (exploded)' : ''}`}
+                      height="100%"
+                    />
+                  ) : (
+                    <RobotViewer
+                      mode={viewMode}
+                      interactive={true}
+                      autoRotate={viewMode === 'detail'}
+                      showAnnotations={true}
+                      height="100%"
+                    />
+                  )}
                 </div>
               </Reveal>
             </div>
