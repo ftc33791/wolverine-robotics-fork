@@ -13,7 +13,7 @@
 
   <!-- Home — highest priority, changes most often -->
   <url>
-    <loc>https://wolverine-robotics.vercel.app/</loc>
+    <loc>https://wolverine-robotics.com/</loc>
     <lastmod>2025-06-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -21,7 +21,7 @@
 
   <!-- About -->
   <url>
-    <loc>https://wolverine-robotics.vercel.app/#about</loc>
+    <loc>https://wolverine-robotics.com/#about</loc>
     <lastmod>2025-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -29,7 +29,7 @@
 
   <!-- Team — updated each season when roster changes -->
   <url>
-    <loc>https://wolverine-robotics.vercel.app/#team</loc>
+    <loc>https://wolverine-robotics.com/#team</loc>
     <lastmod>2025-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -37,7 +37,7 @@
 
   <!-- Robots — updated each season with new robot data -->
   <url>
-    <loc>https://wolverine-robotics.vercel.app/#robots</loc>
+    <loc>https://wolverine-robotics.com/#robots</loc>
     <lastmod>2025-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -45,7 +45,7 @@
 
   <!-- Sponsors — updated when new sponsors join -->
   <url>
-    <loc>https://wolverine-robotics.vercel.app/#sponsors</loc>
+    <loc>https://wolverine-robotics.com/#sponsors</loc>
     <lastmod>2025-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -53,7 +53,7 @@
 
   <!-- Contact -->
   <url>
-    <loc>https://wolverine-robotics.vercel.app/#contact</loc>
+    <loc>https://wolverine-robotics.com/#contact</loc>
     <lastmod>2025-06-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
@@ -61,7 +61,7 @@
 
   <!-- Scouting — tool page, not indexed for content -->
   <url>
-    <loc>https://wolverine-robotics.vercel.app/#scouting</loc>
+    <loc>https://wolverine-robotics.com/#scouting</loc>
     <lastmod>2025-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
