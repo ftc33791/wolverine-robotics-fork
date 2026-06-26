@@ -53,7 +53,6 @@ export const TEAM = {
       initials: 'SS',
       rookie: true,
       season: '2025–26 Decode',
-      bio: 'Led Software Team for Wolverine Robotics in the DECOCDE Season'
     },
     {
       name: 'Sripaadh J Kuppusamy',
@@ -206,6 +205,9 @@ export const ROBOTS = [
     name: 'MATCHSTICK',
     season: '2025-26',
     challenge: 'Decode Challenge',
+    // Onshape "Get embeddable link" URLs (Share -> enable public link -> Get embeddable link).
+    embedUrl: 'https://cad.onshape.com/documents/17f03dbe502fe89245df5c8e/w/299875b13b5c5a7fb4f2fce9/e/e5a8145177c9892ee22d79c2?renderMode=0&uiState=6a3efcc36deca8d7fe72565a',
+    embedUrlExploded: 'https://cad.onshape.com/documents/66f7bbd4e3c3defe039f33a2/w/9fdcf529e51f48ce7b9bb6cb/e/e31fe1c262242588d0dc90b8?renderMode=0&uiState=6a3f00dbae8c7e4546eec16b',
     description:
       'Our debut machine. Built from the ground up for the 2025-26 FTC Decode Challenge, MATCHSTICK combines a mecanum drivetrain, precision linear lift, active roller intake, and servo-actuated claw into a cohesive, high-cycle competitive robot.',
     specs: [
