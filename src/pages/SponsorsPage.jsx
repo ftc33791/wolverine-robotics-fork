@@ -72,7 +72,7 @@ const SponsorCard = ({ sponsor, tier, delay }) => {
               src={sponsor.image}
               alt={sponsor.name}
               className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
-              style={{ filter: 'brightness(0) invert(1)', opacity: 0.7 }}
+              style={{ opacity: 0.92 }}
               onError={() => setImgErr(true)}
             />
           ) : (
