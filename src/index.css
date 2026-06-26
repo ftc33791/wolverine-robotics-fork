@@ -41,50 +41,10 @@ body {
   background: var(--c-blue-deep);
   color: var(--c-text);
   overflow-x: hidden;
-  cursor: none;
 }
 
 #root {
   min-height: 100vh;
-}
-
-/* ─── Custom cursor ────────────────────────────────────────── */
-.cursor-dot {
-  position: fixed;
-  top: 0; left: 0;
-  width: 6px; height: 6px;
-  background: var(--c-orange);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: transform 0.08s var(--ease-out-expo),
-              width 0.2s var(--ease-out-expo),
-              height 0.2s var(--ease-out-expo),
-              background 0.2s ease;
-  will-change: transform;
-}
-
-.cursor-ring {
-  position: fixed;
-  top: 0; left: 0;
-  width: 36px; height: 36px;
-  border: 1.5px solid rgba(255,90,31,0.5);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%, -50%);
-  transition: transform 0.18s var(--ease-out-expo),
-              width 0.25s var(--ease-out-expo),
-              height 0.25s var(--ease-out-expo),
-              border-color 0.2s ease,
-              opacity 0.2s ease;
-  will-change: transform;
-}
-
-.cursor-ring.hovering {
-  width: 56px; height: 56px;
-  border-color: var(--c-orange);
 }
 
 /* ─── Scrollbar ────────────────────────────────────────────── */
