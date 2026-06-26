@@ -9,23 +9,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-three/drei": "^9.99.0",
-    "@react-three/fiber": "^8.15.19",
-    "@react-three/postprocessing": "^2.16.2",
-    "gsap": "^3.12.5",
-    "lucide-react": "^0.263.1",
-    "postprocessing": "^6.36.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "three": "^0.160.0"
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.17.14",
+    "@react-three/postprocessing": "^2.19.1",
+    "gsap": "^3.13.0",
+    "lucide-react": "^0.542.0",
+    "postprocessing": "^6.39.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.180.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.1",
-    "vite": "^5.2.0"
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.0.6"
   }
 }
