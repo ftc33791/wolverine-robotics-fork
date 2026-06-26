@@ -16,7 +16,6 @@ import { NAVIGATION, TEAM, PAST_MEMBERS, ROBOTS, SPONSORS } from './data.js';
 // ── UI Shell ──────────────────────────────────────────────────────
 import Nav from './components/Nav.jsx';
 import Footer from './components/Footer.jsx';
-import CustomCursor from './components/ui/CustomCursor.jsx';
 
 // ── Pages ─────────────────────────────────────────────────────────
 import HomePage     from './pages/HomePage.jsx';
@@ -658,7 +657,6 @@ const App = () => {
   if (initialLoad) {
     return (
       <>
-        <CustomCursor />
         <InitialLoad onComplete={() => setInitialLoad(false)} />
       </>
     );
@@ -666,7 +664,6 @@ const App = () => {
 
   return (
     <>
-      <CustomCursor />
       <Nav
         currentPage={currentPage}
         onNavigate={navigate}
