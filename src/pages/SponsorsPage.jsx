@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Download, Mail } from 'lucide-react';
 import AngleButton from '../components/ui/AngleButton';
 import GridScan from '../components/ui/GridScan';
 
@@ -306,9 +306,21 @@ const SponsorsPage = ({ sponsors, onNavigate }) => {
                 </p>
               </Reveal>
               <Reveal delay={200}>
-                <AngleButton onClick={() => onNavigate('contact')} variant="primary" size="lg">
-                  PARTNER WITH US <ChevronRight size={16} />
-                </AngleButton>
+                <div className="flex flex-wrap gap-4 items-center">
+                  <a
+                    href="https://drive.google.com/file/d/1hEzIhMCc46IsMPRaYb8D-5gL4FJLSHcs/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <AngleButton variant="primary" size="lg">
+                      <Download size={15} /> DOWNLOAD PACKET
+                    </AngleButton>
+                  </a>
+                  <AngleButton onClick={() => onNavigate('contact')} variant="secondary" size="lg">
+                    <Mail size={15} /> EMAIL US
+                  </AngleButton>
+                </div>
               </Reveal>
             </div>
 
