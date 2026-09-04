@@ -5,7 +5,7 @@ import * as THREE from 'three';
  * RobotViewer — Three.js WebGL 3D viewer for the robot.
  * Since STEP files aren't directly importable, we generate a
  * procedural robot representation that matches MATCHSTICK's
- * specs (mecanum drivetrain, intake, lift, claw) and looks
+ * specs (mecanum drivetrain, funneling intake, indexer, flywheel shooter) and looks
  * photorealistic with proper PBR materials and lighting.
  *
  * When a real GLTF/GLB export of the STEP file is placed at
@@ -98,35 +98,47 @@ const RobotViewer = ({
       group.add(wheelGroup);
     });
 
-    // ── Vertical lift tower ──
-    const liftY = exploded ? 0.35 : 0;
-    add(new THREE.BoxGeometry(0.03, 0.55, 0.03), mat.silver,  0.14, 0.3 + liftY * 0.5, 0.05);
-    add(new THREE.BoxGeometry(0.03, 0.55, 0.03), mat.silver, -0.14, 0.3 + liftY * 0.5, 0.05);
+    // ── Horizontal extrusion rails ──
+    add(new THREE.BoxGeometry(0.42, 0.025, 0.025), mat.silver, 0, 0.06,  0.12);
+    add(new THREE.BoxGeometry(0.42, 0.025, 0.025), mat.silver, 0, 0.06, -0.12);
 
-    // Lift carriage
-    add(new THREE.BoxGeometry(0.32, 0.03, 0.08), mat.chassis, 0, 0.32 + liftY, 0.05);
+    // ── Odometry pods (swingarm) ──
+    add(new THREE.BoxGeometry(0.04, 0.02, 0.06), mat.dark, -0.16, -0.04, 0.14);
+    add(new THREE.CylinderGeometry(0.015, 0.015, 0.01, 12), mat.wheel, -0.16, -0.05, 0.14, 0, 0, Math.PI / 2);
+    add(new THREE.BoxGeometry(0.04, 0.02, 0.06), mat.dark,  0.16, -0.04, 0.14);
+    add(new THREE.CylinderGeometry(0.015, 0.015, 0.01, 12), mat.wheel,  0.16, -0.05, 0.14, 0, 0, Math.PI / 2);
 
-    // Lift glow accent
-    add(new THREE.BoxGeometry(0.3, 0.005, 0.005), mat.glow, 0, 0.33 + liftY, 0.09);
+    // ── Funneling intake (front) ──
+    const intakeZ = exploded ? -0.22 : 0;
+    // Intake ramp / funnel walls
+    add(new THREE.BoxGeometry(0.36, 0.03, 0.06), mat.chassis, 0, 0.04, -0.26 + intakeZ);
+    add(new THREE.BoxGeometry(0.04, 0.05, 0.12), mat.orange, -0.17, 0.03, -0.28 + intakeZ, 0, 0.52, 0);
+    add(new THREE.BoxGeometry(0.04, 0.05, 0.12), mat.orange,  0.17, 0.03, -0.28 + intakeZ, 0, -0.52, 0);
+    // Intake rollers (compliant + flap)
+    for (let i = 0; i < 5; i++) {
+      const rx2 = -0.16 + i * 0.08;
+      add(new THREE.CylinderGeometry(0.02, 0.02, 0.08, 12), mat.roller, rx2, 0.05, -0.27 + intakeZ, 0, 0, Math.PI / 2);
+    }
+    // Limelight on intake-side C-channel
+    add(new THREE.BoxGeometry(0.05, 0.03, 0.04), mat.glow, -0.2, 0.1, -0.18 + intakeZ);
 
-    // ── Claw / end effector ──
-    const clawY = exploded ? 0.7 : 0;
-    // Claw arm
-    add(new THREE.BoxGeometry(0.04, 0.18, 0.04), mat.silver, 0, 0.52 + clawY, 0.05);
-    // Claw fingers
-    add(new THREE.BoxGeometry(0.12, 0.02, 0.03), mat.orange, -0.04, 0.63 + clawY, 0.06);
-    add(new THREE.BoxGeometry(0.12, 0.02, 0.03), mat.orange,  0.04, 0.63 + clawY, 0.06);
-    // Claw tips
-    add(new THREE.BoxGeometry(0.02, 0.06, 0.02), mat.silver, -0.09, 0.61 + clawY, 0.06);
-    add(new THREE.BoxGeometry(0.02, 0.06, 0.02), mat.silver,  0.09, 0.61 + clawY, 0.06);
+    // ── Indexer tunnel (center) ──
+    const indexerZ = exploded ? 0.12 : 0;
+    add(new THREE.BoxGeometry(0.14, 0.12, 0.22), mat.chassis, 0, 0.1, 0.02 + indexerZ);
+    // Dual compliant indexer wheels
+    add(new THREE.CylinderGeometry(0.038, 0.038, 0.04, 16), mat.roller, -0.05, 0.1, 0.02 + indexerZ, 0, 0, Math.PI / 2);
+    add(new THREE.CylinderGeometry(0.038, 0.038, 0.04, 16), mat.roller,  0.05, 0.1, 0.02 + indexerZ, 0, 0, Math.PI / 2);
 
-    // ── Intake system ──
-    const intakeZ = exploded ? -0.18 : 0;
-    add(new THREE.BoxGeometry(0.38, 0.04, 0.08), mat.chassis, 0, 0.05, -0.24 + intakeZ);
-    // Intake rollers
-    for (let i = 0; i < 4; i++) {
-      const rx2 = -0.15 + i * 0.1;
-      add(new THREE.CylinderGeometry(0.018, 0.018, 0.07, 12), mat.roller, rx2, 0.05, -0.25 + intakeZ, 0, 0, Math.PI / 2);
+    // ── Triple-flywheel shooter (rear/center-top) ──
+    const shooterZ = exploded ? 0.28 : 0;
+    // Shooter hood
+    add(new THREE.BoxGeometry(0.28, 0.18, 0.06), mat.chassis, 0, 0.22, 0.22 + shooterZ, -0.35, 0, 0);
+    add(new THREE.BoxGeometry(0.26, 0.005, 0.04), mat.glow, 0, 0.28, 0.24 + shooterZ, -0.2, 0, 0);
+    // Three flywheels
+    for (let i = 0; i < 3; i++) {
+      const fz = 0.18 + i * 0.06 + shooterZ;
+      add(new THREE.CylinderGeometry(0.036, 0.036, 0.035, 20), mat.silver, 0, 0.18, fz, 0, 0, Math.PI / 2);
+      add(new THREE.CylinderGeometry(0.042, 0.042, 0.038, 20), mat.wheel, 0, 0.18, fz, 0, 0, Math.PI / 2);
     }
 
     // ── Electronics bay (central) ──
@@ -453,10 +465,10 @@ const RobotViewer = ({
       {showAnnotations && loaded && (
         <div className="absolute inset-0 pointer-events-none">
           {[
-            { label: 'MECANUM DRIVE', sub: 'Omnidirectional 4-wheel', x: '8%', y: '70%' },
-            { label: 'LIFT SYSTEM', sub: 'Linear slide assembly', x: '72%', y: '20%' },
-            { label: 'INTAKE MODULE', sub: 'Roller intake system', x: '5%', y: '40%' },
-            { label: 'CLAW ASSEMBLY', sub: 'Servo-actuated gripper', x: '65%', y: '5%' },
+            { label: 'DRIVEBASE', sub: 'All-metal direct drive', x: '8%', y: '70%' },
+            { label: 'INTAKE', sub: 'Funneling ground intake', x: '5%', y: '38%' },
+            { label: 'INDEXER', sub: 'High-compression feed', x: '58%', y: '42%' },
+            { label: 'SHOOTER', sub: 'Triple-flywheel', x: '68%', y: '12%' },
           ].map((ann, i) => (
             <div
               key={i}

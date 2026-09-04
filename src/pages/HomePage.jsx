@@ -3,13 +3,16 @@ import { ChevronRight, Zap, ArrowDown } from 'lucide-react';
 import GridScan from '../components/ui/GridScan';
 import RobotViewer from '../components/RobotViewer';
 import AngleButton from '../components/ui/AngleButton';
+import { HOME_HIGHLIGHTS, ROBOTS } from '../data.js';
 
 // ── Animated counter ───────────────────────────────────────────────
-const Counter = ({ target, suffix = '', duration = 2000 }) => {
-  const [val, setVal] = useState(0);
+const Counter = ({ target, suffix = '', duration = 2000, decimals = 0, static: staticVal }) => {
+  const [val, setVal] = useState(staticVal ?? '0');
   const ref = useRef(null);
 
   useEffect(() => {
+    if (staticVal != null) return undefined;
+
     const obs = new IntersectionObserver(
       ([e]) => {
         if (!e.isIntersecting) return;
@@ -19,7 +22,12 @@ const Counter = ({ target, suffix = '', duration = 2000 }) => {
           if (!start) start = ts;
           const progress = Math.min((ts - start) / duration, 1);
           const ease = 1 - Math.pow(1 - progress, 3);
-          setVal(Math.floor(ease * target));
+          const current = ease * target;
+          setVal(
+            decimals > 0
+              ? current.toFixed(decimals)
+              : String(Math.floor(current))
+          );
           if (progress < 1) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
@@ -28,9 +36,9 @@ const Counter = ({ target, suffix = '', duration = 2000 }) => {
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
-  }, [target, duration]);
+  }, [target, duration, decimals, staticVal]);
 
-  return <span ref={ref}>{val}{suffix}</span>;
+  return <span ref={ref}>{staticVal ?? val}{suffix}</span>;
 };
 
 // ── Reveal wrapper ─────────────────────────────────────────────────
@@ -309,19 +317,19 @@ const HomePage = ({ onNavigate, teamMembers }) => {
       >
         <div className="container-wide">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { num: 12, suf: '', label: 'TEAM MEMBERS' },
-              { num: 28, suf: ' LBS', label: 'ROBOT WEIGHT' },
-              { num: 3,  suf: 'S',   label: 'CYCLE TIME'  },
-              { num: 2,  suf: 'X',   label: 'CONTROL AWARD'},
-            ].map((s, i) => (
+            {HOME_HIGHLIGHTS.statBar.map((s, i) => (
               <Reveal key={i} delay={i * 60} direction="up">
                 <div className="flex flex-col">
                   <span
                     className="stat-value"
                     style={{ color: i % 2 === 0 ? '#fff' : '#FF5A1F' }}
                   >
-                    <Counter target={s.num} suffix={s.suf} />
+                    <Counter
+                      target={s.num}
+                      suffix={s.suffix}
+                      decimals={s.decimals ?? 0}
+                      static={s.static}
+                    />
                   </span>
                   <span className="stat-label">{s.label}</span>
                 </div>
@@ -398,22 +406,15 @@ const HomePage = ({ onNavigate, teamMembers }) => {
               <Reveal delay={220}>
                 <p className="body-lg mb-8 max-w-md">
                   Our debut machine. Every mechanism engineered from the ground up
-                  — mecanum drivetrain for omnidirectional precision, a linear
-                  lift for high-reach scoring, and a servo-actuated claw designed
-                  for 3-second cycle times.
+                  — mecanum drivetrain for omnidirectional precision, PedroPathing
+                  autonomous, and an interpolated RPM lookup table tuned for
+                  3.8-second scoring cycles.
                 </p>
               </Reveal>
 
               {/* Spec grid */}
               <div className="grid grid-cols-2 gap-3 mb-8">
-                {[
-                  ['WEIGHT', '28 LBS'],
-                  ['HEIGHT', '18 IN'],
-                  ['DRIVETRAIN', 'MECANUM'],
-                  ['LANGUAGE', 'JAVA 17'],
-                  ['CYCLE TIME', '~3 SEC'],
-                  ['AUTONOMY', '12-BALL'],
-                ].map(([label, val], i) => (
+                {HOME_HIGHLIGHTS.spotlightSpecs.map(([label, val], i) => (
                   <Reveal key={i} delay={280 + i * 40} direction="left">
                     <div
                       className="flex justify-between items-center px-4 py-3"
@@ -468,29 +469,8 @@ const HomePage = ({ onNavigate, teamMembers }) => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              {
-                icon: '◈',
-                title: 'MECANUM DRIVETRAIN',
-                detail: 'Four-wheel holonomic drive with independent motor control. Strafe, rotate, and translate simultaneously at competition speed.',
-              },
-              {
-                icon: '⬆',
-                title: 'LINEAR LIFT',
-                detail: 'Dual-rail linear slide system reaching full extension in under 1.2 seconds. Powered by high-torque motors with encoder feedback.',
-              },
-              {
-                icon: '⊙',
-                title: 'INTAKE SYSTEM',
-                detail: 'Active roller intake with adjustable compliance. Capable of capturing game elements in under 0.4 seconds from floor contact.',
-              },
-              {
-                icon: '✦',
-                title: 'CLAW ASSEMBLY',
-                detail: 'Servo-driven dual-finger gripper with tactile compliance. Integrated with automated scoring sequences for consistent cycles.',
-              },
-            ].map((s, i) => (
-              <SubsystemCard key={i} {...s} index={i} />
+            {ROBOTS[0].subsystems.map((s, i) => (
+              <SubsystemCard key={i} icon={s.icon} title={s.name} detail={s.brief} index={i} />
             ))}
           </div>
         </div>
@@ -512,14 +492,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
             </Reveal>
           </div>
           <div className="flex flex-wrap gap-3 justify-center">
-            {[
-              '2× CONTROL AWARD',
-              'SEMI-FINALIST · U-LEAGUE',
-              'WINNER · DALLAS SEMI-REGIONAL',
-              '12-BALL AUTONOMOUS',
-              '3-SECOND CYCLE TIME',
-              'MODULAR SUBSYSTEM DESIGN',
-            ].map((t, i) => (
+            {HOME_HIGHLIGHTS.achievementBadges.map((t, i) => (
               <Badge key={i} text={t} delay={i * 60} />
             ))}
           </div>

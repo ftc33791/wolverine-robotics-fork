@@ -539,17 +539,17 @@ const RobotsPage = ({ robots }) => {
                   ))}
                 </div>
                 <div className="mt-6">
-                  <p style={{ color: 'rgba(255,255,255,0.2)' }}>// MATCHSTICK Autonomous — 12-ball path</p>
+                  <p style={{ color: 'rgba(255,255,255,0.2)' }}>// MATCHSTICK TeleOp — field-centric scoring</p>
                   <p className="mt-2"><span style={{ color: '#FF5A1F' }}>public void</span> <span style={{ color: '#60a5fa' }}>runOpMode</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>()</span> {'{'}</p>
                   <p className="pl-4"><span style={{ color: '#FF5A1F' }}>waitForStart</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>();</span></p>
-                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.2)' }}>// Init subsystems</span></p>
-                  <p className="pl-4"><span style={{ color: '#a78bfa' }}>drivetrain</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>initIMU</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>();</span></p>
-                  <p className="pl-4"><span style={{ color: '#a78bfa' }}>lift</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>home</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>();</span></p>
-                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.2)' }}>// Execute path</span></p>
-                  <p className="pl-4"><span style={{ color: '#a78bfa' }}>auto</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>runPath</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(</span><span style={{ color: '#34d399' }}>"12BALL_RED"</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>);</span></p>
+                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.2)' }}>// Init pathing + drive</span></p>
+                  <p className="pl-4"><span style={{ color: '#a78bfa' }}>follower</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>setStartingPose</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(startPose);</span></p>
+                  <p className="pl-4"><span style={{ color: '#a78bfa' }}>drivetrain</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>setFieldCentric</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(</span><span style={{ color: '#34d399' }}>true</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>);</span></p>
+                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.2)' }}>// Score from anywhere</span></p>
+                  <p className="pl-4"><span style={{ color: '#a78bfa' }}>shooter</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>setTargetRpm</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(</span><span style={{ color: '#a78bfa' }}>lookupTable</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>getRpm</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(distance));</span></p>
                   <p className="mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>{'}'}</p>
-                  <p className="mt-4" style={{ color: 'rgba(255,255,255,0.2)' }}>// Cycle time target: &lt; 3.0s</p>
-                  <p><span style={{ color: '#FF5A1F' }}>static final double</span> <span style={{ color: '#fbbf24' }}>TARGET_CYCLE</span> <span style={{ color: 'rgba(255,255,255,0.6)' }}>= </span><span style={{ color: '#34d399' }}>3.0</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>;</span></p>
+                  <p className="mt-4" style={{ color: 'rgba(255,255,255,0.2)' }}>// Cycle time target: 3.8s (lookup-table optimized)</p>
+                  <p><span style={{ color: '#FF5A1F' }}>static final double</span> <span style={{ color: '#fbbf24' }}>TARGET_CYCLE</span> <span style={{ color: 'rgba(255,255,255,0.6)' }}>= </span><span style={{ color: '#34d399' }}>3.8</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>;</span></p>
                 </div>
               </div>
             </Reveal>

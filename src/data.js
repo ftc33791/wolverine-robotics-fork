@@ -209,16 +209,19 @@ export const ROBOTS = [
     embedUrl: 'https://cad.onshape.com/documents/17f03dbe502fe89245df5c8e/w/299875b13b5c5a7fb4f2fce9/e/e5a8145177c9892ee22d79c2?renderMode=0&uiState=6a3efcc36deca8d7fe72565a',
     embedUrlExploded: 'https://cad.onshape.com/documents/66f7bbd4e3c3defe039f33a2/w/9fdcf529e51f48ce7b9bb6cb/e/e31fe1c262242588d0dc90b8?renderMode=0&uiState=6a3f00dbae8c7e4546eec16b',
     description:
-      'Our debut machine. Built from the ground up for the 2025-26 FTC Decode Challenge, MATCHSTICK combines a mecanum drivetrain, precision linear lift, active roller intake, and servo-actuated claw into a cohesive, high-cycle competitive robot.',
+      'Our debut machine for the 2025-26 FTC Decode Challenge. MATCHSTICK pairs an all-metal direct-drive mecanum chassis with a funneling ground intake, high-compression indexer, and triple-flywheel shooter for rapid, reliable artifact scoring.',
     specs: [
       { label: 'WEIGHT',        value: '28 LBS'        },
       { label: 'HEIGHT',        value: '18 IN'         },
       { label: 'DRIVETRAIN',    value: 'MECANUM'       },
       { label: 'CONTROL HUB',  value: 'REV Control Hub'},
       { label: 'LANGUAGE',      value: 'JAVA 17'       },
-      { label: 'CYCLE TIME',    value: '~3 SEC'        },
-      { label: 'AUTO BALLS',    value: '12 (MAX)'      },
-      { label: 'CHASSIS SIZE',  value: '18 × 18 IN'   },
+      { label: 'CYCLE TIME',    value: '3.8 SEC'           },
+      { label: 'AUTO CLOSE',    value: '12 BALLS · 41–45 PTS' },
+      { label: 'AUTO FAR',      value: '9 BALLS · 38–42 PTS'  },
+      { label: 'SHOT BURST',    value: '0.95 SEC (3)'      },
+      { label: 'VISION ALIGN',  value: '92%'               },
+      { label: 'CHASSIS SIZE',  value: '18 × 18 IN'        },
     ],
     achievements: [
       '2× Control Award Winner',
@@ -227,101 +230,109 @@ export const ROBOTS = [
     ],
     subsystems: [
       {
-        name: 'MECANUM DRIVETRAIN',
+        name: 'ALL-METAL DRIVEBASE',
         icon: '◈',
-        brief: 'Omnidirectional holonomic drive with full field strafing.',
+        brief: 'Direct-drive mecanum chassis with modular COTS extrusion and odometry pods.',
         detail:
-          'Four-wheel mecanum drivetrain powered by REV HD Hex motors and controlled through a REV Control Hub. Independent encoder feedback on each wheel enables accurate dead-reckoning odometry during autonomous. The holonomic configuration allows the robot to strafe, rotate, and translate simultaneously — critical for fast, precise field positioning.',
-        hardware: '4× REV HD Hex Motor · REV Control Hub · Mecanum Wheel Set',
+          'Full metal chassis built from goBILDA extrusions and T-brackets for modular subsystem mounting. Direct-drive mecanum wheels eliminate belt and gear losses for higher torque efficiency. Two swingarm odometry pods integrate with the Pinpoint computer for PedroPathing autonomous positioning.',
+        hardware: '4× REV HD Hex Motor · Mecanum Wheels · 2× Swingarm Odometry Pods · goBILDA Pinpoint',
         features: [
-          'Full omnidirectional movement at competition speed',
-          'Dead-reckoning odometry via wheel encoders',
-          'IMU-corrected heading hold during teleop',
-          'Max speed ~1.4 m/s at full throttle',
+          'Direct-drive mecanum — no belts or gears on drivetrain',
+          'All-metal COTS extrusion frame for structural integrity',
+          'Modular T-bracket mounting for rapid subsystem swaps',
+          'PedroPathing with Pinpoint IMU and swingarm dead wheels (1500 Hz)',
+          'Field-centric teleop via Pinpoint IMU (adopted Meet 3)',
         ],
         metrics: [
-          { label: 'MAX SPEED',  value: '1.4 m/s' },
-          { label: 'ACCURACY',   value: '±1 cm'   },
-          { label: 'RESPONSE',   value: '<50ms'   },
+          { label: 'DRIVE TYPE', value: 'Direct'    },
+          { label: 'CHASSIS',    value: 'All-metal' },
+          { label: 'ODOMETRY',   value: '2× Pods'   },
         ],
       },
       {
-        name: 'LINEAR LIFT',
-        icon: '⬆',
-        brief: 'Dual-rail linear slide reaching full extension in ~1.2s.',
-        detail:
-          'Dual-rail linear slide assembly driven by a high-torque motor with a string-and-spool take-up mechanism. Encoder position feedback enables automated pre-set heights for consistent scoring. Full extension achieves the maximum scoring height for the Decode Challenge game elements while remaining within the legal 18-inch starting configuration.',
-        hardware: '1× REV Core Hex Motor · Linear Slide Rails · Encoder Spool',
-        features: [
-          'Four automated height presets (home, low, mid, high)',
-          'Encoder-based position hold under load',
-          'Gravity-compensated descent profile',
-          'Full extension in under 1.2 seconds',
-        ],
-        metrics: [
-          { label: 'MAX HEIGHT',  value: '28 IN'   },
-          { label: 'EXT. TIME',   value: '1.2 SEC' },
-          { label: 'PRESETS',     value: '4'       },
-        ],
-      },
-      {
-        name: 'INTAKE SYSTEM',
+        name: 'FUNNELING INTAKE',
         icon: '⊙',
-        brief: 'Active roller intake capturing elements from the floor.',
+        brief: 'Multi-roller ground intake with deflection wedges and wide-angle pickup.',
         detail:
-          'Active roller intake using compliant rubber rollers driven by a servo motor. The intake width is calibrated to the game element geometry, enabling consistent floor-level pickup without requiring precise driver aim. An intake detection sensor triggers automatic element acquisition sequences.',
-        hardware: 'Servo Motor · Compliant Rollers · REV Color Sensor',
+          'Tapered compliant wheels and flap wheels morph to artifact shape for efficient ground pickup from a large angle. Custom 30° deflection wedges center artifacts into the indexer path. A 312 RPM motor through a 1:2 gear ratio transfers artifacts reliably. Limelight 3A is mounted on the intake-side C-channel to reduce vibration during vision tracking.',
+        hardware: '312 RPM Motor · 1:2 Gearbox · Compliant & Flap Wheels · Limelight 3A',
         features: [
-          'Compliant roller compliance for off-angle pickup',
-          'Automatic element detection via color sensor',
-          'Intake-to-lift transfer in a single button press',
-          'Floor pickup from full robot width',
+          'Tapered compliant and flap wheels for off-angle pickup',
+          '30° deflection wedges reduce lateral scatter',
+          '312 RPM motor with 1:2 gear ratio to indexer',
+          'Limelight 3A on intake-side mount for low vibration',
+          '30% infill plates for impact durability',
         ],
         metrics: [
-          { label: 'PICKUP TIME', value: '0.4 SEC' },
-          { label: 'WIDTH',       value: '14 IN'   },
-          { label: 'SENSOR',      value: 'COLOR'   },
+          { label: 'MOTOR',       value: '312 RPM' },
+          { label: 'GEAR RATIO',  value: '1:2'     },
+          { label: 'WEDGE ANGLE', value: '30°'     },
         ],
       },
       {
-        name: 'CLAW ASSEMBLY',
-        icon: '✦',
-        brief: 'Servo-driven dual-finger gripper with tactile compliance.',
+        name: 'HIGH-COMPRESSION INDEXER',
+        icon: '⬡',
+        brief: 'Independent-motor indexer with dual 3" compliant wheels and controlled compression.',
         detail:
-          'Dual-finger claw actuated by two independent servo motors, allowing variable grip width for different game element orientations. Integrated into the automated scoring macro: driver triggers the sequence, robot extends lift to preset height, opens claw, advances, closes, and retracts — targeting a 3-second end-to-end cycle.',
-        hardware: '2× Servo Motors · Claw Finger Assembly',
+          'The indexer runs on its own motor, independently from the intake and shooter, allowing precise timing and jam recovery without affecting other systems. Dual 3-inch compliant wheels provide greater contact area for consistent feed rates. High-compression geometry centers each artifact before it enters the shooter, reducing bounce and misalignment.',
+        hardware: 'Independent Indexer Motor · 2× 3" Compliant Wheels',
         features: [
-          'Variable grip width for different element sizes',
-          'Automated scoring macro (single button)',
-          'Servo torque hold prevents dropping under load',
-          'Consistent placement within ±5mm',
+          'Separate motor — independent of intake and shooter',
+          'Dual 3" compliant wheels for grip and consistent feed',
+          'High-compression geometry centers artifacts pre-shot',
+          'Reverse or stop without affecting other subsystems',
+          'Minimizes jamming during rapid artifact cycling',
         ],
         metrics: [
-          { label: 'CYCLE TIME', value: '~3 SEC'  },
-          { label: 'ACCURACY',   value: '±5 MM'   },
-          { label: 'GRIP FORCE', value: '8 N·m'   },
+          { label: 'WHEELS',  value: '3" Compliant' },
+          { label: 'CONTROL', value: 'Independent'  },
+          { label: 'MODE',    value: 'Dual'         },
+        ],
+      },
+      {
+        name: 'TRIPLE-FLYWHEEL SHOOTER',
+        icon: '✦',
+        brief: 'Dual-motor flywheel shooter with PID control and fixed hood compression.',
+        detail:
+          'Dual REV HD Hex motors drive three flywheels through dual GT2 3 mm belts with quadruple bearing support. 72 mm steel flywheels (1.24 lb combined) inside 96 mm Rhino 30A traction wheels deliver consistent exit velocity. Closed-loop PID maintains RPM for rapid fire — all three artifacts in 0.95 seconds. A fixed hood provides consistent compression; distance is tuned via RPM adjustment.',
+        hardware: '2× REV HD Hex · Dual GT2 Belts · 72 mm Steel Flywheels · Rhino 30A Wheels',
+        features: [
+          'Closed-loop PID flywheel speed control',
+          '3 artifacts fired in 0.95 seconds',
+          'Dual GT2 belt drive with quadruple bearing support',
+          'Fixed hood — distance controlled by RPM, not mechanics',
+          'Interpolated RPM lookup table for any-field scoring',
+        ],
+        metrics: [
+          { label: 'SHOT BURST', value: '0.95 SEC'     },
+          { label: 'FLYWHEEL',   value: '72 mm Steel'  },
+          { label: 'MOTORS',     value: '2× REV HD Hex' },
         ],
       },
     ],
     software: {
       overview:
-        'Custom Java 17 codebase built on the FTC SDK. Modular architecture separates hardware abstraction, autonomous path planning, and driver-control logic — enabling clean iteration and confident code merges between competitions.',
+        'Custom Java 17 codebase built on the FTC SDK. PedroPathing drives autonomous routines fused with goBILDA Pinpoint IMU and swingarm dead-wheel odometry. TeleOp layers field-centric driving, Limelight 3A AprilTag alignment, and an interpolated RPM lookup table — enabling clean iteration between competitions.',
       features: [
         {
-          title: 'MODULAR HARDWARE ABSTRACTION',
-          desc: 'Each subsystem (drivetrain, lift, intake, claw) is its own class. Swapping hardware means changing one file, not the whole codebase.',
+          title: 'DUAL AUTONOMOUS ROUTINES',
+          desc: 'Alliance-adaptive paths for close zone (12 balls, 41–45 pts) and far zone (9 balls, 38–42 pts). Multiple routines let us adapt to partner playstyle.',
         },
         {
-          title: '12-BALL AUTONOMOUS PATH',
-          desc: 'Pre-programmed path using encoder dead-reckoning and IMU heading correction. Scores up to 12 game elements without driver input.',
+          title: 'PEDROPATHING + PINPOINT ODOMETRY',
+          desc: 'Switched from unreliable encoder-only pathing to PedroPathing. Pinpoint IMU and swingarm dead wheels fused at 1500 Hz for precise autonomous positioning.',
         },
         {
-          title: 'AUTOMATED CYCLE MACROS',
-          desc: 'Driver presses one button; software handles lift extension, claw positioning, scoring, and retraction in under 3 seconds.',
+          title: 'LIMELIGHT 3A AUTO-ALIGN',
+          desc: 'Closed-loop AprilTag tracking with a custom distance-offset algorithm. Alignment accuracy improved from 48% to 92%, with a 70% gain in far-zone scoring.',
         },
         {
-          title: 'TUNABLE CONSTANTS FILE',
-          desc: 'All PID gains, heights, speeds, and autonomous path coordinates live in a single constants file — easy to tune at competition.',
+          title: 'FIELD-CENTRIC ONE-CONTROLLER TELEOP',
+          desc: 'Single-driver layout eliminates operator communication overhead. Field-centric drive powered by the Pinpoint IMU, adopted for Meet 3 and beyond.',
+        },
+        {
+          title: 'VELOCITY LOOKUP TABLE + PID FLYWHEEL',
+          desc: 'Interpolated RPM-by-distance table cut scoring cycles from 6.5s to 3.8s (41.5% faster). Closed-loop PID fires all three artifacts in 0.95 seconds.',
         },
       ],
     },
@@ -340,6 +351,36 @@ export const ROBOTS = [
   //   software: { ... },
   // },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOME PAGE HIGHLIGHTS
+// Shared performance stats for HomePage — keep in sync with ROBOTS[0] specs.
+// statBar entries: { num, suffix, label, decimals?, static? }
+// ─────────────────────────────────────────────────────────────────────────────
+export const HOME_HIGHLIGHTS = {
+  statBar: [
+    { num: 12, suffix: '', label: 'TEAM MEMBERS' },
+    { num: 28, suffix: ' LBS', label: 'ROBOT WEIGHT' },
+    { num: 0.95, suffix: 'S', label: '3-SHOT BURST', decimals: 2 },
+    { num: 2, suffix: 'X', label: 'CONTROL AWARD' },
+  ],
+  spotlightSpecs: [
+    ['WEIGHT', '28 LBS'],
+    ['HEIGHT', '18 IN'],
+    ['DRIVETRAIN', 'MECANUM'],
+    ['LANGUAGE', 'JAVA 17'],
+    ['CYCLE TIME', '3.8 SEC'],
+    ['AUTONOMY', '12 / 9 BALL'],
+  ],
+  achievementBadges: [
+    '2× CONTROL AWARD',
+    'SEMI-FINALIST · U-LEAGUE',
+    'WINNER · DALLAS SEMI-REGIONAL',
+    'DUAL AUTO ROUTINES',
+    '3.8S CYCLE TIME',
+    '92% VISION ALIGN',
+  ],
+};
 
 
 // ─────────────────────────────────────────────────────────────────────────────
