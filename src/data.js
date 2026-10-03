@@ -4,7 +4,7 @@
  *  Single source of truth. Edit this file to update the website content.
  *
  *  ADDING A NEW ROBOT:   append to ROBOTS array
- *  ADDING A TEAM MEMBER: append to TEAM.students / coaches / mentors
+ *  ADDING A TEAM MEMBER: append to TEAM.roster / newMembers / extended / coaches
  *  GRADUATING A MEMBER:  move to PAST_MEMBERS array
  *  ADDING A SPONSOR:     append to SPONSORS array (set tier field)
  * ─────────────────────────────────────────────────────────────────────────────
@@ -25,137 +25,76 @@ export const NAVIGATION = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TEAM MEMBERS
+// TEAM MEMBERS  (roster per Dev's list, 2026-10-02)
 // Each member object:
-//   name      string   Full name
-//   role      string   Comma-separated roles (first role shown in previews)
-//   image     string   Path from /public (e.g. /data/team/Dev.png)
-//   initials  string   2-char fallback when image missing
-//   rookie    boolean  Show "ROOKIE" badge in team page
-//   season    string   e.g. "2025–26 Decode"
-//   bio       string   (optional) Short paragraph shown in modal
+//   name          string    Full name
+//   roles         string[]  All roles, most important first. Cards show the
+//                           first 3 (Team page) or the first 1 (Home page);
+//                           the pop-up shows all of them.
+//   image         string    Path from /public. Use DEFAULT_PHOTO if none yet.
+//   initials      string    2-char fallback if the image fails to load
+//   bio           string    Pop-up paragraph (placeholder text for now)
+//   yearsInFirst  number|null  Years in FIRST   (null = not filled in yet)
+//   yearsOnTeam   number|null  Years on the team (null = not filled in yet)
+//   grade         string|null  e.g. "11th"      (null = not filled in yet)
+//   season        string    e.g. "2025–26 Decode"
 // ─────────────────────────────────────────────────────────────────────────────
+export const DEFAULT_PHOTO = '/data/team/default.svg';
+const BIO_PLACEHOLDER = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+
+const member = (name, roles, image = DEFAULT_PHOTO) => ({
+  name,
+  roles,
+  image,
+  initials: name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase(),
+  bio: BIO_PLACEHOLDER,
+  yearsInFirst: null,
+  yearsOnTeam: null,
+  grade: null,
+  season: '2025–26 Decode',
+});
+
 export const TEAM = {
-  students: [
-    {
-      name: 'Dev Gavande',
-      role: 'Team Captain, Founder, Driver, CAD Lead, Hardware Lead',
-      image: '/data/team/Dev.png',
-      initials: 'DG',
-      rookie: false,
-      season: '2025–26 Decode',
-      bio: 'Founding member and team captain leading Wolverine Robotics through its inaugural season.',
-    },
-    {
-      name: 'Sahejdeep Singh',
-      role: 'Software Lead, Hardware, Drive Coach',
-      image: '/data/team/sahejdeep.jpg',
-      initials: 'SS',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Sripaadh J Kuppusamy',
-      role: 'Hardware, Human Player',
-      image: '/data/team/sripadh.jpg',
-      initials: 'SK',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Manveer Singh Tib',
-      role: 'Hardware, Human Player',
-      image: '/data/team/manveer.jpg',
-      initials: 'MT',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Jivansh Pandya',
-      role: 'Hardware',
-      image: '/data/team/Jivansh.jpg',
-      initials: 'JP',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Jacob Esparza',
-      role: 'Hardware',
-      image: '/data/team/Jacob.jpeg',
-      initials: 'JE',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Kaiden Lee',
-      role: 'Hardware',
-      image: '/data/team/kaiden.jpg',
-      initials: 'KL',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Kalvik Das',
-      role: 'Hardware',
-      image: '/data/team/Kalvik.jpg',
-      initials: 'KD',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Alexander Fiderfish',
-      role: 'Hardware',
-      image: '/data/team/member9.jpg',
-      initials: 'AF',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Piousvir Singh',
-      role: 'Outreach',
-      image: '/data/team/pious.jpg',
-      initials: 'PS',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Pratham Erramilli',
-      role: 'Outreach',
-      image: '/data/team/pratham.jpg',
-      initials: 'PE',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
-    {
-      name: 'Kavin Murugan',
-      role: 'Outreach',
-      image: '/data/team/kavin.jpg',
-      initials: 'KM',
-      rookie: true,
-      season: '2025–26 Decode',
-    },
+  // Team Roster, in this order left to right.
+  roster: [
+    member('Dev Gavande', ['Team Captain', 'Founder', 'CAD & Hardware Lead', 'Driver'], '/data/team/Dev.png'),
+    member('Sahejdeep Singh', ['Software Co-Lead', 'Drive Coach'], '/data/team/sahejdeep.jpg'),
+    member('Sripaadh Jayashree Kuppusamy', ['Scouting Lead', 'Software'], '/data/team/sripadh.jpg'),
+    member('Jacob Esparza', ['Pit Crew Lead', 'Hardware'], '/data/team/Jacob.jpeg'),
+    member('Jivansh Pandya', ['Hardware', 'CAD'], '/data/team/Jivansh.jpg'),
+    member('Manveer Tib', ['Hardware'], '/data/team/manveer.jpg'),
+    member('Kalvik Das', ['Hardware'], '/data/team/Kalvik.jpg'),
+    member('Kaiden Lee', ['Hardware'], '/data/team/kaiden.jpg'),
+  ],
+  // Subsection of Team Roster.
+  newMembers: [
+    member('Mohan Chillara', ['Business Lead', 'CAD', 'Hardware']),
+    member('Abdullah Khaled', ['Software Co-Lead']),
+    member('Zakariah Khaled', ['CAD', 'Hardware']),
+    member('Alexander Kolev', ['Hardware']),
+    member('Ayush Sharma', ['CAD', 'Hardware']),
+    member('Aditya Kothuri', ['Software']),
+    member('Dylan Daigrepont', ['Hardware']),
+  ],
+  // Its own section, same card structure.
+  extended: [
+    member('Pratham Erramilli', ['Hardware'], '/data/team/pratham.jpg'),
+    member('Soumya Singh', ['Software']),
+    member('Aarav Agrawal', ['Hardware']),
+    member('Akhil Yallapu', ['Hardware']),
+    member('Sanvi Gupta', ['Hardware', 'Software']),
   ],
   coaches: [
     {
       name: 'Mr. Ellis',
-      role: 'Coach',
+      roles: ['Coach'],
       image: '/data/team/ellis.jpg',
       initials: 'E',
-      rookie: false,
       season: '2025–26 Decode',
     },
   ],
-  mentors: [
-    {
-      name: 'Abdullah Khaled',
-      role: 'Youth Software Mentor',
-      image: '/data/team/abdullah.jpg',
-      initials: 'AK',
-      rookie: false,
-      season: '2025–26 Decode',
-      bio: 'Wolverine Robotics Youth Software Mentor guiding the team on software architecture and Java best practices.',
-    },
-  ],
+  // Mentor section removed from the site 2026-10-02 (no mentors this season).
+  mentors: [],
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -6,6 +6,9 @@ import AngleButton from '../components/ui/AngleButton';
 import { HOME_HIGHLIGHTS, ROBOTS } from '../data.js';
 
 // ── Animated counter ───────────────────────────────────────────────
+// Everyone on the student roster (core + new members + extended).
+const allStudents = (t) => t.roster.length + t.newMembers.length + t.extended.length;
+
 const Counter = ({ target, suffix = '', duration = 2000, decimals = 0, static: staticVal }) => {
   const [val, setVal] = useState(staticVal ?? '0');
   const ref = useRef(null);
@@ -216,7 +219,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
             >
               <div
                 className="w-1.5 h-1.5 rounded-full"
-                style={{ background: '#FF5A1F', boxShadow: '0 0 8px #FF5A1F', animation: 'pulse-glow 2s infinite' }}
+                style={{ background: '#FF5A1F', boxShadow: '0 0 8px #FF5A1F' }}
               />
               <span
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase"
@@ -297,7 +300,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
           </p>
           <ArrowDown
             size={14}
-            style={{ color: 'rgba(255,90,31,0.5)', animation: 'float 2s ease-in-out infinite' }}
+            style={{ color: 'rgba(255,90,31,0.5)' }}
           />
         </div>
 
@@ -534,10 +537,10 @@ const HomePage = ({ onNavigate, teamMembers }) => {
 
           {/* Team grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {teamMembers.students.slice(0, 6).map((member, i) => (
+            {teamMembers.roster.slice(0, 6).map((member, i) => (
               <Reveal key={i} delay={i * 60} direction="scale">
                 <div
-                  className="relative group cursor-none"
+                  className="relative group cursor-pointer"
                   onClick={() => onNavigate('team')}
                 >
                   <div
@@ -564,7 +567,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                           className="text-[9px] tracking-wider uppercase mt-0.5"
                           style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
                         >
-                          {member.role.split(',')[0]}
+                          {member.roles[0]}
                         </p>
                       </div>
                     </div>
@@ -575,7 +578,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
           </div>
 
           {/* Remaining count */}
-          {teamMembers.students.length > 6 && (
+          {allStudents(teamMembers) > 6 && (
             <Reveal delay={400}>
               <div className="mt-6 text-center">
                 <button
@@ -585,7 +588,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF5A1F')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
                 >
-                  +{teamMembers.students.length - 6} more engineers →
+                  +{allStudents(teamMembers) - 6} more engineers →
                 </button>
               </div>
             </Reveal>

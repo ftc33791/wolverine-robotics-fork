@@ -62,8 +62,8 @@ const Nav = ({ currentPage, onNavigate, navigation }) => {
           borderBottom: scrolled ? '1px solid rgba(255,90,31,0.15)' : '1px solid transparent',
         }}
       >
-        {/* Scanline on border-bottom */}
-        {scrolled && (
+        {/* Scanline on border-bottom: turned off 2026-10-02 (effects cut; see WORKLOG). */}
+        {false && scrolled && (
           <div
             className="absolute bottom-0 left-0 h-px pointer-events-none overflow-hidden"
             style={{ width: '100%' }}

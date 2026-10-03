@@ -557,67 +557,6 @@ function ScoutingPage() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// INITIAL LOAD ANIMATION
-// ─────────────────────────────────────────────────────────────────────────────
-function InitialLoad({ onComplete }) {
-  const [phase, setPhase] = useState(0); // 0=counting, 1=reveal, 2=done
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 1800);
-    const t2 = setTimeout(() => { setPhase(2); onComplete(); }, 2600);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [onComplete]);
-
-  return (
-    <div
-      className="fixed inset-0 z-[500] flex items-center justify-center"
-      style={{
-        background: '#061020',
-        opacity: phase === 1 ? 0 : 1,
-        transition: 'opacity 0.8s cubic-bezier(0.4,0,0.2,1)',
-        pointerEvents: phase === 2 ? 'none' : 'all',
-      }}
-    >
-      <div className="text-center">
-        <p
-          className="text-[9px] font-semibold tracking-[0.3em] uppercase mb-4"
-          style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,90,31,0.6)' }}
-        >
-          INITIALIZING SYSTEM
-        </p>
-        <div
-          className="text-6xl font-black uppercase tracking-tight text-white"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          WOLVERINE
-        </div>
-        <div
-          className="text-xl font-black uppercase tracking-[0.2em] mt-1"
-          style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
-        >
-          TEAM 33791
-        </div>
-        {/* Progress bar */}
-        <div
-          className="mt-8 h-px overflow-hidden mx-auto"
-          style={{ width: 200, background: 'rgba(255,90,31,0.15)' }}
-        >
-          <div
-            className="h-full"
-            style={{
-              background: '#FF5A1F',
-              width: phase === 0 ? '100%' : '100%',
-              transition: 'width 1.6s cubic-bezier(0.4,0,0.2,1)',
-              animation: 'width-expand 1.6s cubic-bezier(0.4,0,0.2,1) forwards',
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // ROOT APP
 // ─────────────────────────────────────────────────────────────────────────────
 // Valid page ids <-> URL paths (e.g. 'about' <-> '/about', 'home' <-> '/')
@@ -634,20 +573,14 @@ const App = () => {
   const initialPage = typeof window !== 'undefined' ? pageFromPath(window.location.pathname) : 'home';
   const [currentPage,  setCurrentPage]  = useState(initialPage);
   const [displayPage,  setDisplayPage]  = useState(initialPage);
-  const [transitioning, setTransitioning] = useState(false);
-  const [transPhase,   setTransPhase]   = useState('none'); // 'none'|'out'|'in'
-  const [initialLoad,  setInitialLoad]  = useState(true);
 
   // Page transition
   useEffect(() => {
     if (currentPage === displayPage) return;
-    if (currentPage === 'home' && initialLoad) return;
-    setTransitioning(true);
-    setTransPhase('out');
-    const t1 = setTimeout(() => window.scrollTo(0, 0), 300);
-    const t2 = setTimeout(() => { setDisplayPage(currentPage); setTransPhase('in'); }, 540);
-    const t3 = setTimeout(() => { setTransitioning(false); setTransPhase('none'); }, 1100);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    // The "claw" page transition was cut 2026-10-02 (effects cut; see WORKLOG):
+    // pages now switch instantly.
+    window.scrollTo(0, 0);
+    setDisplayPage(currentPage);
   }, [currentPage]);
 
   // Keep the URL in sync with the active page, and support browser back/forward
@@ -679,13 +612,7 @@ const App = () => {
     }
   };
 
-  if (initialLoad) {
-    return (
-      <>
-        <InitialLoad onComplete={() => setInitialLoad(false)} />
-      </>
-    );
-  }
+  // The "INITIALIZING SYSTEM" loading screen was removed 2026-10-02 (Dev's list).
 
   return (
     <>
@@ -694,16 +621,7 @@ const App = () => {
         onNavigate={navigate}
         navigation={NAVIGATION}
       />
-      <div
-        style={{
-          animation:
-            transPhase === 'out' ? 'claw-out 0.54s cubic-bezier(0.4,0,0.6,1) forwards' :
-            transPhase === 'in'  ? 'claw-in  0.54s cubic-bezier(0.4,0,0.2,1) forwards' :
-            'none',
-          willChange: transPhase !== 'none' ? 'clip-path, opacity' : 'auto',
-          minHeight: '100vh',
-        }}
-      >
+      <div style={{ minHeight: '100vh' }}>
         {renderPage()}
       </div>
       {/* Hide footer on scouting page for wider layout */}

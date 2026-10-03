@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" role="img" aria-label="No photo yet">
+  <!-- Default blank grey headshot for members without a photo yet. -->
+  <rect width="300" height="400" fill="#9aa0a6"/>
+  <circle cx="150" cy="150" r="62" fill="#c4c8cc"/>
+  <path d="M40 400c0-78 49-128 110-128s110 50 110 128z" fill="#c4c8cc"/>
+</svg>
