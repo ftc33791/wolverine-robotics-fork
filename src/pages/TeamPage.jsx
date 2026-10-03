@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import GridScan from '../components/ui/GridScan';
 
 const Reveal = ({ children, delay = 0, direction = 'up', className = '' }) => {
   const ref = useRef(null);
@@ -34,10 +33,10 @@ const MemberPhoto = ({ member, size = 'small' }) => {
   );
 };
 
-const MemberCard = ({ member, onClick, delay, showRookie }) => (
+const MemberCard = ({ member, onClick, delay }) => (
   <Reveal delay={delay} direction="scale">
     <div
-      className="relative group cursor-none"
+      className="relative group cursor-pointer"
       onClick={() => onClick(member)}
     >
       <div
@@ -59,28 +58,15 @@ const MemberCard = ({ member, onClick, delay, showRookie }) => (
           style={{ background: 'linear-gradient(to top, rgba(6,16,32,0.97) 0%, rgba(6,16,32,0.6) 60%, transparent 100%)' }}
         >
           <p className="text-white text-[13px] font-bold leading-tight">{member.name}</p>
+          {/* Top 3 roles on the card; all roles are in the pop-up. */}
           <p
-            className="text-[9px] tracking-widest uppercase mt-0.5"
+            className="text-[9px] tracking-widest uppercase mt-1 leading-relaxed"
             style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
           >
-            {member.role.split(',')[0]}
+            {member.roles.slice(0, 3).join(' · ')}
           </p>
         </div>
 
-        {/* Rookie badge */}
-        {showRookie && member.rookie && (
-          <div
-            className="absolute top-2 right-2 px-2 py-1 text-[8px] font-bold tracking-wider uppercase"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              background: 'rgba(255,90,31,0.9)',
-              color: '#fff',
-              clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 0 100%)',
-            }}
-          >
-            ROOKIE
-          </div>
-        )}
 
         {/* Hover: details icon */}
         <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -179,7 +165,7 @@ const MemberModal = ({ member, onClose }) => {
               ROLES
             </p>
             <div className="flex flex-wrap gap-2">
-              {member.role.split(',').map((r, i) => (
+              {member.roles.map((r, i) => (
                 <span
                   key={i}
                   className="px-3 py-1.5 text-[10px] font-semibold tracking-wider border"
@@ -191,11 +177,27 @@ const MemberModal = ({ member, onClose }) => {
                     color: 'rgba(255,255,255,0.65)',
                   }}
                 >
-                  {r.trim()}
+                  {r}
                 </span>
               ))}
             </div>
           </div>
+
+          {/* Facts: not filled in yet show as a dash. */}
+          {member.roles && !member.isCoach && (
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                ['YEARS IN FIRST', member.yearsInFirst],
+                ['YEARS ON TEAM', member.yearsOnTeam],
+                ['GRADE', member.grade],
+              ].map(([label, value]) => (
+                <div key={label} className="px-3 py-3 border" style={{ borderColor: 'rgba(255,90,31,0.15)', background: 'rgba(255,90,31,0.04)' }}>
+                  <p className="text-[8px] tracking-[0.2em] uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.3)' }}>{label}</p>
+                  <p className="text-lg font-black text-white" style={{ fontFamily: 'var(--font-display)' }}>{value ?? '—'}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Bio */}
           {member.bio && (
@@ -212,25 +214,6 @@ const MemberModal = ({ member, onClose }) => {
             </div>
           )}
 
-          {/* Rookie indicator */}
-          {member.rookie && !member.isPast && (
-            <div
-              className="mt-5 flex items-center gap-2 px-4 py-3"
-              style={{
-                background: 'rgba(255,90,31,0.06)',
-                border: '1px solid rgba(255,90,31,0.15)',
-                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)',
-              }}
-            >
-              <div className="w-2 h-2 rotate-45 flex-shrink-0" style={{ background: '#FF5A1F' }} />
-              <p
-                className="text-[11px] font-semibold"
-                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,90,31,0.8)' }}
-              >
-                First season competing — Rookie 2025-26
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -256,11 +239,29 @@ const GroupSection = ({ group, onMemberClick }) => (
         {group.sub}
       </p>
     </Reveal>
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      {group.members.map((m, i) => (
-        <MemberCard key={i} member={m} onClick={onMemberClick} delay={i * 50} showRookie={group.rookie} />
-      ))}
-    </div>
+    <MemberGrid members={group.members} onMemberClick={onMemberClick} />
+    {(group.subsections || []).map((sub) => (
+      <div key={sub.label} className="mt-16">
+        <Reveal>
+          <h3
+            className="text-xl font-black text-white uppercase tracking-tight mb-8"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {sub.label}
+          </h3>
+        </Reveal>
+        <MemberGrid members={sub.members} onMemberClick={onMemberClick} />
+      </div>
+    ))}
+  </div>
+);
+
+// More room between cards than before (Dev, 2026-10-02).
+const MemberGrid = ({ members, onMemberClick }) => (
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-10 sm:gap-x-10 sm:gap-y-12">
+    {members.map((m, i) => (
+      <MemberCard key={m.name} member={m} onClick={onMemberClick} delay={i * 50} />
+    ))}
   </div>
 );
 
@@ -268,41 +269,37 @@ const TeamPage = ({ teamMembers, pastMembers }) => {
   const [selected, setSelected] = useState(null);
   const [showPast, setShowPast] = useState(false);
 
+  // Order per Dev's list (2026-10-02). The Mentor section was removed.
   const groups = [
-    { label: 'STUDENTS', sub: 'THE ENGINEERS', members: teamMembers.students, rookie: true },
-    { label: 'COACHES', sub: 'THE LEADERS', members: teamMembers.coaches, rookie: false },
-    { label: 'MENTORS', sub: 'THE GUIDES', members: teamMembers.mentors, rookie: false },
+    {
+      label: 'TEAM ROSTER',
+      sub: 'THE ENGINEERS',
+      members: teamMembers.roster,
+      subsections: [{ label: 'New Members', members: teamMembers.newMembers }],
+    },
+    { label: 'EXTENDED ROSTER', sub: 'THE WIDER PACK', members: teamMembers.extended },
+    { label: 'COACHES', sub: 'THE LEADERS', members: teamMembers.coaches.map((c) => ({ ...c, isCoach: true })) },
   ].filter((g) => g.members.length > 0);
+  const studentCount = teamMembers.roster.length + teamMembers.newMembers.length + teamMembers.extended.length;
 
   return (
     <div style={{ background: 'var(--c-blue-deep)' }}>
       {selected && <MemberModal member={selected} onClose={() => setSelected(null)} />}
 
-      {/* ─── Hero ──────────────────────────────────────────────────── */}
+      {/* ─── Hero ("The Pack"): about 70% shorter than before (Dev, 2026-10-02) ─── */}
       <section
-        className="relative pt-32 pb-20 overflow-hidden"
+        className="relative pt-[84px] pb-5 overflow-hidden"
         style={{
           background: 'linear-gradient(180deg, #061020 0%, #0a1628 100%)',
           borderBottom: '1px solid rgba(255,90,31,0.08)',
         }}
       >
         <div className="absolute inset-0 blueprint-grid opacity-25 pointer-events-none" />
-        <div className="absolute inset-0 pointer-events-none opacity-35">
-          <GridScan sensitivity={0.2} scanOpacity={0.1} opacity={1} />
-        </div>
-        <div className="container-wide relative z-10">
-          <Reveal><span className="label-caps">TEAM 33791 · 2025-26</span></Reveal>
-          <Reveal delay={80} direction="left">
-            <h1 className="display-xl text-white mt-4 mb-6" style={{ lineHeight: 0.9 }}>
-              THE<span style={{ color: '#FF5A1F', display: 'block' }}>PACK</span>
-            </h1>
-          </Reveal>
-          <Reveal delay={160}>
-            <p className="body-lg max-w-xl">
-              {teamMembers.students.length} students. 1 vision. Every member essential.
-              Click any photo to learn more about the people building the future of Wolverine Robotics.
-            </p>
-          </Reveal>
+        <div className="container-wide relative z-10 flex flex-wrap items-end gap-x-6 gap-y-1">
+          <h1 className="display-lg text-white" style={{ lineHeight: 0.95 }}>
+            THE <span style={{ color: '#FF5A1F' }}>PACK</span>
+          </h1>
+          <span className="label-caps pb-1">TEAM 33791 · 2025-26 · {studentCount} STUDENTS · CLICK A CARD FOR DETAILS</span>
         </div>
       </section>
 
