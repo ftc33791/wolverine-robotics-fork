@@ -59,8 +59,8 @@ export const TEAM = {
   roster: [
     member('Dev Gavande', ['Team Captain', 'Founder', 'CAD & Hardware Lead', 'Driver'], '/data/team/Dev.png'),
     member('Sahejdeep Singh', ['Software Co-Lead', 'Drive Coach'], '/data/team/sahejdeep.jpg'),
-    member('Sripaadh Jayashree Kuppusamy', ['Scouting Lead', 'Software'], '/data/team/sripadh.jpg'),
-    member('Jacob Esparza', ['Pit Crew Lead', 'Hardware'], '/data/team/Jacob.jpeg'),
+    member('Sripaadh Jayashree Kuppusamy', ['Software'], '/data/team/sripadh.jpg'),
+    member('Jacob Esparza', ['Hardware'], '/data/team/Jacob.jpeg'),
     member('Jivansh Pandya', ['Hardware', 'CAD'], '/data/team/Jivansh.jpg'),
     member('Manveer Tib', ['Hardware'], '/data/team/manveer.jpg'),
     member('Kalvik Das', ['Hardware'], '/data/team/Kalvik.jpg'),
@@ -68,7 +68,7 @@ export const TEAM = {
   ],
   // Subsection of Team Roster.
   newMembers: [
-    member('Mohan Chillara', ['Business Lead', 'CAD', 'Hardware']),
+    member('Mohan Chillara', ['CAD', 'Hardware']),
     member('Abdullah Khaled', ['Software Co-Lead']),
     member('Zakariah Khaled', ['CAD', 'Hardware']),
     member('Alexander Kolev', ['Hardware']),
