@@ -79,7 +79,7 @@ export const TEAM = {
   // Its own section, same card structure.
   extended: [
     member('Pratham Erramilli', ['Hardware'], '/data/team/pratham.jpg'),
-    member('Soumya Singh', ['Software']),
+    member('Kavyashree Santosh', ['Software']),
     member('Aarav Agrawal', ['Hardware']),
     member('Akhil Yallapu', ['Hardware']),
     member('Sanvi Gupta', ['Hardware', 'Software']),
