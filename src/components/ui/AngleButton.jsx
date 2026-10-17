@@ -77,7 +77,7 @@ const AngleButton = ({
         v.base,
         v.hover,
         v.glow,
-        disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-none',
+        disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
         className,
       ].join(' ')}
       style={{ willChange: 'transform', transitionProperty: 'transform, box-shadow, background-color, border-color, color' }}

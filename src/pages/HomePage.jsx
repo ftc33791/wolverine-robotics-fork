@@ -96,7 +96,7 @@ const SubsystemCard = ({ title, detail, icon, index }) => (
       <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l" style={{ borderColor: 'rgba(255,90,31,0.3)' }} />
 
       <p
-        className="text-[9px] font-semibold tracking-[0.25em] uppercase mb-3"
+        className="text-[11px] font-semibold tracking-[0.25em] uppercase mb-3"
         style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
       >
         {icon} {title}
@@ -222,7 +222,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                 style={{ background: '#FF5A1F', boxShadow: '0 0 8px #FF5A1F' }}
               />
               <span
-                className="text-[10px] font-semibold tracking-[0.2em] uppercase"
+                className="text-[11px] font-semibold tracking-[0.2em] uppercase"
                 style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
               >
                 FTC TEAM 33791 · SEASON 2025-26
@@ -255,7 +255,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
               <div className="h-px flex-1 max-w-[48px]" style={{ background: 'linear-gradient(90deg, #FF5A1F, transparent)' }} />
               <p
                 className="text-[11px] font-semibold tracking-[0.22em] uppercase"
-                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.45)' }}
+                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.72)' }}
               >
                 ROBOTICS · FRISCO, TEXAS
               </p>
@@ -264,12 +264,12 @@ const HomePage = ({ onNavigate, teamMembers }) => {
             <p
               className="text-base leading-relaxed mb-10 max-w-sm"
               style={{
-                color: 'rgba(255,255,255,0.5)',
+                color: 'rgba(255,255,255,0.72)',
                 animation: 'fade-up 0.8s 0.5s var(--ease-out-expo) both',
               }}
             >
-              Precision engineering. Relentless innovation. First-year team
-              competing at the highest level of FIRST Tech Challenge.
+              A first-year FIRST Tech Challenge team from Wakeland High School
+              in Frisco, Texas.
             </p>
 
             {/* CTAs */}
@@ -293,10 +293,10 @@ const HomePage = ({ onNavigate, teamMembers }) => {
           style={{ animation: 'fade-up 1s 1.2s var(--ease-out-expo) both' }}
         >
           <p
-            className="text-[9px] tracking-[0.3em] uppercase"
-            style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+            className="text-[11px] tracking-[0.3em] uppercase"
+            style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
           >
-            SCROLL TO EXPLORE
+            SCROLL
           </p>
           <ArrowDown
             size={14}
@@ -372,12 +372,12 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                 {/* Corner HUD elements */}
                 <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ background: '#FF5A1F', animation: 'pulse-glow 2s infinite' }} />
-                  <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,90,31,0.7)' }}>
+                  <span className="text-[11px] tracking-widest uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,90,31,0.7)' }}>
                     3D RENDER · MATCHSTICK
                   </span>
                 </div>
                 <div className="absolute bottom-3 right-3 z-10">
-                  <span className="text-[8px] tracking-widest uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.2)' }}>
+                  <span className="text-[11px] tracking-widest uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}>
                     CAD VISUALIZATION
                   </span>
                 </div>
@@ -408,10 +408,9 @@ const HomePage = ({ onNavigate, teamMembers }) => {
               </Reveal>
               <Reveal delay={220}>
                 <p className="body-lg mb-8 max-w-md">
-                  Our debut machine. Every mechanism engineered from the ground up
-                  — mecanum drivetrain for omnidirectional precision, PedroPathing
-                  autonomous, and an interpolated RPM lookup table tuned for
-                  3.8-second scoring cycles.
+                  MATCHSTICK is our first robot. It has a mecanum drivetrain,
+                  PedroPathing for autonomous, and an RPM lookup table that
+                  brings a scoring cycle down to 3.8 seconds.
                 </p>
               </Reveal>
 
@@ -428,8 +427,8 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                       }}
                     >
                       <span
-                        className="text-[9px] tracking-widest uppercase"
-                        style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.3)' }}
+                        className="text-[11px] tracking-widest uppercase"
+                        style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                       >
                         {label}
                       </span>
@@ -466,7 +465,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
             </div>
             <Reveal delay={120}>
               <p className="body-lg max-w-sm text-right">
-                Each module independently designed and tested for peak performance.
+                The four subsystems that make up MATCHSTICK.
               </p>
             </Reveal>
           </div>
@@ -523,7 +522,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
         <div className="container-wide relative z-10">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16">
             <div>
-              <Reveal><span className="label-caps">THE PEOPLE BEHIND THE MACHINE</span></Reveal>
+              <Reveal><span className="label-caps">OUR STUDENTS</span></Reveal>
               <Reveal delay={80} direction="left">
                 <h2 className="display-lg text-white mt-3">THE PACK</h2>
               </Reveal>
@@ -564,7 +563,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                       <div>
                         <p className="text-white text-[11px] font-bold leading-tight">{member.name}</p>
                         <p
-                          className="text-[9px] tracking-wider uppercase mt-0.5"
+                          className="text-[11px] tracking-wider uppercase mt-0.5"
                           style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
                         >
                           {member.roles[0]}
@@ -584,11 +583,11 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                 <button
                   onClick={() => onNavigate('team')}
                   className="text-sm transition-colors duration-200"
-                  style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}
+                  style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.1em' }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#FF5A1F')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
                 >
-                  +{allStudents(teamMembers) - 6} more engineers →
+                  +{allStudents(teamMembers) - 6} more students →
                 </button>
               </div>
             </Reveal>
@@ -608,8 +607,8 @@ const HomePage = ({ onNavigate, teamMembers }) => {
         <div className="container-narrow text-center">
           <Reveal>
             <p
-              className="text-[10px] tracking-[0.3em] uppercase mb-8"
-              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.2)' }}
+              className="text-[11px] tracking-[0.3em] uppercase mb-8"
+              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
             >
               SUPPORTED BY
             </p>
@@ -621,7 +620,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
                   key={i}
                   onClick={() => onNavigate('sponsors')}
                   className="text-[15px] font-bold uppercase tracking-widest transition-colors duration-200"
-                  style={{ fontFamily: 'var(--font-display)', color: 'rgba(255,255,255,0.2)' }}
+                  style={{ fontFamily: 'var(--font-display)', color: 'rgba(255,255,255,0.55)' }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}
                 >

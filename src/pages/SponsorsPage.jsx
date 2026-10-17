@@ -50,7 +50,7 @@ const SponsorCard = ({ sponsor, tier, delay }) => {
       >
         {/* Tier badge */}
         <div
-          className="absolute top-3 right-3 px-2 py-0.5 text-[8px] font-bold tracking-widest uppercase"
+          className="absolute top-3 right-3 px-2 py-0.5 text-[11px] font-bold tracking-widest uppercase"
           style={{
             fontFamily: 'var(--font-mono)',
             background: `${style.badge}18`,
@@ -78,7 +78,7 @@ const SponsorCard = ({ sponsor, tier, delay }) => {
           ) : (
             <p
               className="text-xl font-black text-center uppercase"
-              style={{ fontFamily: 'var(--font-display)', color: 'rgba(255,255,255,0.4)' }}
+              style={{ fontFamily: 'var(--font-display)', color: 'rgba(255,255,255,0.72)' }}
             >
               {sponsor.name}
             </p>
@@ -92,14 +92,14 @@ const SponsorCard = ({ sponsor, tier, delay }) => {
         >
           <p
             className="text-[11px] font-semibold tracking-wider text-center"
-            style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.45)' }}
+            style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.72)' }}
           >
             {sponsor.name}
           </p>
           {sponsor.description && (
             <p
-              className="text-[10px] text-center mt-1"
-              style={{ color: 'rgba(255,255,255,0.25)' }}
+              className="text-[11px] text-center mt-1"
+              style={{ color: 'rgba(255,255,255,0.55)' }}
             >
               {sponsor.description}
             </p>
@@ -128,7 +128,7 @@ const TierSection = ({ tier, sponsors, delay }) => {
         <div className="flex items-center gap-5 mb-8">
           <div>
             <p className="label-caps">{cfg.label} SPONSORS</p>
-            <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: 'var(--font-mono)' }}>
+            <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-mono)' }}>
               {cfg.desc}
             </p>
           </div>
@@ -156,7 +156,7 @@ const TierTableRow = ({ tier, perks, price, featured }) => (
   >
     {featured && (
       <div
-        className="absolute top-3 right-4 text-[8px] font-bold tracking-widest uppercase px-2 py-0.5"
+        className="absolute top-3 right-4 text-[11px] font-bold tracking-widest uppercase px-2 py-0.5"
         style={{
           fontFamily: 'var(--font-mono)',
           background: 'rgba(255,90,31,0.2)',
@@ -171,7 +171,7 @@ const TierTableRow = ({ tier, perks, price, featured }) => (
     <div className="flex flex-wrap items-start gap-6">
       <div className="min-w-[120px]">
         <p
-          className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-1"
+          className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-1"
           style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
         >
           {tier}
@@ -187,12 +187,12 @@ const TierTableRow = ({ tier, perks, price, featured }) => (
         {perks.map((perk, i) => (
           <span
             key={i}
-            className="px-3 py-1 text-[10px] tracking-wider border"
+            className="px-3 py-1 text-[11px] tracking-wider border"
             style={{
               fontFamily: 'var(--font-mono)',
               background: 'rgba(255,255,255,0.03)',
               borderColor: 'rgba(255,255,255,0.08)',
-              color: 'rgba(255,255,255,0.5)',
+              color: 'rgba(255,255,255,0.72)',
               clipPath: 'polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%)',
             }}
           >
@@ -244,8 +244,8 @@ const SponsorsPage = ({ sponsors, onNavigate }) => {
           </Reveal>
           <Reveal delay={160}>
             <p className="body-lg max-w-xl">
-              Their belief in the next generation of engineers makes this program possible.
-              Every sponsor is a direct investor in student-led innovation.
+              Our sponsors make this program possible. Thank you for supporting
+              student engineers.
             </p>
           </Reveal>
         </div>
@@ -258,7 +258,7 @@ const SponsorsPage = ({ sponsors, onNavigate }) => {
             <div className="text-center py-20">
               <p
                 className="text-sm tracking-widest uppercase"
-                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.15)' }}
+                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
               >
                 SPONSORS COMING SOON
               </p>
@@ -298,11 +298,10 @@ const SponsorsPage = ({ sponsors, onNavigate }) => {
                 </h2>
               </Reveal>
               <Reveal delay={140}>
-                <p className="text-sm leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  Your support directly funds competition entry fees, robot components,
-                  travel, and outreach programs. In return, your brand reaches thousands
-                  of STEM-engaged students, parents, and industry professionals across
-                  the FIRST community.
+                <p className="text-sm leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                  Sponsorship pays for competition entry fees, robot components,
+                  travel, and outreach. In return, your brand reaches students,
+                  parents, and industry professionals across the FIRST community.
                 </p>
               </Reveal>
               <Reveal delay={200}>
@@ -328,8 +327,8 @@ const SponsorsPage = ({ sponsors, onNavigate }) => {
             <div className="space-y-3">
               <Reveal delay={120}>
                 <p
-                  className="text-[9px] font-semibold tracking-[0.22em] uppercase mb-5"
-                  style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+                  className="text-[11px] font-semibold tracking-[0.22em] uppercase mb-5"
+                  style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                 >
                   PARTNERSHIP TIERS
                 </p>

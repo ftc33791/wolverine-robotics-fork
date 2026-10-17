@@ -60,7 +60,7 @@ const MemberCard = ({ member, onClick, delay }) => (
           <p className="text-white text-[13px] font-bold leading-tight">{member.name}</p>
           {/* Top 3 roles on the card; all roles are in the pop-up. */}
           <p
-            className="text-[9px] tracking-widest uppercase mt-1 leading-relaxed"
+            className="text-[11px] tracking-widest uppercase mt-1 leading-relaxed"
             style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
           >
             {member.roles.slice(0, 3).join(' · ')}
@@ -71,11 +71,11 @@ const MemberCard = ({ member, onClick, delay }) => (
         {/* Hover: details icon */}
         <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div
-            className="text-[8px] tracking-widest uppercase px-2 py-1"
+            className="text-[11px] tracking-widest uppercase px-2 py-1"
             style={{
               fontFamily: 'var(--font-mono)',
               background: 'rgba(6,16,32,0.85)',
-              color: 'rgba(255,255,255,0.5)',
+              color: 'rgba(255,255,255,0.72)',
               clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 0 100%)',
             }}
           >
@@ -128,7 +128,7 @@ const MemberModal = ({ member, onClose }) => {
           />
           {member.isPast && (
             <div
-              className="absolute top-3 left-3 px-3 py-1 text-[9px] font-semibold tracking-widest uppercase"
+              className="absolute top-3 left-3 px-3 py-1 text-[11px] font-semibold tracking-widest uppercase"
               style={{
                 fontFamily: 'var(--font-mono)',
                 background: 'rgba(100,116,139,0.8)',
@@ -150,7 +150,7 @@ const MemberModal = ({ member, onClose }) => {
             {member.name}
           </h2>
           <p
-            className="text-[10px] tracking-widest uppercase mb-6"
+            className="text-[11px] tracking-widest uppercase mb-6"
             style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
           >
             {member.season || '2025-26 Decode'}
@@ -159,8 +159,8 @@ const MemberModal = ({ member, onClose }) => {
           {/* Roles */}
           <div className="mb-5">
             <p
-              className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-3"
-              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+              className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3"
+              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
             >
               ROLES
             </p>
@@ -168,7 +168,7 @@ const MemberModal = ({ member, onClose }) => {
               {member.roles.map((r, i) => (
                 <span
                   key={i}
-                  className="px-3 py-1.5 text-[10px] font-semibold tracking-wider border"
+                  className="px-3 py-1.5 text-[11px] font-semibold tracking-wider border"
                   style={{
                     fontFamily: 'var(--font-mono)',
                     clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)',
@@ -192,7 +192,7 @@ const MemberModal = ({ member, onClose }) => {
                 ['GRADE', member.grade],
               ].map(([label, value]) => (
                 <div key={label} className="px-3 py-3 border" style={{ borderColor: 'rgba(255,90,31,0.15)', background: 'rgba(255,90,31,0.04)' }}>
-                  <p className="text-[8px] tracking-[0.2em] uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.3)' }}>{label}</p>
+                  <p className="text-[11px] tracking-[0.2em] uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}>{label}</p>
                   <p className="text-lg font-black text-white" style={{ fontFamily: 'var(--font-display)' }}>{value ?? '—'}</p>
                 </div>
               ))}
@@ -203,12 +203,12 @@ const MemberModal = ({ member, onClose }) => {
           {member.bio && (
             <div>
               <p
-                className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-3"
-                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+                className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3"
+                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
               >
                 ABOUT
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
                 {member.bio}
               </p>
             </div>
@@ -233,7 +233,7 @@ const GroupSection = ({ group, onMemberClick }) => (
         <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(255,90,31,0.4), transparent)' }} />
       </div>
       <p
-        className="text-[10px] tracking-[0.22em] uppercase mb-10"
+        className="text-[11px] tracking-[0.22em] uppercase mb-10"
         style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
       >
         {group.sub}
@@ -318,7 +318,7 @@ const TeamPage = ({ teamMembers, pastMembers }) => {
             >
               <span
                 className="text-sm font-semibold tracking-[0.15em] uppercase transition-colors duration-200"
-                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                 onMouseEnter={(e) => (e.target.style.color = '#fff')}
                 onMouseLeave={(e) => (e.target.style.color = 'rgba(255,255,255,0.25)')}
               >
@@ -326,7 +326,7 @@ const TeamPage = ({ teamMembers, pastMembers }) => {
               </span>
               {pastMembers.length > 0 && (
                 <span
-                  className="px-2 py-0.5 text-[9px] border"
+                  className="px-2 py-0.5 text-[11px] border"
                   style={{
                     fontFamily: 'var(--font-mono)',
                     background: 'rgba(255,90,31,0.08)',
@@ -344,9 +344,9 @@ const TeamPage = ({ teamMembers, pastMembers }) => {
                 {pastMembers.length === 0 ? (
                   <p
                     className="text-sm tracking-widest uppercase text-center py-12"
-                    style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.15)' }}
+                    style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                   >
-                    NO ALUMNI YET — CHECK BACK NEXT SEASON
+                    NO ALUMNI YET
                   </p>
                 ) : (
                   <GroupSection

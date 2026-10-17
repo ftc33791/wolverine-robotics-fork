@@ -39,7 +39,7 @@ const Field = ({ label, type = 'text', value, onChange, required, rows }) => {
   return (
     <div>
       <label
-        className="block text-[9px] font-semibold tracking-[0.22em] uppercase mb-2"
+        className="block text-[11px] font-semibold tracking-[0.22em] uppercase mb-2"
         style={{ fontFamily: 'var(--font-mono)', color: focused ? '#FF5A1F' : 'rgba(255,255,255,0.3)' }}
       >
         {label}{required && <span style={{ color: '#FF5A1F' }}> *</span>}
@@ -94,8 +94,8 @@ const InfoCard = ({ icon: Icon, label, value, href, delay }) => (
       </div>
       <div>
         <p
-          className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-1"
-          style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+          className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-1"
+          style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
         >
           {label}
         </p>
@@ -161,7 +161,7 @@ const ContactPage = () => {
           </Reveal>
           <Reveal delay={160}>
             <p className="body-lg max-w-xl">
-              Questions? Sponsorship inquiries? Want to collaborate? We're responsive and ready to talk.
+              Have a question, a sponsorship inquiry, or an idea to work on together? Send us a message.
             </p>
           </Reveal>
         </div>
@@ -176,8 +176,8 @@ const ContactPage = () => {
             <div className="lg:col-span-4 space-y-4">
               <Reveal>
                 <p
-                  className="text-[9px] font-semibold tracking-[0.22em] uppercase mb-6"
-                  style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+                  className="text-[11px] font-semibold tracking-[0.22em] uppercase mb-6"
+                  style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                 >
                   CONTACT INFO
                 </p>
@@ -191,8 +191,8 @@ const ContactPage = () => {
               <Reveal delay={220}>
                 <div className="pt-4">
                   <p
-                    className="text-[9px] font-semibold tracking-[0.22em] uppercase mb-4"
-                    style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+                    className="text-[11px] font-semibold tracking-[0.22em] uppercase mb-4"
+                    style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                   >
                     FOLLOW US
                   </p>
@@ -208,13 +208,13 @@ const ContactPage = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={label}
-                        className="flex items-center gap-2 px-4 py-2.5 border text-[10px] font-semibold tracking-wider uppercase transition-all duration-300 hover:scale-105"
+                        className="flex items-center gap-2 px-4 py-2.5 border text-[11px] font-semibold tracking-wider uppercase transition-all duration-300 hover:scale-105"
                         style={{
                           fontFamily: 'var(--font-mono)',
                           clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)',
                           background: 'rgba(255,90,31,0.06)',
                           borderColor: 'rgba(255,90,31,0.2)',
-                          color: 'rgba(255,255,255,0.5)',
+                          color: 'rgba(255,255,255,0.72)',
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.borderColor = '#FF5A1F';
@@ -254,7 +254,7 @@ const ContactPage = () => {
                       >
                         MESSAGE SENT
                       </p>
-                      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.72)' }}>
                         We'll get back to you shortly.
                       </p>
                       <button
@@ -278,8 +278,8 @@ const ContactPage = () => {
 
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <p
-                          className="text-[10px]"
-                          style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.2)' }}
+                          className="text-[11px]"
+                          style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                         >
                           * Required fields
                         </p>

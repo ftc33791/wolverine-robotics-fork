@@ -35,9 +35,8 @@ const Footer = ({ onNavigate, navigation }) => {
                 ROBOTICS · TEAM 33791
               </p>
             </div>
-            <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              First-year FTC team from Frisco, Texas. Engineering precision.
-              Competing with conviction. Building the future.
+            <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              A first-year FTC team from Wakeland High School in Frisco, Texas.
             </p>
             <div className="flex gap-3">
               {[
@@ -78,7 +77,7 @@ const Footer = ({ onNavigate, navigation }) => {
           {/* Quick links */}
           <div className="md:col-span-3">
             <p
-              className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-5"
+              className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-5"
               style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
             >
               QUICK LINKS
@@ -91,7 +90,7 @@ const Footer = ({ onNavigate, navigation }) => {
                   className="text-left text-[13px] transition-all duration-200 hover:translate-x-1"
                   style={{
                     fontFamily: 'var(--font-mono)',
-                    color: 'rgba(255,255,255,0.35)',
+                    color: 'rgba(255,255,255,0.55)',
                     letterSpacing: '0.06em',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
@@ -106,7 +105,7 @@ const Footer = ({ onNavigate, navigation }) => {
           {/* Contact */}
           <div className="md:col-span-3">
             <p
-              className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-5"
+              className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-5"
               style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
             >
               CONTACT
@@ -120,14 +119,14 @@ const Footer = ({ onNavigate, navigation }) => {
               ].map(([label, val]) => (
                 <div key={label}>
                   <span
-                    className="text-[9px] tracking-widest"
+                    className="text-[11px] tracking-widest"
                     style={{ fontFamily: 'var(--font-mono)', color: 'var(--c-text-faint)' }}
                   >
                     {label}
                   </span>
                   <p
                     className="text-[13px]"
-                    style={{ color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-mono)' }}
+                    style={{ color: 'rgba(255,255,255,0.72)', fontFamily: 'var(--font-mono)' }}
                   >
                     {val}
                   </p>
@@ -142,10 +141,10 @@ const Footer = ({ onNavigate, navigation }) => {
           className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8"
           style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <p className="text-[11px]" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.2)' }}>
+          <p className="text-[11px]" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}>
             © 2025 Wolverine Robotics · FTC Team 33791 · All rights reserved
           </p>
-          <p className="text-[10px] text-center" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.12)' }}>
+          <p className="text-[11px] text-center" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}>
             Built by Sahejdeep Singh · Guided by Dev Gavande & Abdullah Khaled
           </p>
         </div>

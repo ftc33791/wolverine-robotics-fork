@@ -97,7 +97,7 @@ const Nav = ({ currentPage, onNavigate, navigation }) => {
                   WOLVERINE
                 </p>
                 <p
-                  className="text-[10px] tracking-[0.22em] uppercase leading-none mt-0.5"
+                  className="text-[11px] tracking-[0.22em] uppercase leading-none mt-0.5"
                   style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
                 >
                   TEAM 33791

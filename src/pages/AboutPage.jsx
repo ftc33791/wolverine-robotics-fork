@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import AngleButton from '../components/ui/AngleButton';
 import GridScan from '../components/ui/GridScan';
+import { TEAM } from '../data.js';
+
+const STUDENT_COUNT = TEAM.roster.length + TEAM.newMembers.length + TEAM.extended.length;
 
 const Reveal = ({ children, delay = 0, direction = 'up', className = '' }) => {
   const ref = useRef(null);
@@ -46,7 +49,7 @@ const ValueCard = ({ number, title, body, delay }) => (
       >
         {title}
       </h3>
-      <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+      <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
         {body}
       </p>
     </div>
@@ -86,12 +89,12 @@ const AboutPage = ({ onNavigate }) => {
           <Reveal delay={180}>
             <p
               className="text-lg leading-relaxed max-w-2xl"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
+              style={{ color: 'rgba(255,255,255,0.72)' }}
             >
-              We are Team 33791 — a first-year FIRST Tech Challenge robotics team from
-              Wakeland High School in Frisco, Texas. Twelve students. One shared
-              obsession: build a machine that proves rookies can compete at the
-              highest level of high school robotics.
+              We are Team 33791, a first-year FIRST Tech Challenge robotics team at
+              Wakeland High School in Frisco, Texas. We have {STUDENT_COUNT} students, and we want
+              to show that a rookie team can compete at the highest level of
+              high school robotics.
             </p>
           </Reveal>
         </div>
@@ -117,8 +120,8 @@ const AboutPage = ({ onNavigate }) => {
                   <div className="mt-6 flex items-center gap-3">
                     <div className="w-8 h-px" style={{ background: '#FF5A1F' }} />
                     <p
-                      className="text-[10px] tracking-widest uppercase"
-                      style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.35)' }}
+                      className="text-[11px] tracking-widest uppercase"
+                      style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                     >
                       WOLVERINE ROBOTICS MOTTO
                     </p>
@@ -144,18 +147,15 @@ const AboutPage = ({ onNavigate }) => {
               <Reveal delay={80}>
                 <div>
                   <p
-                    className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-3"
+                    className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3"
                     style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
                   >
                     THE BEGINNING
                   </p>
-                  <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    Founded in 2025, Wolverine Robotics emerged from a simple question:
-                    what happens when students who genuinely love engineering stop
-                    waiting for permission to compete? Team 33791 was built from scratch —
-                    no legacy hardware, no veteran alumni to lean on, just twelve students
-                    and a shared commitment to build something extraordinary in their
-                    first season.
+                  <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    Wolverine Robotics was founded in 2025. Team 33791 started from
+                    scratch, with no old hardware and no alumni to lean on, and set out
+                    to build something great in its first season.
                   </p>
                 </div>
               </Reveal>
@@ -163,17 +163,16 @@ const AboutPage = ({ onNavigate }) => {
               <Reveal delay={140}>
                 <div>
                   <p
-                    className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-3"
+                    className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3"
                     style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
                   >
                     THE MACHINE
                   </p>
-                  <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    MATCHSTICK is our 2025-26 competition robot — designed in CAD,
-                    stress-tested in simulation, and refined through dozens of practice
-                    matches. Every bolt placement, wire run, and motor selection was
-                    deliberate. The result is a robot that embodies the team's philosophy:
-                    build clean, build fast, build to win.
+                  <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    MATCHSTICK is our 2025-26 competition robot. We designed it in CAD,
+                    stress-tested it in simulation, and refined it over dozens of
+                    practice matches. Every bolt, wire run, and motor was a deliberate
+                    choice. It reflects how we work: build clean, build fast, build to win.
                   </p>
                 </div>
               </Reveal>
@@ -181,17 +180,16 @@ const AboutPage = ({ onNavigate }) => {
               <Reveal delay={200}>
                 <div>
                   <p
-                    className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-3"
+                    className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-3"
                     style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
                   >
                     THE MISSION
                   </p>
-                  <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    Beyond trophies, we're building engineers. Every competition is a
-                    live test of systems designed under pressure, integrated across
-                    disciplines, and operated by students who understand every component
-                    they touch. FTC is our proving ground — a place where STEM education
-                    becomes real, immediate, and consequential.
+                  <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    We care about more than trophies. Every competition tests a robot
+                    we designed under pressure, with several disciplines working
+                    together, and driven by students who understand every part they
+                    touch. For us, FTC is where STEM education becomes real.
                   </p>
                 </div>
               </Reveal>
@@ -231,33 +229,33 @@ const AboutPage = ({ onNavigate }) => {
             {[
               {
                 number: '01',
-                title: 'ENGINEERING INTEGRITY',
-                body: "Every design decision is documented, every choice is justified. We build with purpose, not assumption. If we can't explain why, we don't ship it.",
+                title: 'HONEST ENGINEERING',
+                body: "We document every design decision and justify every choice. If we can't explain why, we don't ship it.",
               },
               {
                 number: '02',
-                title: 'RELENTLESS ITERATION',
-                body: 'The first solution is never the best solution. We prototype, test, break, and rebuild until the mechanism does exactly what we need — every time.',
+                title: 'ITERATION',
+                body: 'The first solution is rarely the best one. We prototype, test, break, and rebuild until the mechanism does what we need every time.',
               },
               {
                 number: '03',
-                title: 'COLLABORATIVE EXCELLENCE',
-                body: 'No subsystem succeeds in isolation. Mechanical, software, and strategy must integrate seamlessly. We win or lose as a complete system.',
+                title: 'TEAMWORK',
+                body: 'No subsystem succeeds alone. Mechanical, software, and strategy have to work together, and we win or lose as one system.',
               },
               {
                 number: '04',
-                title: 'COMPETITION MENTALITY',
-                body: "Practice doesn't simulate competition. We train for the scenario where everything can go wrong and prepare solutions before we ever need them.",
+                title: 'COMPETITION MINDSET',
+                body: "Practice isn't the same as competition. We train for the case where everything goes wrong and prepare fixes before we need them.",
               },
               {
                 number: '05',
                 title: 'COMMUNITY IMPACT',
-                body: "We're part of a larger ecosystem. Outreach, mentorship, and STEM advocacy are not optional add-ons — they're built into what it means to be Wolverine.",
+                body: "We're part of a larger community. Outreach, mentorship, and STEM advocacy are part of what it means to be Wolverine.",
               },
               {
                 number: '06',
                 title: 'GRACIOUS PROFESSIONALISM',
-                body: "FIRST's core value isn't optional for us. How you compete matters as much as whether you win. Respect opponents, mentor rookies, celebrate the sport.",
+                body: "Gracious Professionalism is a FIRST core value, and we hold to it. How you compete matters as much as whether you win. We respect opponents, mentor rookies, and celebrate the sport.",
               },
             ].map((v, i) => (
               <ValueCard key={i} {...v} delay={i * 70} />
@@ -282,11 +280,11 @@ const AboutPage = ({ onNavigate }) => {
           </Reveal>
           <Reveal delay={140}>
             <p className="body-lg max-w-2xl mx-auto mb-10">
-              FTC challenges students to design, build, program, and operate robots
-              to compete in alliance-based head-to-head matches. Teams are judged on
+              In FTC, students design, build, program, and drive robots in
+              head-to-head matches played in alliances. Teams are judged on
               robot performance, engineering documentation, outreach, and
-              gracious professionalism — the complete engineering pipeline,
-              compressed into one school year.
+              gracious professionalism. It is the whole engineering process in
+              one school year.
             </p>
           </Reveal>
           <Reveal delay={200}>

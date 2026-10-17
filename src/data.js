@@ -148,7 +148,7 @@ export const ROBOTS = [
     embedUrl: 'https://cad.onshape.com/documents/17f03dbe502fe89245df5c8e/w/299875b13b5c5a7fb4f2fce9/e/e5a8145177c9892ee22d79c2?renderMode=0&uiState=6a3efcc36deca8d7fe72565a',
     embedUrlExploded: 'https://cad.onshape.com/documents/66f7bbd4e3c3defe039f33a2/w/9fdcf529e51f48ce7b9bb6cb/e/e31fe1c262242588d0dc90b8?renderMode=0&uiState=6a3f00dbae8c7e4546eec16b',
     description:
-      'Our debut machine for the 2025-26 FTC Decode Challenge. MATCHSTICK pairs an all-metal direct-drive mecanum chassis with a funneling ground intake, high-compression indexer, and triple-flywheel shooter for rapid, reliable artifact scoring.',
+      'Our first robot, built for the 2025-26 FTC Decode Challenge. MATCHSTICK has an all-metal direct-drive mecanum chassis, a funneling ground intake, a high-compression indexer, and a triple-flywheel shooter. Together they score artifacts quickly and reliably.',
     specs: [
       { label: 'WEIGHT',        value: '28 LBS'        },
       { label: 'HEIGHT',        value: '18 IN'         },
@@ -176,7 +176,7 @@ export const ROBOTS = [
           'Full metal chassis built from goBILDA extrusions and T-brackets for modular subsystem mounting. Direct-drive mecanum wheels eliminate belt and gear losses for higher torque efficiency. Two swingarm odometry pods integrate with the Pinpoint computer for PedroPathing autonomous positioning.',
         hardware: '4× REV HD Hex Motor · Mecanum Wheels · 2× Swingarm Odometry Pods · goBILDA Pinpoint',
         features: [
-          'Direct-drive mecanum — no belts or gears on drivetrain',
+          'Direct-drive mecanum with no belts or gears on the drivetrain',
           'All-metal COTS extrusion frame for structural integrity',
           'Modular T-bracket mounting for rapid subsystem swaps',
           'PedroPathing with Pinpoint IMU and swingarm dead wheels (1500 Hz)',
@@ -216,7 +216,7 @@ export const ROBOTS = [
           'The indexer runs on its own motor, independently from the intake and shooter, allowing precise timing and jam recovery without affecting other systems. Dual 3-inch compliant wheels provide greater contact area for consistent feed rates. High-compression geometry centers each artifact before it enters the shooter, reducing bounce and misalignment.',
         hardware: 'Independent Indexer Motor · 2× 3" Compliant Wheels',
         features: [
-          'Separate motor — independent of intake and shooter',
+          'Separate motor, independent of intake and shooter',
           'Dual 3" compliant wheels for grip and consistent feed',
           'High-compression geometry centers artifacts pre-shot',
           'Reverse or stop without affecting other subsystems',
@@ -239,7 +239,7 @@ export const ROBOTS = [
           'Closed-loop PID flywheel speed control',
           '3 artifacts fired in 0.95 seconds',
           'Dual GT2 belt drive with quadruple bearing support',
-          'Fixed hood — distance controlled by RPM, not mechanics',
+          'Fixed hood: distance is controlled by RPM, not mechanics',
           'Interpolated RPM lookup table for any-field scoring',
         ],
         metrics: [
@@ -251,27 +251,27 @@ export const ROBOTS = [
     ],
     software: {
       overview:
-        'Custom Java 17 codebase built on the FTC SDK. PedroPathing drives autonomous routines fused with goBILDA Pinpoint IMU and swingarm dead-wheel odometry. TeleOp layers field-centric driving, Limelight 3A AprilTag alignment, and an interpolated RPM lookup table — enabling clean iteration between competitions.',
+        'Custom Java 17 code on the FTC SDK. PedroPathing runs the autonomous routines using the goBILDA Pinpoint IMU and swingarm dead-wheel odometry. TeleOp adds field-centric driving, Limelight 3A AprilTag alignment, and an interpolated RPM lookup table, so we can iterate quickly between competitions.',
       features: [
         {
           title: 'DUAL AUTONOMOUS ROUTINES',
-          desc: 'Alliance-adaptive paths for close zone (12 balls, 41–45 pts) and far zone (9 balls, 38–42 pts). Multiple routines let us adapt to partner playstyle.',
+          desc: 'Alliance-adaptive paths for the close zone (12 balls, 41–45 pts) and the far zone (9 balls, 38–42 pts). Having more than one routine lets us adapt to different partner playstyles.',
         },
         {
           title: 'PEDROPATHING + PINPOINT ODOMETRY',
-          desc: 'Switched from unreliable encoder-only pathing to PedroPathing. Pinpoint IMU and swingarm dead wheels fused at 1500 Hz for precise autonomous positioning.',
+          desc: 'We switched from unreliable encoder-only pathing to PedroPathing. The Pinpoint IMU and swingarm dead wheels are fused at 1500 Hz for precise autonomous positioning.',
         },
         {
           title: 'LIMELIGHT 3A AUTO-ALIGN',
-          desc: 'Closed-loop AprilTag tracking with a custom distance-offset algorithm. Alignment accuracy improved from 48% to 92%, with a 70% gain in far-zone scoring.',
+          desc: 'Closed-loop AprilTag tracking with a custom distance-offset algorithm. Alignment accuracy improved from 48% to 92%, and far-zone scoring improved by 70%.',
         },
         {
           title: 'FIELD-CENTRIC ONE-CONTROLLER TELEOP',
-          desc: 'Single-driver layout eliminates operator communication overhead. Field-centric drive powered by the Pinpoint IMU, adopted for Meet 3 and beyond.',
+          desc: 'One driver controls the whole robot, so there is no operator communication to manage. Field-centric drive uses the Pinpoint IMU and has been in place since Meet 3.',
         },
         {
           title: 'VELOCITY LOOKUP TABLE + PID FLYWHEEL',
-          desc: 'Interpolated RPM-by-distance table cut scoring cycles from 6.5s to 3.8s (41.5% faster). Closed-loop PID fires all three artifacts in 0.95 seconds.',
+          desc: 'An interpolated RPM-by-distance table cut scoring cycles from 6.5s to 3.8s (41.5% faster). Closed-loop PID fires all three artifacts in 0.95 seconds.',
         },
       ],
     },
@@ -298,7 +298,7 @@ export const ROBOTS = [
 // ─────────────────────────────────────────────────────────────────────────────
 export const HOME_HIGHLIGHTS = {
   statBar: [
-    { num: 12, suffix: '', label: 'TEAM MEMBERS' },
+    { num: 20, suffix: '', label: 'TEAM MEMBERS' },
     { num: 28, suffix: ' LBS', label: 'ROBOT WEIGHT' },
     { num: 0.95, suffix: 'S', label: '3-SHOT BURST', decimals: 2 },
     { num: 2, suffix: 'X', label: 'CONTROL AWARD' },

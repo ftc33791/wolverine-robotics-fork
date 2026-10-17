@@ -37,8 +37,8 @@ const SpecRow = ({ label, value, delay }) => (
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
     >
       <span
-        className="text-[10px] font-semibold tracking-[0.2em] uppercase"
-        style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.3)' }}
+        className="text-[11px] font-semibold tracking-[0.2em] uppercase"
+        style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
       >
         {label}
       </span>
@@ -72,7 +72,7 @@ const SubsystemCard = ({ subsystem, isActive, onClick }) => (
     <div className="flex items-center gap-3 mb-2">
       <span style={{ fontSize: 18 }}>{subsystem.icon}</span>
       <p
-        className="text-[10px] font-semibold tracking-[0.18em] uppercase"
+        className="text-[11px] font-semibold tracking-[0.18em] uppercase"
         style={{
           fontFamily: 'var(--font-mono)',
           color: isActive ? '#FF5A1F' : 'rgba(255,255,255,0.4)',
@@ -83,7 +83,7 @@ const SubsystemCard = ({ subsystem, isActive, onClick }) => (
     </div>
     <p
       className="text-[12px] leading-relaxed"
-      style={{ color: isActive ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.3)' }}
+      style={{ color: isActive ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)' }}
     >
       {subsystem.brief}
     </p>
@@ -123,7 +123,7 @@ const SeasonTab = ({ robot, isActive, onClick }) => (
     }}
   >
     <p
-      className="text-[10px] tracking-[0.2em] uppercase font-semibold"
+      className="text-[11px] tracking-[0.2em] uppercase font-semibold"
       style={{ fontFamily: 'var(--font-mono)', color: isActive ? '#FF5A1F' : 'rgba(255,255,255,0.3)' }}
     >
       {robot.season}
@@ -215,7 +215,7 @@ const RobotsPage = ({ robots }) => {
                     <button
                       key={mode}
                       onClick={() => setViewMode(mode)}
-                      className="px-4 py-2 text-[9px] font-semibold tracking-widest uppercase border transition-all duration-300"
+                      className="px-4 py-2 text-[11px] font-semibold tracking-widest uppercase border transition-all duration-300"
                       style={{
                         fontFamily: 'var(--font-mono)',
                         clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)',
@@ -248,7 +248,7 @@ const RobotsPage = ({ robots }) => {
                       style={{ background: '#FF5A1F', animation: 'pulse-glow 2s infinite' }}
                     />
                     <span
-                      className="text-[9px] tracking-widest uppercase"
+                      className="text-[11px] tracking-widest uppercase"
                       style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,90,31,0.7)' }}
                     >
                       {robot.name} · {robot.season}
@@ -256,8 +256,8 @@ const RobotsPage = ({ robots }) => {
                   </div>
                   <div className="absolute top-3 right-3 z-10">
                     <span
-                      className="text-[8px] tracking-widest uppercase"
-                      style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.2)' }}
+                      className="text-[11px] tracking-widest uppercase"
+                      style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                     >
                       {viewMode === 'exploded' ? 'EXPLODED VIEW' : '3D RENDER'}
                     </span>
@@ -302,7 +302,7 @@ const RobotsPage = ({ robots }) => {
 
               {/* Description */}
               <Reveal delay={140}>
-                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
                   {robot.description}
                 </p>
               </Reveal>
@@ -327,8 +327,8 @@ const RobotsPage = ({ robots }) => {
                 <div>
                   <Reveal delay={320}>
                     <p
-                      className="text-[9px] font-semibold tracking-[0.22em] uppercase mb-3"
-                      style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.25)' }}
+                      className="text-[11px] font-semibold tracking-[0.22em] uppercase mb-3"
+                      style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                     >
                       ACHIEVEMENTS
                     </p>
@@ -400,7 +400,7 @@ const RobotsPage = ({ robots }) => {
                           {sub.hardware && (
                             <p
                               className="text-[11px] mt-1"
-                              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.3)' }}
+                              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                             >
                               {sub.hardware}
                             </p>
@@ -424,7 +424,7 @@ const RobotsPage = ({ robots }) => {
                               />
                               <p
                                 className="text-[12px] leading-snug"
-                                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.45)' }}
+                                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.72)' }}
                               >
                                 {f}
                               </p>
@@ -454,8 +454,8 @@ const RobotsPage = ({ robots }) => {
                               {m.value}
                             </p>
                             <p
-                              className="text-[9px] tracking-widest uppercase mt-1"
-                              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.3)' }}
+                              className="text-[11px] tracking-widest uppercase mt-1"
+                              style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}
                             >
                               {m.label}
                             </p>
@@ -487,7 +487,7 @@ const RobotsPage = ({ robots }) => {
                 <h2 className="display-lg text-white mt-3 mb-6">SOFTWARE</h2>
               </Reveal>
               <Reveal delay={140}>
-                <p className="text-sm leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <p className="text-sm leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.72)' }}>
                   {robot.software?.overview || 'Custom Java 17 codebase built on the FTC SDK. Modular architecture separates hardware abstraction, autonomous routines, and driver-control logic for clean iteration between competitions.'}
                 </p>
               </Reveal>
@@ -512,7 +512,7 @@ const RobotsPage = ({ robots }) => {
                           >
                             {f.title}
                           </p>
-                          <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
                             {f.desc}
                           </p>
                         </div>
@@ -539,16 +539,16 @@ const RobotsPage = ({ robots }) => {
                   ))}
                 </div>
                 <div className="mt-6">
-                  <p style={{ color: 'rgba(255,255,255,0.2)' }}>// MATCHSTICK TeleOp — field-centric scoring</p>
+                  <p style={{ color: 'rgba(255,255,255,0.55)' }}>// MATCHSTICK TeleOp — field-centric scoring</p>
                   <p className="mt-2"><span style={{ color: '#FF5A1F' }}>public void</span> <span style={{ color: '#60a5fa' }}>runOpMode</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>()</span> {'{'}</p>
                   <p className="pl-4"><span style={{ color: '#FF5A1F' }}>waitForStart</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>();</span></p>
-                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.2)' }}>// Init pathing + drive</span></p>
+                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.55)' }}>// Init pathing + drive</span></p>
                   <p className="pl-4"><span style={{ color: '#a78bfa' }}>follower</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>setStartingPose</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(startPose);</span></p>
                   <p className="pl-4"><span style={{ color: '#a78bfa' }}>drivetrain</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>setFieldCentric</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(</span><span style={{ color: '#34d399' }}>true</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>);</span></p>
-                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.2)' }}>// Score from anywhere</span></p>
+                  <p className="pl-4 mt-1"><span style={{ color: 'rgba(255,255,255,0.55)' }}>// Score from anywhere</span></p>
                   <p className="pl-4"><span style={{ color: '#a78bfa' }}>shooter</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>setTargetRpm</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(</span><span style={{ color: '#a78bfa' }}>lookupTable</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>.</span><span style={{ color: '#60a5fa' }}>getRpm</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>(distance));</span></p>
                   <p className="mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>{'}'}</p>
-                  <p className="mt-4" style={{ color: 'rgba(255,255,255,0.2)' }}>// Cycle time target: 3.8s (lookup-table optimized)</p>
+                  <p className="mt-4" style={{ color: 'rgba(255,255,255,0.55)' }}>// Cycle time target: 3.8s (lookup-table optimized)</p>
                   <p><span style={{ color: '#FF5A1F' }}>static final double</span> <span style={{ color: '#fbbf24' }}>TARGET_CYCLE</span> <span style={{ color: 'rgba(255,255,255,0.6)' }}>= </span><span style={{ color: '#34d399' }}>3.8</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>;</span></p>
                 </div>
               </div>
