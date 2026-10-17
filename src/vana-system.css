@@ -1,0 +1,254 @@
+/* ─── Redesign 2026-10-17 ─────────────────────────────────────────────────
+   Layout, type scale, spacing and colour system follow the structure of
+   Vana (Awwwards SOTD, vana.com), rebuilt here in our own CSS: warm paper
+   page, giant tight headline over a saturated blue field, tall tinted
+   door cards, mono labels, photo cards. Blue field = blueprint theme.     */
+
+:root {
+  --paper:    #fcfcfa;
+  --ink:      #111111;
+  --ink-dim:  #4b4b52;
+  --ink-faint:#6d6d76;
+  --rule:     #e4e3dc;
+  --blue:     #1f3bf0;
+  --blue-deep:#0f1fb0;
+  --blue-ink: #0a1470;
+  --tint-cream:  #f3efe3;
+  --tint-blue:   #d9dcff;
+  --tint-peach:  #f2d9c3;
+  --tint-yellow: #fbf0b4;
+  --radius: 9px;
+  --font-display: 'Tomorrow', system-ui, sans-serif;
+  --font-body:    'Red Hat Text', system-ui, sans-serif;
+  --font-mono:    'Martian Mono', ui-monospace, Consolas, monospace;
+  --c-orange: #1f3bf0;
+}
+
+/* No hyphenation or mid-word wrapping, anywhere. */
+html, body, #root, #root * {
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--paper); color: var(--ink); }
+#root { text-align: center; }
+#root h1, #root h2, #root h3, #root p { text-wrap: balance; }
+.scouting-page { text-align: left; background: #0a1628; color: #e8edf3; }
+.scouting-page * { text-wrap: wrap; }
+.noise::before { display: none; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(1.25rem, 5vw, 2.5rem); }
+.wrap-narrow { max-width: 760px; margin: 0 auto; padding: 0 clamp(1.25rem, 5vw, 2.5rem); }
+.v-section { padding: clamp(4rem, 9vw, 7rem) 0; }
+
+/* ─── Type ─────────────────────────────────────────────────────────────── */
+.v-mono {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.v-h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 10.5vw, 6.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+.v-h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2rem, 6.2vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+}
+.v-h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.375rem; line-height: 1.2; letter-spacing: -0.02em; }
+.v-lead { font-size: clamp(1.125rem, 2.4vw, 1.5rem); line-height: 1.35; color: var(--ink-dim); letter-spacing: -0.01em; }
+.v-body { font-size: 1.0625rem; line-height: 1.6; color: var(--ink-dim); }
+.v-dim { color: var(--ink-faint); }
+
+/* ─── Header ───────────────────────────────────────────────────────────── */
+.v-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(252, 252, 250, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+.v-nav-in { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 1.5rem; }
+@media (min-width: 900px) { .v-nav-in { justify-content: center; gap: 2.5rem; } }
+.v-logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; letter-spacing: -0.02em; font-size: 1.05rem; }
+.v-logo small { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 0.65rem; letter-spacing: 0.08em; color: var(--ink-faint); text-align: left; }
+.v-links { display: none; gap: 0.25rem; align-items: center; }
+@media (min-width: 900px) { .v-links { display: flex; } }
+.v-link { padding: 0.5rem 0.75rem; font-size: 0.94rem; color: var(--ink); border-radius: 6px; transition: background .2s; }
+.v-link:hover { background: rgba(0,0,0,0.05); }
+.v-link[aria-current="page"] { background: var(--tint-blue); }
+
+/* ─── Buttons ──────────────────────────────────────────────────────────── */
+.v-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.7rem 1.15rem; border-radius: var(--radius);
+  font-size: 0.95rem; font-weight: 500; letter-spacing: -0.01em;
+  background: var(--blue); color: #fff; cursor: pointer;
+  border: 1px solid var(--blue);
+  transition: transform .2s, background .2s;
+}
+.v-btn:hover { background: var(--blue-deep); transform: translateY(-1px); }
+.v-btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.v-btn-ghost:hover { background: var(--ink); color: #fff; }
+.v-btn-on-blue { background: #fff; color: var(--blue); border-color: #fff; }
+.v-btn-on-blue:hover { background: var(--tint-blue); }
+.v-btn-line { background: transparent; color: #fff; border-color: rgba(255,255,255,0.6); }
+.v-btn-line:hover { background: rgba(255,255,255,0.12); }
+
+/* ─── Blue blueprint field (hero + CTA bands) ──────────────────────────── */
+.bp-field {
+  position: relative; overflow: hidden; color: #fff;
+  background:
+    radial-gradient(900px 600px at 80% 0%, #3b57ff 0%, transparent 60%),
+    radial-gradient(800px 600px at 0% 100%, #1a2fd0 0%, transparent 60%),
+    linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);
+}
+.bp-field > .bp-content { position: relative; z-index: 2; }
+.bp-field .v-lead, .bp-field .v-body { color: rgba(255,255,255,0.86); }
+.bp-fx { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.bp-grid { position: absolute; left: -240px; top: -240px; right: -240px; bottom: -240px; will-change: transform; }
+.bp-grid-minor {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  animation: bp-drift 90s linear infinite;
+}
+.bp-grid-major {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+  background-size: 120px 120px;
+  animation: bp-drift 90s linear infinite;
+}
+@keyframes bp-drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-120px,-120px,0); } }
+.bp-lines { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.28; }
+.bp-spin-a { animation: bp-rot 240s linear infinite; }
+.bp-spin-b { animation: bp-rot 300s linear infinite reverse; }
+@keyframes bp-rot { to { transform: rotate(360deg); } }
+.bp-draw, .bp-pulse { animation: bp-breathe 12s ease-in-out infinite; }
+@keyframes bp-breathe { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+.bp-grain {
+  position: absolute; inset: 0; opacity: 0.16; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─── Door tiles (4 tall tinted cards) ─────────────────────────────────── */
+.v-tiles {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-radius: 14px; overflow: hidden; border: 1px solid var(--rule);
+}
+@media (max-width: 899px) { .v-tiles { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 539px) { .v-tiles { grid-template-columns: 1fr; } }
+.v-tile {
+  display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+  min-height: 420px; padding: 1.5rem; text-align: center; color: var(--ink);
+  transition: filter .25s;
+}
+.v-tile:hover { filter: brightness(0.97); }
+@media (max-width: 539px) { .v-tile { min-height: 260px; } }
+.v-tile .top { width: 100%; display: flex; justify-content: space-between; }
+.v-tile .link { margin-top: 1.25rem; font-family: var(--font-mono); font-size: 0.74rem; }
+.t-cream { background: var(--tint-cream); } .t-blue { background: var(--tint-blue); }
+.t-peach { background: var(--tint-peach); } .t-yellow { background: var(--tint-yellow); }
+
+/* ─── Cards, panels, photos ────────────────────────────────────────────── */
+.v-card {
+  background: #fff; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+}
+.v-card .body { padding: 1.1rem 1.25rem 1.4rem; }
+.v-grid { display: grid; gap: 1.25rem; }
+.v-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.v-grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 899px) { .v-grid-3, .v-grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 539px) { .v-grid-3, .v-grid-4 { grid-template-columns: 1fr; } }
+.v-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.v-ratio-43 { aspect-ratio: 4 / 3; overflow: hidden; background: var(--tint-cream); }
+.v-ratio-sq { aspect-ratio: 1 / 1; overflow: hidden; background: var(--tint-cream); }
+.v-ratio-34 { aspect-ratio: 3 / 4; overflow: hidden; background: var(--tint-cream); }
+.v-stat { font-family: var(--font-display); font-weight: 500; font-size: clamp(2.2rem, 6.5vw, 4rem); letter-spacing: -0.03em; line-height: 1; }
+.v-chip { display: inline-flex; align-items: center; gap: .5rem; padding: .45rem .85rem; border: 1px solid var(--rule); border-radius: 999px; background: #fff; font-family: var(--font-mono); font-size: .78rem; }
+.v-cad {
+  border: 1.5px dashed var(--blue); border-radius: 14px; background: rgba(31,59,240,0.04);
+  min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; padding: 2rem;
+}
+.v-footer { border-top: 1px solid var(--rule); padding: 4rem 0 2.5rem; background: var(--paper); }
+.v-footer .col a, .v-footer .col button { display: block; padding: .3rem 0; color: var(--ink); font-size: .95rem; margin: 0 auto; }
+.v-footer .col a:hover, .v-footer .col button:hover { color: var(--blue); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-grid, .bp-spin-a, .bp-spin-b, .bp-draw, .bp-pulse { animation: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* ═══ Addendum 5 (dad, 10-17: "its a lot of white"): blueprint blue throughout.
+   White is for type, linework and small accents only. These rules come last
+   and override the paper-and-tint tokens above. ═══════════════════════════ */
+:root {
+  --paper:    #0c24cf;
+  --ink:      #ffffff;
+  --ink-dim:  rgba(255, 255, 255, 0.86);
+  --ink-faint:rgba(255, 255, 255, 0.68);
+  --rule:     rgba(255, 255, 255, 0.24);
+  --accent:   #c3cfff;
+  --tint-cream:  rgba(255, 255, 255, 0.06);
+  --tint-blue:   rgba(255, 255, 255, 0.13);
+  --tint-peach:  rgba(3, 10, 110, 0.32);
+  --tint-yellow: rgba(3, 10, 110, 0.5);
+}
+html, body { background: #0a1fb8; }
+.bp-page {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  background:
+    radial-gradient(1100px 760px at 78% 6%, #3a56ff 0%, transparent 60%),
+    radial-gradient(900px 700px at 4% 96%, #1630dc 0%, transparent 58%),
+    linear-gradient(180deg, #0f2ae0 0%, #0a1cae 100%);
+}
+#root > div { position: relative; z-index: 1; }
+.scouting-page { position: relative; z-index: 1; }
+
+.v-nav { background: rgba(10, 28, 174, 0.82); border-bottom-color: var(--rule); }
+.v-logo small { color: var(--ink-faint); }
+.v-link:hover { background: rgba(255, 255, 255, 0.1); }
+.v-link[aria-current="page"] { background: rgba(255, 255, 255, 0.18); }
+
+.v-btn { background: #fff; color: #0a1cae; border-color: #fff; }
+.v-btn:hover { background: #dfe5ff; }
+.v-btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.7); }
+.v-btn-ghost:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+.v-btn-on-blue { background: #fff; color: #0a1cae; border-color: #fff; }
+.v-btn-line { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.7); }
+
+.bp-field {
+  background: linear-gradient(180deg, rgba(40, 70, 255, 0.28) 0%, rgba(10, 28, 174, 0.1) 100%);
+}
+.v-section { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+
+.v-tiles { border-color: var(--rule); backdrop-filter: blur(2px); }
+.v-tile { color: #fff; border-right: 1px solid var(--rule); }
+.v-tile:last-child { border-right: 0; }
+.v-tile:hover { filter: none; background-color: rgba(255, 255, 255, 0.16); }
+.v-card { background: rgba(4, 14, 120, 0.45); border-color: var(--rule); box-shadow: none; backdrop-filter: blur(4px); }
+.v-chip { background: rgba(255, 255, 255, 0.08); border-color: var(--rule); color: #fff; }
+.v-ratio-43, .v-ratio-sq, .v-ratio-34 { background: rgba(255, 255, 255, 0.08); }
+.v-cad { border-color: rgba(255, 255, 255, 0.65); background: rgba(255, 255, 255, 0.05); }
+.v-cad .v-mono { color: var(--accent) !important; }
+.v-footer { background: rgba(4, 14, 120, 0.72); border-top-color: var(--rule); }
+.v-footer .col a:hover, .v-footer .col button:hover { color: var(--accent); }
+.bg-white { background: rgba(4, 14, 120, 0.45) !important; }
+.scouting-page .v-btn { background: transparent; }
+
+.v-tiles-3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 899px) { .v-tiles-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 539px) { .v-tiles-3 { grid-template-columns: 1fr; } }
+@media (max-width: 899px) { .v-tile { border-bottom: 1px solid var(--rule); } }

@@ -27,8 +27,8 @@ export default {
         faint:   '#3D526A',
       },
       fontFamily: {
-        display: ['Inter', 'SF Pro Display', 'system-ui', '-apple-system', 'sans-serif'],
-        mono:    ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+        display: ['Tomorrow', 'system-ui', 'sans-serif'],
+        mono:    ['Martian Mono', 'Consolas', 'monospace'],
       },
       transitionTimingFunction: {
         'out-expo':    'cubic-bezier(0.16, 1, 0.3, 1)',

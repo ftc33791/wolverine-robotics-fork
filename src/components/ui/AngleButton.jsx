@@ -68,7 +68,7 @@ const AngleButton = ({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={[
-        'relative inline-flex items-center gap-2.5 border',
+        'relative inline-flex items-center justify-center gap-2.5 border',
         'font-mono font-semibold tracking-widest uppercase',
         'transition-all duration-300',
         'clip-chamfer-sm overflow-hidden',

@@ -19,6 +19,7 @@ export const NAVIGATION = [
   { name: 'ABOUT',   id: 'about'    },
   { name: 'TEAM',    id: 'team'     },
   { name: 'ROBOTS',  id: 'robots'   },
+  { name: 'GALLERY', id: 'gallery'  },
   { name: 'SPONSORS',id: 'sponsors' },
   { name: 'CONTACT', id: 'contact'  },
   { name: 'SCOUTING',id: 'scouting' },

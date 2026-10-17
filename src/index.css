@@ -16,8 +16,8 @@
   --c-text:          #E8EDF3;
   --c-text-dim:      #93A6BB;
   --c-text-faint:    #3D526A;
-  --font-display:    'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
-  --font-mono:       'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-display:    'Tomorrow', system-ui, sans-serif;
+  --font-mono:       'Martian Mono', 'Consolas', monospace;
   --ease-out-expo:   cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-cinematic:  cubic-bezier(0.4, 0, 0.2, 1);

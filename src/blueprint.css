@@ -1,0 +1,140 @@
+/* ─── Blueprint theme (redesign 2026-10-17) ───────────────────────────────
+   One fixed backdrop behind every page, centred layout, no word breaks.   */
+
+:root {
+  --bp-blue:        #0b2a7c;
+  --bp-blue-deep:   #061a55;
+  --bp-ink:         #04123f;
+  --bp-line:        rgba(255, 255, 255, 0.16);
+  --bp-line-soft:   rgba(255, 255, 255, 0.07);
+  --bp-panel:       rgba(4, 18, 70, 0.62);
+  --bp-panel-solid: #061a55;
+  --c-orange:       #FF6A2B;
+  --font-display:   'Space Grotesk', 'Instrument Sans', system-ui, sans-serif;
+  --font-body:      'Instrument Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:      'IBM Plex Mono', 'JetBrains Mono', Consolas, monospace;
+}
+
+/* No hyphenation or mid-word wrapping, anywhere. */
+html, body, #root, #root * {
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  line-break: auto;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bp-blue-deep);
+  color: #fff;
+}
+
+/* Everything centred. */
+#root { text-align: center; }
+#root h1, #root h2, #root h3, #root p, #root label { text-wrap: balance; }
+#root p { margin-left: auto; margin-right: auto; }
+#root .flex.flex-wrap { justify-content: center; }
+.scouting-page { text-align: left; }
+.scouting-page * { text-wrap: wrap; }
+
+/* ─── Backdrop ─────────────────────────────────────────────────────────── */
+.bp-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 800px at 70% 10%, #1238a8 0%, transparent 60%),
+    radial-gradient(1000px 700px at 10% 90%, #0d2f94 0%, transparent 55%),
+    linear-gradient(180deg, var(--bp-blue) 0%, var(--bp-blue-deep) 100%);
+}
+#root > div { position: relative; z-index: 1; }
+nav { z-index: 200; }
+
+.bp-grid {
+  position: absolute;
+  left: -240px; top: -240px; right: -240px; bottom: -240px;
+  will-change: transform;
+}
+.bp-grid-minor {
+  background-image:
+    linear-gradient(var(--bp-line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-line-soft) 1px, transparent 1px);
+  background-size: 24px 24px;
+  animation: bp-drift 90s linear infinite;
+}
+.bp-grid-major {
+  background-image:
+    linear-gradient(var(--bp-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-line) 1px, transparent 1px);
+  background-size: 120px 120px;
+  animation: bp-drift 90s linear infinite;
+}
+@keyframes bp-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-120px, -120px, 0); }
+}
+
+.bp-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
+}
+.bp-spin-a { animation: bp-rot 240s linear infinite; }
+.bp-spin-b { animation: bp-rot 300s linear infinite reverse; }
+@keyframes bp-rot { to { transform: rotate(360deg); } }
+.bp-draw { animation: bp-breathe 14s ease-in-out infinite; }
+.bp-pulse { animation: bp-breathe 9s ease-in-out infinite; }
+@keyframes bp-breathe {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+.bp-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.bp-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 80% at 50% 40%, transparent 40%, rgba(3, 12, 45, 0.55) 100%);
+}
+
+/* The old per-page noise overlay is replaced by the backdrop grain. */
+.noise::before { display: none; }
+
+/* ─── Type ─────────────────────────────────────────────────────────────── */
+.display-hero, .display-xl, .display-lg {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  white-space: normal;
+}
+/* Single words must fit a 360 px phone without breaking. */
+.display-hero { font-size: clamp(2.25rem, 11.5vw, 9rem); line-height: 0.95; }
+.display-xl   { font-size: clamp(2rem, 9.5vw, 6.5rem);   line-height: 0.98; }
+.display-lg   { font-size: clamp(1.75rem, 7vw, 3.75rem); line-height: 1.02; }
+
+.label-caps, .stat-label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+}
+.body-lg { color: rgba(255, 255, 255, 0.82); }
+
+/* Panels sit on the blueprint as dark glass with a drafting-line border. */
+.glass-card, .bp-panel {
+  background: var(--bp-panel);
+  border: 1px solid var(--bp-line);
+  backdrop-filter: blur(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-grid, .bp-spin-a, .bp-spin-b, .bp-draw, .bp-pulse { animation: none !important; }
+}

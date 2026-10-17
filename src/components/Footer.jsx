@@ -1,156 +1,42 @@
 import React from 'react';
-import { Github, Linkedin, Instagram } from 'lucide-react';
 
-const Footer = ({ onNavigate, navigation }) => {
-  return (
-    <footer
-      style={{
-        background: '#061020',
-        borderTop: '1px solid rgba(255,90,31,0.12)',
-      }}
-    >
-      {/* Top accent line */}
-      <div
-        className="w-full h-px"
-        style={{
-          background: 'linear-gradient(90deg, transparent, rgba(255,90,31,0.5) 30%, rgba(255,90,31,0.5) 70%, transparent)',
-        }}
-      />
+const SOCIAL = [
+  ['GitHub', 'https://github.com/wolverine-robotics'],
+  ['LinkedIn', 'https://www.linkedin.com/company/wolverine-robotics/'],
+  ['Instagram', 'https://www.instagram.com/wolverine_robotics_ftc33791/'],
+];
 
-      <div className="container-wide py-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-14">
-          {/* Brand */}
-          <div className="md:col-span-4">
-            <div className="mb-6">
-              <p
-                className="text-white font-black text-xl uppercase tracking-widest leading-none"
-                style={{ fontFamily: 'var(--font-display)' }}
-              >
-                WOLVERINE
-              </p>
-              <p
-                className="text-[11px] tracking-[0.2em] uppercase mt-1"
-                style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
-              >
-                ROBOTICS · TEAM 33791
-              </p>
-            </div>
-            <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              A first-year FTC team from Wakeland High School in Frisco, Texas.
-            </p>
-            <div className="flex gap-3">
-              {[
-                [Github, 'https://github.com/wolverine-robotics', 'GitHub'],
-                [Linkedin, 'https://www.linkedin.com/company/wolverine-robotics/', 'LinkedIn'],
-                [Instagram, 'https://www.instagram.com/wolverine_robotics/', 'Instagram'],
-              ].map(([Icon, href, label], i) => (
-                <a
-                  key={i}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="w-9 h-9 flex items-center justify-center border transition-all duration-300 hover:scale-110"
-                  style={{
-                    clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)',
-                    background: 'rgba(255,90,31,0.08)',
-                    borderColor: 'rgba(255,90,31,0.25)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,90,31,0.2)';
-                    e.currentTarget.style.borderColor = '#FF5A1F';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,90,31,0.08)';
-                    e.currentTarget.style.borderColor = 'rgba(255,90,31,0.25)';
-                  }}
-                >
-                  <Icon size={15} color="#FF5A1F" />
-                </a>
-              ))}
-            </div>
-          </div>
+const Footer = ({ onNavigate, navigation }) => (
+  <footer className="v-footer">
+    <div className="wrap">
+      <p className="v-h3">Wolverine Robotics</p>
+      <p className="v-body mt-2">A first-year FTC team from Wakeland High School in Frisco, Texas.</p>
 
-          {/* Spacer */}
-          <div className="md:col-span-2" />
-
-          {/* Quick links */}
-          <div className="md:col-span-3">
-            <p
-              className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-5"
-              style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
-            >
-              QUICK LINKS
-            </p>
-            <div className="flex flex-col gap-3">
-              {navigation.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.id)}
-                  className="text-left text-[13px] transition-all duration-200 hover:translate-x-1"
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    color: 'rgba(255,255,255,0.55)',
-                    letterSpacing: '0.06em',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.35)')}
-                >
-                  {item.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Contact */}
-          <div className="md:col-span-3">
-            <p
-              className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-5"
-              style={{ fontFamily: 'var(--font-mono)', color: '#FF5A1F' }}
-            >
-              CONTACT
-            </p>
-            <div className="flex flex-col gap-2">
-              {[
-                ['EMAIL', 'ftc33791@gmail.com'],
-                ['LOCATION', 'Frisco, Texas'],
-                ['SCHOOL', 'Wakeland High School'],
-                ['SEASON', '2025-26 Decode'],
-              ].map(([label, val]) => (
-                <div key={label}>
-                  <span
-                    className="text-[11px] tracking-widest"
-                    style={{ fontFamily: 'var(--font-mono)', color: 'var(--c-text-faint)' }}
-                  >
-                    {label}
-                  </span>
-                  <p
-                    className="text-[13px]"
-                    style={{ color: 'rgba(255,255,255,0.72)', fontFamily: 'var(--font-mono)' }}
-                  >
-                    {val}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-8 sm:grid-cols-3">
+        <div className="col">
+          <p className="v-mono v-dim mb-2">EXPLORE</p>
+          {navigation.map((item) => (
+            <button key={item.id} onClick={() => onNavigate(item.id)}>{item.name.charAt(0) + item.name.slice(1).toLowerCase()}</button>
+          ))}
         </div>
-
-        {/* Bottom bar */}
-        <div
-          className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <p className="text-[11px]" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}>
-            © 2025 Wolverine Robotics · FTC Team 33791 · All rights reserved
-          </p>
-          <p className="text-[11px] text-center" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.55)' }}>
-            Built by Sahejdeep Singh · Guided by Dev Gavande & Abdullah Khaled
-          </p>
+        <div className="col">
+          <p className="v-mono v-dim mb-2">FIND US</p>
+          {SOCIAL.map(([l, h]) => <a key={l} href={h} target="_blank" rel="noopener noreferrer">{l}</a>)}
+        </div>
+        <div className="col col-span-2 sm:col-span-1">
+          <p className="v-mono v-dim mb-2">CONTACT</p>
+          <a href="mailto:ftc33791@gmail.com">ftc33791@gmail.com</a>
+          <p className="v-body" style={{ fontSize: '.95rem' }}>Frisco, Texas</p>
+          <p className="v-body" style={{ fontSize: '.95rem' }}>2025-26 Decode</p>
         </div>
       </div>
-    </footer>
-  );
-};
+
+      <div className="mt-12 border-t pt-6" style={{ borderColor: 'var(--rule)' }}>
+        <p className="v-mono v-dim">© 2025 Wolverine Robotics · FTC Team 33791 · All rights reserved</p>
+        <p className="v-mono v-dim mt-2" style={{ opacity: 0.8 }}>Built by Sahejdeep Singh · Guided by Dev Gavande &amp; Abdullah Khaled</p>
+      </div>
+    </div>
+  </footer>
+);
 
 export default Footer;

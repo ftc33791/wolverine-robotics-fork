@@ -16,6 +16,7 @@ import { NAVIGATION, TEAM, PAST_MEMBERS, ROBOTS, SPONSORS } from './data.js';
 // ── UI Shell ──────────────────────────────────────────────────────
 import Nav from './components/Nav.jsx';
 import Footer from './components/Footer.jsx';
+import BlueprintBackground from './components/BlueprintBackground.jsx';
 
 // ── Pages ─────────────────────────────────────────────────────────
 import HomePage     from './pages/HomePage.jsx';
@@ -24,6 +25,7 @@ import TeamPage     from './pages/TeamPage.jsx';
 import RobotsPage   from './pages/RobotsPage.jsx';
 import SponsorsPage from './pages/SponsorsPage.jsx';
 import ContactPage  from './pages/ContactPage.jsx';
+import GalleryPage  from './pages/GalleryPage.jsx';
 
 // ── Scouting CSS ──────────────────────────────────────────────────
 import './Scouting.css';
@@ -560,7 +562,7 @@ function ScoutingPage() {
 // ROOT APP
 // ─────────────────────────────────────────────────────────────────────────────
 // Valid page ids <-> URL paths (e.g. 'about' <-> '/about', 'home' <-> '/')
-const VALID_PAGES = ['home', 'about', 'team', 'robots', 'sponsors', 'contact', 'scouting'];
+const VALID_PAGES = ['home', 'about', 'team', 'robots', 'gallery', 'sponsors', 'contact', 'scouting'];
 
 const pageFromPath = (pathname) => {
   const slug = pathname.replace(/^\/+/, '').replace(/\/+$/, '').toLowerCase();
@@ -607,6 +609,7 @@ const App = () => {
       case 'robots':   return <RobotsPage   robots={ROBOTS} />;
       case 'sponsors': return <SponsorsPage sponsors={SPONSORS} onNavigate={navigate} />;
       case 'contact':  return <ContactPage  />;
+      case 'gallery':  return <GalleryPage  />;
       case 'scouting': return <ScoutingPage />;
       default:         return <HomePage     onNavigate={navigate} teamMembers={TEAM} />;
     }
@@ -616,6 +619,7 @@ const App = () => {
 
   return (
     <>
+      <div className="bp-page"><BlueprintBackground /></div>
       <Nav
         currentPage={currentPage}
         onNavigate={navigate}
