@@ -39,8 +39,8 @@ const SponsorCard = ({ sponsor }) => {
           ? <img src={sponsor.image} alt={sponsor.name} className="max-h-full max-w-full object-contain" onError={() => setErr(true)} />
           : <p className="v-h3">{sponsor.name}</p>}
       </div>
-      <p className="mt-3 text-[15px] font-medium">{sponsor.name}</p>
-      {sponsor.description && <p className="v-body mt-1" style={{ fontSize: '.85rem' }}>{sponsor.description}</p>}
+      <p className="mt-3 text-[0.9375rem] font-medium">{sponsor.name}</p>
+      {sponsor.description && <p className="v-body mt-1" style={{ fontSize: '.95rem' }}>{sponsor.description}</p>}
     </div></Card>
   );
 };
@@ -85,7 +85,7 @@ const SponsorsPage = ({ sponsors }) => (
           <Reveal key={l}><Card className="h-full"><div className="body !pt-6">
             <p className="v-stat" style={{ color: 'var(--accent)' }}>{n}</p>
             <p className="v-mono mt-3">{l}</p>
-            <p className="v-body mt-2" style={{ fontSize: '.88rem' }}>{d}</p>
+            <p className="v-body mt-2" style={{ fontSize: '.95rem' }}>{d}</p>
           </div></Card></Reveal>
         ))}
       </div>

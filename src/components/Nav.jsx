@@ -38,7 +38,7 @@ const Nav = ({ currentPage, onNavigate, navigation }) => {
         </div>
       </nav>
       <div
-        className="fixed inset-0 flex flex-col items-center pt-[64px] md:hidden"
+        className="fixed inset-0 flex flex-col items-center pt-[4.5rem] md:hidden"
         style={{ zIndex: 199, background: 'var(--paper)', opacity: open ? 1 : 0, pointerEvents: open ? 'all' : 'none', transition: 'opacity .25s' }}
       >
         <div className="flex w-full flex-col items-center px-8 py-6">

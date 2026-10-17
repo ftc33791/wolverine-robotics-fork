@@ -55,7 +55,6 @@ export const PHOTOS = [
   { src: '/photos/c-gsp_4876.jpg', alt: "Team members at a competition", tag: 'team' },
   { src: '/photos/c-gsp_4881.jpg', alt: "Team members at a competition", tag: 'team' },
   { src: '/photos/a-img_4630.jpg', alt: "Control Award trophy", tag: 'event' },
-  { src: '/photos/a-img_9178.jpg', alt: "Projector screen at the FIT-North U-League Tournament showing Playoff Match 4", tag: 'event' },
   { src: '/photos/a-controlawardstream.jpg', alt: "Match results on the event scoreboard", tag: 'event' },
   { src: '/photos/b-20260110_081005.jpg', alt: "Scene from a FIRST Tech Challenge event", tag: 'event' },
   { src: '/photos/b-20260110_082517.jpg', alt: "Scene from a FIRST Tech Challenge event", tag: 'event' },

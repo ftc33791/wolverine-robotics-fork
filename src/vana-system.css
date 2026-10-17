@@ -195,7 +195,7 @@ body { font-family: var(--font-body); background: var(--paper); color: var(--ink
    White is for type, linework and small accents only. These rules come last
    and override the paper-and-tint tokens above. ═══════════════════════════ */
 :root {
-  --paper:    #0c24cf;
+  --paper:    #0919a0;
   --ink:      #ffffff;
   --ink-dim:  rgba(255, 255, 255, 0.86);
   --ink-faint:rgba(255, 255, 255, 0.68);
@@ -206,27 +206,27 @@ body { font-family: var(--font-body); background: var(--paper); color: var(--ink
   --tint-peach:  rgba(3, 10, 110, 0.32);
   --tint-yellow: rgba(3, 10, 110, 0.5);
 }
-html, body { background: #0a1fb8; }
+html, body { background: #060f78; }
 .bp-page {
   position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
   background:
-    radial-gradient(1100px 760px at 78% 6%, #3a56ff 0%, transparent 60%),
-    radial-gradient(900px 700px at 4% 96%, #1630dc 0%, transparent 58%),
-    linear-gradient(180deg, #0f2ae0 0%, #0a1cae 100%);
+    radial-gradient(1100px 760px at 78% 6%, #2840d8 0%, transparent 60%),
+    radial-gradient(900px 700px at 4% 96%, #0f27b0 0%, transparent 58%),
+    linear-gradient(180deg, #0a1fb8 0%, #060f78 100%);
 }
-#root > div { position: relative; z-index: 1; }
+#root > div:not(.bp-page) { position: relative; z-index: 1; }
 .scouting-page { position: relative; z-index: 1; }
 
-.v-nav { background: rgba(10, 28, 174, 0.82); border-bottom-color: var(--rule); }
+.v-nav { background: rgba(6, 15, 120, 0.88); border-bottom-color: var(--rule); }
 .v-logo small { color: var(--ink-faint); }
 .v-link:hover { background: rgba(255, 255, 255, 0.1); }
 .v-link[aria-current="page"] { background: rgba(255, 255, 255, 0.18); }
 
-.v-btn { background: #fff; color: #0a1cae; border-color: #fff; }
+.v-btn { background: #fff; color: #060f78; border-color: #fff; }
 .v-btn:hover { background: #dfe5ff; }
 .v-btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.7); }
 .v-btn-ghost:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
-.v-btn-on-blue { background: #fff; color: #0a1cae; border-color: #fff; }
+.v-btn-on-blue { background: #fff; color: #060f78; border-color: #fff; }
 .v-btn-line { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.7); }
 
 .bp-field {
@@ -243,7 +243,7 @@ html, body { background: #0a1fb8; }
 .v-ratio-43, .v-ratio-sq, .v-ratio-34 { background: rgba(255, 255, 255, 0.08); }
 .v-cad { border-color: rgba(255, 255, 255, 0.65); background: rgba(255, 255, 255, 0.05); }
 .v-cad .v-mono { color: var(--accent) !important; }
-.v-footer { background: rgba(4, 14, 120, 0.72); border-top-color: var(--rule); }
+.v-footer { background: rgba(3, 9, 90, 0.72); border-top-color: var(--rule); }
 .v-footer .col a:hover, .v-footer .col button:hover { color: var(--accent); }
 .bg-white { background: rgba(4, 14, 120, 0.45) !important; }
 .scouting-page .v-btn { background: transparent; }
@@ -252,3 +252,63 @@ html, body { background: #0a1fb8; }
 @media (max-width: 899px) { .v-tiles-3 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 539px) { .v-tiles-3 { grid-template-columns: 1fr; } }
 @media (max-width: 899px) { .v-tile { border-bottom: 1px solid var(--rule); } }
+
+/* ═══ Addendum 6 (dad, 10-17): background clearly visible, everything larger,
+   comfortable tap targets. Rules come last and override the above. ═════════ */
+html { font-size: 112.5%; }                 /* 18 px base on phones and tablets */
+@media (min-width: 900px) { html { font-size: 120%; } }   /* 19.2 px base on desktop */
+
+.bp-grid-minor {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px);
+  background-size: 28px 28px;
+  animation-duration: 70s;
+}
+.bp-grid-major {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.38) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.38) 1px, transparent 1px);
+  background-size: 140px 140px;
+  animation-duration: 70s;
+}
+@keyframes bp-drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-140px,-140px,0); } }
+.bp-lines { opacity: 0.55; }
+.bp-spin-a { animation-duration: 160s; } .bp-spin-b { animation-duration: 200s; }
+.bp-grain { opacity: 0.24; }
+.bp-field { background: linear-gradient(180deg, rgba(30, 55, 215, 0.16) 0%, rgba(6, 15, 120, 0.04) 100%); }
+.v-footer { background: rgba(3, 9, 90, 0.6); }
+.v-card { background: rgba(3, 9, 90, 0.45); backdrop-filter: none; }
+.v-section { border-top-color: transparent; }
+
+.v-mono { font-size: 0.8rem; }
+.v-nav-in { height: 4.5rem; }
+.v-tile { min-height: 26rem; }
+@media (max-width: 539px) { .v-tile { min-height: 16rem; } }
+.v-cad { min-height: 20rem; }
+.v-body { font-size: 1.05rem; }
+
+/* Tap targets of at least 44 px. */
+.v-btn, button.v-chip, a.v-chip, .v-link, .v-nav button { min-height: 44px; }
+.v-btn { padding: 0.8rem 1.4rem; }
+.v-link { display: inline-flex; align-items: center; }
+.v-chip { padding: 0.55rem 1rem; }
+.v-footer .col a, .v-footer .col button { padding: 0.65rem 0; min-height: 44px; }
+.v-tile, .v-nav button[aria-label] { min-height: 44px; }
+.v-tile { min-height: 26rem; }
+@media (max-width: 539px) { .v-tile { min-height: 16rem; } }
+.v-nav button[aria-label="Toggle menu"] { min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
+@media (min-width: 900px) { .v-nav button[aria-label="Toggle menu"] { display: none; } }
+
+/* Readable minimums on phones: nothing under ~13 px, paragraphs at least 16 px. */
+.v-logo small { font-size: 0.74rem; }
+#root .text-sm { font-size: 0.95rem; }
+#root .text-\[0\.6875rem\], #root .text-\[0\.625rem\], #root .text-\[0\.5625rem\] { font-size: 0.75rem; }
+#root a.block.text-sm, #root a.mt-1 { display: inline-flex; align-items: center; min-height: 44px; }
+.v-mono[class] , button.v-mono { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Addendum 7: the footer must sit above the fixed backdrop (it was painted underneath, which looked like empty space). */
+.v-footer { position: relative; z-index: 1; }
+
+.v-footer { padding: 3rem 0 1.75rem; }
+.v-footer .col a, .v-footer .col button { padding: 0.5rem 0; }

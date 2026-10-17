@@ -13,8 +13,8 @@ const MemberCard = ({ member, onClick, delay }) => (
   <Reveal delay={delay}>
     <button className="block w-full" onClick={() => onClick(member)}>
       <div className="v-ratio-34 rounded-xl" style={{ border: '1px solid var(--rule)' }}><MemberPhoto member={member} /></div>
-      <p className="mt-3 text-[15px] font-medium">{member.name}</p>
-      <p className="v-mono v-dim mt-1" style={{ fontSize: '.68rem', lineHeight: 1.5 }}>{member.roles.slice(0, 3).join(' · ')}</p>
+      <p className="mt-3 text-[0.9375rem] font-medium">{member.name}</p>
+      <p className="v-mono v-dim mt-1" style={{ fontSize: '.78rem', lineHeight: 1.5 }}>{member.roles.slice(0, 3).join(' · ')}</p>
     </button>
   </Reveal>
 );
@@ -28,7 +28,7 @@ const MemberModal = ({ member, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 300, background: 'rgba(17,17,17,0.55)', backdropFilter: 'blur(6px)' }} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="relative w-full overflow-y-auto rounded-2xl text-center" style={{ maxWidth: 480, maxHeight: '90vh', background: 'var(--paper)', animation: 'fade-up 0.35s var(--ease-out-expo) both' }}>
-        <button onClick={onClose} className="absolute right-4 top-4 rounded-full bg-white p-1.5" style={{ color: '#0a1cae' }} aria-label="Close"><X size={18} /></button>
+        <button onClick={onClose} className="absolute right-4 top-4 rounded-full bg-white p-1.5" style={{ color: '#060f78' }} aria-label="Close"><X size={18} /></button>
         <div style={{ height: 260 }}><MemberPhoto member={member} /></div>
         <div className="px-8 pb-8 pt-6">
           <h2 className="v-h2" style={{ fontSize: '2rem' }}>{member.name}</h2>
@@ -38,7 +38,7 @@ const MemberModal = ({ member, onClose }) => {
             <div className="mt-6 grid grid-cols-3 gap-3">
               {[['YEARS IN FIRST', member.yearsInFirst], ['YEARS ON TEAM', member.yearsOnTeam], ['GRADE', member.grade]].map(([l, v]) => (
                 <div key={l} className="rounded-lg border p-3" style={{ borderColor: 'var(--rule)', background: 'rgba(255,255,255,0.08)' }}>
-                  <p className="v-mono v-dim" style={{ fontSize: '.6rem' }}>{l}</p>
+                  <p className="v-mono v-dim" style={{ fontSize: '.78rem' }}>{l}</p>
                   <p className="v-h3 mt-1">{v ?? '—'}</p>
                 </div>
               ))}

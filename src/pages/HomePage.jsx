@@ -101,19 +101,6 @@ const HomePage = ({ onNavigate, teamMembers }) => {
         </Block>
       )}
 
-      <Block narrow>
-        <SectionHead eyebrow="COMPETITION MOMENT" title="Playoff Match 4" />
-        <Reveal>
-          <Card>
-            <div style={{ background: '#050b3a' }}><Photo src="/photos/a-img_9178.jpg" alt="Projector screen at the FIT-North U-League Tournament showing Playoff Match 4, with team 33791 on Alliance 2" className="mx-auto block" /></div>
-            <div className="body">
-              <p className="v-mono" style={{ color: 'var(--accent)' }}>FIT-NORTH U-LEAGUE TOURNAMENT</p>
-              <p className="v-body mt-2">Team 33791 played on Alliance 2. The screen reads 173 to 164.</p>
-            </div>
-          </Card>
-        </Reveal>
-      </Block>
-
       <Block>
         <SectionHead
           eyebrow="2025-26 SEASON · DECODE CHALLENGE"
@@ -160,7 +147,7 @@ const HomePage = ({ onNavigate, teamMembers }) => {
               <button className="block w-full" onClick={() => onNavigate('team')}>
                 <div className="v-ratio-sq rounded-xl"><MemberPhoto member={m} /></div>
                 <p className="mt-3 text-sm font-medium">{m.name}</p>
-                <p className="v-mono v-dim mt-1" style={{ fontSize: '.68rem' }}>{m.roles[0]}</p>
+                <p className="v-mono v-dim mt-1" style={{ fontSize: '.78rem' }}>{m.roles[0]}</p>
               </button>
             </Reveal>
           ))}

@@ -17,7 +17,7 @@ const RobotsPage = ({ robots }) => {
       </BlueField>
 
       {robots.length > 1 && (
-        <div className="sticky z-[150] border-b" style={{ top: 64, background: 'rgba(252,252,250,0.95)', borderColor: 'var(--rule)' }}>
+        <div className="sticky z-[150] border-b" style={{ top: '4.5rem', background: 'rgba(252,252,250,0.95)', borderColor: 'var(--rule)' }}>
           <div className="wrap flex justify-center gap-2 overflow-x-auto py-3">
             {robots.map((r, i) => (
               <button key={r.id} onClick={() => { setIdx(i); setSub(0); }} className="v-chip" style={{ background: i === idx ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.06)' }}>{r.season} · {r.name}</button>
@@ -41,7 +41,7 @@ const RobotsPage = ({ robots }) => {
           {robot.specs.map((sp, i) => (
             <div key={sp.label} className="flex items-center justify-between px-5 py-3.5" style={{ borderTop: i ? '1px solid var(--rule)' : 'none' }}>
               <span className="v-mono v-dim">{sp.label}</span>
-              <span className="text-[15px] font-medium">{sp.value}</span>
+              <span className="text-[0.9375rem] font-medium">{sp.value}</span>
             </div>
           ))}
         </div>
@@ -58,7 +58,7 @@ const RobotsPage = ({ robots }) => {
         <SectionHead eyebrow="ENGINEERING BREAKDOWN" title="Subsystems" />
         <div className="mb-8 flex flex-wrap justify-center gap-2">
           {robot.subsystems.map((x, i) => (
-            <button key={x.name} onClick={() => setSub(i)} className="v-chip" style={{ background: i === sub ? '#fff' : 'rgba(255,255,255,0.08)', color: i === sub ? '#0a1cae' : '#fff', borderColor: i === sub ? '#fff' : 'var(--rule)' }}>{x.icon} {x.name}</button>
+            <button key={x.name} onClick={() => setSub(i)} className="v-chip" style={{ background: i === sub ? '#fff' : 'rgba(255,255,255,0.08)', color: i === sub ? '#060f78' : '#fff', borderColor: i === sub ? '#fff' : 'var(--rule)' }}>{x.icon} {x.name}</button>
           ))}
         </div>
         {s && (
@@ -76,7 +76,7 @@ const RobotsPage = ({ robots }) => {
             {s.metrics && (
               <div className="mt-4 grid grid-cols-3 gap-3">
                 {s.metrics.map((m) => (
-                  <Card key={m.label}><div className="body !py-4"><p className="v-h3" style={{ color: 'var(--accent)' }}>{m.value}</p><p className="v-mono v-dim mt-1" style={{ fontSize: '.65rem' }}>{m.label}</p></div></Card>
+                  <Card key={m.label}><div className="body !py-4"><p className="v-h3" style={{ color: 'var(--accent)' }}>{m.value}</p><p className="v-mono v-dim mt-1" style={{ fontSize: '.78rem' }}>{m.label}</p></div></Card>
                 ))}
               </div>
             )}

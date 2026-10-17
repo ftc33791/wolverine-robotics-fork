@@ -17,7 +17,7 @@ const GalleryPage = () => {
       </BlueField>
       <Block>
         <div className="mb-10 flex flex-wrap justify-center gap-2">
-          {TAGS.map(([id, l]) => <button key={id} onClick={() => setTag(id)} className="v-chip" style={{ background: tag === id ? '#fff' : 'rgba(255,255,255,0.08)', color: tag === id ? '#0a1cae' : '#fff' }}>{l}</button>)}
+          {TAGS.map(([id, l]) => <button key={id} onClick={() => setTag(id)} className="v-chip" style={{ background: tag === id ? '#fff' : 'rgba(255,255,255,0.08)', color: tag === id ? '#060f78' : '#fff' }}>{l}</button>)}
         </div>
         {shown.length === 0 && <p className="v-mono v-dim">PHOTOS COMING SOON</p>}
         <div style={{ columnGap: '1rem' }} className="columns-1 sm:columns-2 lg:columns-3">

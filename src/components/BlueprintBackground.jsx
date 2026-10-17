@@ -11,7 +11,7 @@ const BlueprintBackground = () => (
     <div className="bp-grid bp-grid-major" />
 
     <svg className="bp-lines" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
-      <g fill="none" stroke="#fff" strokeWidth="1.2" vectorEffect="non-scaling-stroke">
+      <g fill="none" stroke="#fff" strokeWidth="1.8" vectorEffect="non-scaling-stroke">
         {/* large drafting circles, slow rotation */}
         <g className="bp-spin-a" style={{ transformOrigin: '1180px 300px' }}>
           <circle cx="1180" cy="300" r="260" strokeDasharray="2 10" />
@@ -26,6 +26,13 @@ const BlueprintBackground = () => (
           <circle cx="300" cy="720" r="60" strokeDasharray="10 6" />
           <line x1="60" y1="720" x2="540" y2="720" />
           <line x1="300" y1="480" x2="300" y2="960" />
+        </g>
+        {/* large faint construction shapes */}
+        <g className="bp-spin-b" style={{ transformOrigin: '800px 500px' }}>
+          <circle cx="800" cy="500" r="470" strokeDasharray="1 14" />
+          <circle cx="800" cy="500" r="340" />
+          <path d="M800 30 L1206 735 L394 735 Z" strokeDasharray="10 8" />
+          <path d="M330 500 H1270 M800 30 V970" strokeDasharray="3 10" />
         </g>
         {/* dimension lines that draw themselves */}
         <g className="bp-draw">
