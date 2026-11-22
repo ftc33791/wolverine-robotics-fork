@@ -15,10 +15,6 @@
       "destination": "https://ftc.ignitepathways.org/api/public/$1"
     },
     {
-      "source": "/scout-app/(.*)",
-      "destination": "/scout-app/$1"
-    },
-    {
       "source": "/((?!data/|assets/|.*\\..*).*)",
       "destination": "/index.html"
     }
